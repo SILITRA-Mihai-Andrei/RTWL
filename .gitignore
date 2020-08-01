@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 *.iml
 .gradle
 /local.properties
@@ -13,7 +13,7 @@
 /captures
 .externalNativeBuild
 .cxx
-=======
+
 # Built application files
 *.apk
 *.aar
@@ -53,7 +53,6 @@ proguard/
 captures/
 
 # IntelliJ
-*.iml
 .idea/workspace.xml
 .idea/tasks.xml
 .idea/gradle.xml
@@ -72,7 +71,6 @@ captures/
 #*.keystore
 
 # External native build folder generated in Android Studio 2.2 and later
-.externalNativeBuild
 .cxx/
 
 # Google Services (e.g. APIs or Firebase)
@@ -99,4 +97,3 @@ lint/generated/
 lint/outputs/
 lint/tmp/
 # lint/reports/
->>>>>>> 707298a4eb6d299a94f11c67ab815723d90b651b
