@@ -1,18 +1,69 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context=".MainActivity"
+    android:background="@android:color/black">
 
     <TextView
+        android:id="@+id/bluetooth_status"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello World!"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
+        android:layout_marginTop="@dimen/dim_32dp"
+        android:textColor="@android:color/white"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/bluetooth_devices_txt"
+        android:layout_width="@dimen/dim_0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/dim_16dp"
+        android:textColor="@android:color/darker_gray"
+        android:text="@string/choose_the_bluetooth_device"
+        app:layout_constraintStart_toStartOf="@+id/ls_bluetooth_devices"
+        app:layout_constraintTop_toBottomOf="@+id/bluetooth_status" />
+
+    <ListView
+        android:id="@+id/ls_bluetooth_devices"
+        android:layout_width="@dimen/dim_0dp"
+        android:layout_height="@dimen/dim_0dp"
+        android:layout_marginTop="@dimen/dim_8dp"
+        android:layout_marginBottom="@dimen/dim_16dp"
+        android:overScrollMode="never"
+        android:scrollbars="none"
+        app:layout_constraintBottom_toTopOf="@+id/btn_terminal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/bluetooth_devices_txt"
+        app:layout_constraintWidth_percent="0.8" />
+
+    <Button
+        android:id="@+id/btn_terminal"
+        android:layout_width="@dimen/dim_0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/terminal"
+        android:textColor="@android:color/white"
+        android:background="@drawable/btn_rounded_8dp_dark_gray"
+        android:layout_marginBottom="@dimen/dim_16dp"
+        app:layout_constraintStart_toStartOf="@+id/ls_bluetooth_devices"
+        app:layout_constraintEnd_toEndOf="@+id/ls_bluetooth_devices"
+        app:layout_constraintBottom_toTopOf="@id/btn_google_maps"/>
+
+    <Button
+        android:id="@+id/btn_google_maps"
+        android:layout_width="@dimen/dim_0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/google_maps"
+        android:textColor="@color/color_green"
+        android:background="@drawable/btn_rounded_8dp_dark_gray_border_green"
+        android:layout_marginBottom="@dimen/dim_32dp"
+        app:layout_constraintStart_toStartOf="@+id/ls_bluetooth_devices"
+        app:layout_constraintEnd_toEndOf="@+id/ls_bluetooth_devices"
+        app:layout_constraintBottom_toBottomOf="parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

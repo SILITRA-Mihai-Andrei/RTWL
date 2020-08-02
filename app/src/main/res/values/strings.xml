@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">Real Time Weather Location Traffic System</string>
+    <string name="google_maps">Google Maps</string>
+    <string name="terminal">Terminal</string>
+    <string name="bluetooth_not_available">Bluetooth is not available!</string>
+    <string name="bluetooth_is_off">Bluetooth is OFF</string>
+    <string name="bluetooth_is_on">Bluetooth is ON</string>
+    <string name="choose_the_bluetooth_device">Choose the bluetooth device</string>
 </resources>
