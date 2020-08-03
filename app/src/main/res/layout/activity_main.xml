@@ -13,7 +13,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/dim_32dp"
-        android:textColor="@android:color/white"
+        android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -23,10 +23,40 @@
         android:layout_width="@dimen/dim_0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/dim_16dp"
-        android:textColor="@android:color/darker_gray"
         android:text="@string/choose_the_bluetooth_device"
         app:layout_constraintStart_toStartOf="@+id/ls_bluetooth_devices"
-        app:layout_constraintTop_toBottomOf="@+id/bluetooth_status" />
+        app:layout_constraintTop_toBottomOf="@+id/bluetooth_status"/>
+
+    <TextView
+        android:id="@+id/no_paired_devices"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/no_paired_devices"
+        android:textColor="@android:color/holo_red_light"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/bluetooth_devices_txt"
+        app:layout_constraintStart_toStartOf="@id/ls_bluetooth_devices"/>
+
+    <TextView
+        android:id="@+id/selected_bluetooth_devices"
+        android:layout_width="@dimen/dim_0dp"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="@+id/ls_bluetooth_devices"
+        app:layout_constraintTop_toBottomOf="@+id/no_paired_devices"/>
+
+    <Button
+        android:id="@+id/btn_go_to_bluetooth_settings"
+        android:layout_width="@dimen/dim_0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/go_to_bluetooth_settings"
+        android:textColor="@android:color/white"
+        android:background="@drawable/btn_rounded_8dp_dark_gray"
+        android:layout_marginTop="@dimen/dim_8dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@+id/selected_bluetooth_devices"
+        app:layout_constraintStart_toStartOf="@+id/ls_bluetooth_devices"
+        app:layout_constraintEnd_toEndOf="@+id/ls_bluetooth_devices"/>
 
     <ListView
         android:id="@+id/ls_bluetooth_devices"
@@ -39,11 +69,22 @@
         app:layout_constraintBottom_toTopOf="@+id/btn_terminal"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/bluetooth_devices_txt"
+        app:layout_constraintTop_toBottomOf="@+id/selected_bluetooth_devices"
         app:layout_constraintWidth_percent="0.8" />
+
+    <Switch
+        android:id="@+id/development"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/development"
+        android:layout_marginBottom="@dimen/dim_32dp"
+        app:layout_constraintTop_toBottomOf="@id/ls_bluetooth_devices"
+        app:layout_constraintBottom_toTopOf="@id/btn_terminal"
+        app:layout_constraintStart_toStartOf="@id/ls_bluetooth_devices" />
 
     <Button
         android:id="@+id/btn_terminal"
+        android:onClick="goToTerminal"
         android:layout_width="@dimen/dim_0dp"
         android:layout_height="wrap_content"
         android:text="@string/terminal"
@@ -56,6 +97,7 @@
 
     <Button
         android:id="@+id/btn_google_maps"
+        android:onClick="goToGoogleMaps"
         android:layout_width="@dimen/dim_0dp"
         android:layout_height="wrap_content"
         android:text="@string/google_maps"
