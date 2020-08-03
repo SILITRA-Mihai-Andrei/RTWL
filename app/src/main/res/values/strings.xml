@@ -35,4 +35,5 @@
     <string name="invalid_data">Invalid data!</string>
     <string name="valid_data">Sending data to database.</string>
     <string name="complete_all_fields">All fields must be completed!</string>
+    <string name="data_base_error">"DataBase error: %1$s"</string>
 </resources>

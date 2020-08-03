@@ -117,4 +117,8 @@ public class Utils {
             }
         }).start();
     }
+
+    public static String getCurrentDateAndTime(){
+        return android.text.format.DateFormat.format("yy:MM:dd:kk:mm", new java.util.Date()).toString();
+    }
 }

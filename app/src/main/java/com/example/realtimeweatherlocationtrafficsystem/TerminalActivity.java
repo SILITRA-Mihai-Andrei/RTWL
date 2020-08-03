@@ -1,5 +1,6 @@
 package com.example.realtimeweatherlocationtrafficsystem;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.bluetooth.BluetoothAdapter;
@@ -14,10 +15,26 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.realtimeweatherlocationtrafficsystem.models.Data;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Objects;
 import java.util.Random;
 
 public class TerminalActivity extends AppCompatActivity {
 
+    private FirebaseDatabase mDatabase;
+    private DatabaseReference dataReference;
     private TextView connectedDeviceTextView;
     private TextView statusTextView;
     private EditText coordinates;
@@ -43,6 +60,8 @@ public class TerminalActivity extends AppCompatActivity {
     }
 
     private void initComponents() {
+        mDatabase = FirebaseDatabase.getInstance();
+        dataReference = mDatabase.getReference().child("data");
         device = (String) getIntent().getSerializableExtra("BT_DEVICE_SESSION_ID");
         development = (boolean) getIntent().getSerializableExtra("DEVELOPMENT_SESSION_ID");
         bluetoothHandler = new android.os.Handler();
@@ -50,7 +69,7 @@ public class TerminalActivity extends AppCompatActivity {
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         findViews(); //find views
         setDevelopmentViews();
-        setButtonListeners();
+        setListeners();
     }
 
     private void setDevelopmentViews() {
@@ -70,11 +89,13 @@ public class TerminalActivity extends AppCompatActivity {
         }
     }
 
-    private void setButtonListeners() {
+    private void setListeners() {
         if (development) {
             sendTestData.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    dataReference.child("47 64 26 24").child(Utils.getCurrentDateAndTime()).setValue(new Data(100, 23, 50, 70));
+                    dataReference.child("47 63 26 24").child(Utils.getCurrentDateAndTime()).setValue(new Data(200, 33, 50, 70));
                     if (coordinates == null || code == null || temperature == null || humidity == null || air == null) {
                         setStatus(getResources().getString(R.string.complete_all_fields));
                         return;
@@ -93,6 +114,21 @@ public class TerminalActivity extends AppCompatActivity {
                 }
             });
         }
+        dataReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for (DataSnapshot ds : snapshot.getChildren()) {
+                    Data data = new Data(Objects.requireNonNull(ds.getValue(Data.class)));
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(TerminalActivity.this,
+                        String.format(getResources().getString(R.string.data_base_error), error.toString()),
+                        Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void findViews() {
@@ -124,12 +160,12 @@ public class TerminalActivity extends AppCompatActivity {
         }
     };
 
-    private void setStatus(String status){
+    private void setStatus(String status) {
         statusTextView.setText(status);
         Utils.blinkTextView(statusTextView, statusTextView.getCurrentTextColor(), 100, 10);
     }
 
-    public void goToMainActivity(View view){
+    public void goToMainActivity(View view) {
         startActivity(new Intent(this, MainActivity.class));
     }
 }

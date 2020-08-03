@@ -206,7 +206,7 @@ public class MainActivity extends AppCompatActivity {
     public void goToGoogleMaps(View view){
         if(selected_device.isEmpty()){
             Toast.makeText(this, R.string.please_select_one_device, Toast.LENGTH_SHORT).show();
-            return;
+            //return;
         }
         Intent intent = new Intent(this, GoogleMapsActivity.class);
         intent.putExtra("BT_DEVICE_SESSION_ID", selected_device);
