@@ -8,10 +8,8 @@ import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.text.Html;
-import android.text.Spanned;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -21,7 +19,9 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
@@ -42,8 +42,8 @@ public class MainActivity extends AppCompatActivity {
     private Button goToBluetoothSettings;
     private ListView bluetoothDevicesListView;
     private Switch development;
-    private ArrayList<String> devices;
-    private String selected_device = "";
+    private ArrayList<BluetoothDevice> devices;
+    private BluetoothDevice selected_device;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,10 +78,10 @@ public class MainActivity extends AppCompatActivity {
         bluetoothDevicesListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                selected_device = (String) parent.getItemAtPosition(position);
+                selected_device = getBluetoothDevice((String) parent.getItemAtPosition(position));
                 selectedBluetoothDevice.setText(Html.fromHtml(
                         getResources().getString(R.string.connected_to_device) + " <font color=" + getResources().getColor(R.color.color_green) + "><b>"
-                                        + selected_device.split("\n")[0] + "</b></font>."));
+                                        + selected_device.getName() + "</b></font>."));
                 selectedBluetoothDevice.setVisibility(View.VISIBLE);
             }
         });
@@ -102,8 +102,12 @@ public class MainActivity extends AppCompatActivity {
         checkBluetoothStatus();
     }
 
-    private void updateBluetoothDevicesListView() {
-        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(this, R.layout.item_bluetooth_device, devices);
+    private void updateBluetoothDevicesListView(){
+        List<String> deviceList = new ArrayList<>();
+        for(int i=0; i<devices.size(); i++){
+            deviceList.add(devices.get(i).getName() + "\n" + devices.get(i).getAddress());
+        }
+        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(this, R.layout.item_bluetooth_device, deviceList);
         bluetoothDevicesListView.setAdapter(arrayAdapter);
         arrayAdapter.notifyDataSetChanged();
     }
@@ -114,7 +118,7 @@ public class MainActivity extends AppCompatActivity {
         {
             bluetoothHandler.postDelayed(this, 2000);
             checkBluetoothStatus();
-            if(selected_device.isEmpty()){
+            if(selected_device==null){
                 selectedBluetoothDevice.setVisibility(View.GONE);
             }
         }
@@ -129,7 +133,7 @@ public class MainActivity extends AppCompatActivity {
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 if (device != null) {
                     if (device.getBondState() != BluetoothDevice.BOND_BONDED){
-                        devices.add(device.getName() + '\n' + device.getAddress());
+                        devices.add(device);
                         updateBluetoothDevicesListView();
                         Toast.makeText(context, "found", Toast.LENGTH_SHORT).show();
                     }
@@ -155,9 +159,7 @@ public class MainActivity extends AppCompatActivity {
         devices = new ArrayList<>();
         if (pairedDevices.size() > 0) {
             setPairedDevicesView(PAIRED_DEVICES);
-            for (BluetoothDevice device : pairedDevices) {
-                devices.add(device.getName() + "\n" + device.getAddress());
-            }
+            devices.addAll(pairedDevices);
         }
         else {
             setPairedDevicesView(NO_PAIRED_DEVICES);
@@ -203,8 +205,17 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private BluetoothDevice getBluetoothDevice(String device){
+        for(int i=0; i<devices.size(); i++){
+            if(devices.get(i).getName().equals(device.split("\n")[0])
+                    && devices.get(i).getAddress().equals(device.split("\n")[1]))
+                        return devices.get(i);
+        }
+        return null;
+    }
+
     public void goToGoogleMaps(View view){
-        if(selected_device.isEmpty()){
+        if(selected_device==null){
             Toast.makeText(this, R.string.please_select_one_device, Toast.LENGTH_SHORT).show();
             //return;
         }
@@ -214,7 +225,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void goToTerminal(View view){
-        if(selected_device.isEmpty()){
+        if(selected_device==null && !development.isChecked()){
+            //startActivity(new Intent(this, TesteActivity.class));
             Toast.makeText(this, R.string.please_select_one_device, Toast.LENGTH_SHORT).show();
             return;
         }

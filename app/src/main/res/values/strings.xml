@@ -27,7 +27,7 @@
     <string name="first_status_in_development_mode">Send custom and valid data to database using the above fields.</string>
     <string name="connected_to_placeholder_device">Connected to %1$s.</string>
     <string name="connected_to_device">Connected to </string>
-    <string name="invalid_coordinates">Invalid coordinates! Must be as hint format, latitude between 0:90 and longitude between 0:180</string>
+    <string name="invalid_coordinates">Invalid coordinates! Must be as hint format, latitude between -90:90 and longitude between -180:180</string>
     <string name="invalid_code">Invalid code. Must be between 100 and 499.</string>
     <string name="invalid_temperature">Invalid temperature. Must be between -50 and 50.</string>
     <string name="invalid_humidity">Invalid humidity. Must be between 0 and 100.</string>
@@ -36,4 +36,28 @@
     <string name="valid_data">Sending data to database.</string>
     <string name="complete_all_fields">All fields must be completed!</string>
     <string name="data_base_error">"DataBase error: %1$s"</string>
+    <string name="data_base">DataBase:</string>
+    <string name="marker_title_placeholder">Region %1$s (%2$s)</string>
+    <string name="marker_description_temperature">Temperature</string>
+    <string name="marker_description_humidity">Humidity</string>
+    <string name="marker_description_air">Air quality</string>
+    <string name="weather_sunny">Sunny</string>
+    <string name="weather_sun">Sun</string>
+    <string name="weather_heat">Heat</string>
+    <string name="weather_soft_rain">Soft rain</string>
+    <string name="weather_moderate_rain">Moderate rain</string>
+    <string name="weather_torrential_rain">Torrential Rain</string>
+    <string name="weather_soft_wind">Soft wind</string>
+    <string name="weather_moderate_wind">Moderate wind</string>
+    <string name="weather_torrential_wind">Torrential wind</string>
+    <string name="weather_soft_snow_fall">Soft snow fall</string>
+    <string name="weather_moderate_snow_fall">Moderate snow fall</string>
+    <string name="weather_massive_snow_fall">Massive snow fall</string>
+    <string name="unknown">Unknown</string>
+    <string name="region">Region</string>
+    <string name="temperature">Temperature:</string>
+    <string name="temperature_celsius_placeholder">%1$d\u2103:</string>
+    <string name="humidity">Humidity:</string>
+    <string name="air_quality">Air quality:</string>
+    <string name="value_percent_placeholder">%1$d%%</string>
 </resources>
