@@ -20,153 +20,175 @@
         android:id="@+id/connected_device"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/dim_16dp"
+        android:layout_marginTop="@dimen/dim_32dp"
         android:textColor="@android:color/white"
         app:layout_constraintEnd_toEndOf="@id/view"
         app:layout_constraintStart_toStartOf="@id/view"
         app:layout_constraintTop_toBottomOf="@id/view" />
 
     <LinearLayout
-        android:id="@+id/test_container"
+        android:id="@+id/container"
         android:layout_width="@dimen/dim_0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="@dimen/dim_0dp"
         android:orientation="vertical"
-        android:visibility="gone"
-        app:layout_constraintVertical_bias="0"
+        app:layout_constraintBottom_toTopOf="@id/textView"
         app:layout_constraintEnd_toEndOf="@id/view"
         app:layout_constraintStart_toStartOf="@id/view"
         app:layout_constraintTop_toBottomOf="@id/connected_device"
-        app:layout_constraintBottom_toTopOf="@id/status">
-
-        <EditText
-            android:id="@+id/coordinates"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/dim_8dp"
-            android:autofillHints="@string/coordinates_hint"
-            android:hint="@string/coordinates_hint"
-            android:maxLines="1"
-            android:textAlignment="center" />
+        app:layout_constraintVertical_bias="0">
 
         <LinearLayout
+            android:id="@+id/test_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:orientation="vertical"
+            android:visibility="visible">
 
             <EditText
-                android:id="@+id/code"
-                android:layout_width="wrap_content"
+                android:id="@+id/coordinates"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/dim_8dp"
-                android:layout_marginEnd="@dimen/dim_8dp"
-                android:layout_weight="1"
-                android:hint="@string/code_hint"
+                android:autofillHints="@string/coordinates_hint"
+                android:hint="@string/coordinates_hint"
+                android:inputType="number"
                 android:maxLines="1"
                 android:textAlignment="center" />
 
-            <EditText
-                android:id="@+id/temperature"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/dim_8dp"
-                android:layout_marginEnd="@dimen/dim_8dp"
-                android:layout_weight="1"
-                android:hint="@string/temperature_hint"
-                android:maxLines="1"
-                android:textAlignment="center" />
+                android:orientation="horizontal">
 
-            <EditText
-                android:id="@+id/humidity"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/dim_8dp"
-                android:layout_marginEnd="@dimen/dim_8dp"
-                android:layout_weight="1"
-                android:hint="@string/humidity_hint"
-                android:maxLines="1"
-                android:textAlignment="center" />
+                <EditText
+                    android:id="@+id/code"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/dim_8dp"
+                    android:layout_marginEnd="@dimen/dim_8dp"
+                    android:layout_weight="1"
+                    android:hint="@string/code_hint"
+                    android:inputType="numberSigned"
+                    android:maxLines="1"
+                    android:textAlignment="center" />
 
-            <EditText
-                android:id="@+id/air"
-                android:layout_width="wrap_content"
+                <EditText
+                    android:id="@+id/temperature"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/dim_8dp"
+                    android:layout_marginEnd="@dimen/dim_8dp"
+                    android:layout_weight="1"
+                    android:hint="@string/temperature_hint"
+                    android:inputType="numberSigned"
+                    android:maxLines="1"
+                    android:textAlignment="center" />
+
+                <EditText
+                    android:id="@+id/humidity"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/dim_8dp"
+                    android:layout_marginEnd="@dimen/dim_8dp"
+                    android:layout_weight="1"
+                    android:hint="@string/humidity_hint"
+                    android:inputType="numberSigned"
+                    android:maxLines="1"
+                    android:textAlignment="center" />
+
+                <EditText
+                    android:id="@+id/air"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/dim_8dp"
+                    android:layout_weight="1"
+                    android:hint="@string/air_hint"
+                    android:inputType="numberSigned"
+                    android:maxLines="1"
+                    android:textAlignment="center" />
+
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/send_test_data"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/dim_8dp"
-                android:layout_weight="1"
-                android:hint="@string/air_hint"
-                android:maxLines="1"
-                android:textAlignment="center" />
+                android:layout_marginTop="@dimen/dim_16dp"
+                android:background="@drawable/btn_rounded_8dp_dark_gray"
+                android:text="@string/send_to_database" />
 
         </LinearLayout>
 
-        <Button
-            android:id="@+id/send_test_data"
+        <LinearLayout
+            android:id="@+id/terminal_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/dim_16dp"
-            android:background="@drawable/btn_rounded_8dp_dark_gray"
-            android:text="@string/send_to_database" />
+            android:orientation="vertical"
+            android:visibility="gone">
 
-    </LinearLayout>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/received" />
 
-    <LinearLayout
-        android:id="@+id/terminal_container"
-        android:layout_width="@dimen/dim_0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/dim_16dp"
-        android:orientation="vertical"
-        android:visibility="visible"
-        app:layout_constraintVertical_bias="0"
-        app:layout_constraintEnd_toEndOf="@id/view"
-        app:layout_constraintStart_toStartOf="@id/view"
-        app:layout_constraintTop_toBottomOf="@id/connected_device"
-        app:layout_constraintBottom_toTopOf="@id/status">
+            <ScrollView
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_marginTop="@dimen/dim_4dp"
+                android:layout_weight="1"
+                android:background="@drawable/border_dark_gray"
+                android:overScrollMode="never"
+                android:padding="@dimen/dim_4dp"
+                android:scrollbars="none">
+
+                <TextView
+                    android:id="@+id/receive_box"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+            </ScrollView>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/dim_16dp"
+                android:text="@string/message_to_send" />
+
+            <EditText
+                android:id="@+id/message_to_send"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/message_to_send_hint"
+                android:inputType="textNoSuggestions" />
+
+            <Button
+                android:id="@+id/send"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/dim_8dp"
+                android:background="@drawable/btn_rounded_8dp_dark_gray"
+                android:text="@string/send" />
+
+        </LinearLayout>
 
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/received" />
+            android:text="@string/data_base"
+            android:layout_marginTop="@dimen/dim_16dp"/>
 
         <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_marginTop="@dimen/dim_4dp"
-            android:background="@drawable/border_dark_gray"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:scrollbars="none"
             android:overScrollMode="never"
-            android:padding="@dimen/dim_4dp"
-            android:layout_weight="1"
-            android:scrollbars="none">
-
+            android:layout_marginVertical="@dimen/dim_16dp">
             <TextView
-                android:id="@+id/receive_box"
+                android:id="@+id/dataBase"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"/>
         </ScrollView>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/dim_16dp"
-            android:text="@string/message_to_send" />
-
-        <EditText
-            android:id="@+id/message_to_send"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="@string/message_to_send_hint"
-            android:inputType="textNoSuggestions" />
-
-        <Button
-            android:id="@+id/send"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/dim_8dp"
-            android:background="@drawable/btn_rounded_8dp_dark_gray"
-            android:text="@string/send" />
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/dim_0dp"
-            android:layout_weight="3"/>
 
     </LinearLayout>
 
@@ -183,20 +205,20 @@
         android:id="@+id/status"
         android:layout_width="@dimen/dim_0dp"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/dim_16dp"
         android:maxLines="4"
         android:textAlignment="center"
-        android:layout_marginBottom="@dimen/dim_16dp"
         app:layout_constraintBottom_toTopOf="@id/disconnect"
         app:layout_constraintEnd_toEndOf="@id/disconnect"
         app:layout_constraintStart_toStartOf="@id/disconnect" />
 
     <Button
         android:id="@+id/disconnect"
-        android:onClick="goToMainActivity"
         android:layout_width="@dimen/dim_0dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="@dimen/dim_16dp"
         android:background="@drawable/btn_rounded_8dp_dark_gray"
+        android:onClick="goToMainActivity"
         android:text="@string/disconnect"
         android:textColor="@android:color/holo_red_light"
         app:layout_constraintBottom_toBottomOf="parent"

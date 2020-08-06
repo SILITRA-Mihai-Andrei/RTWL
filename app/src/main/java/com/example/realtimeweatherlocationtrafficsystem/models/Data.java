@@ -1,5 +1,7 @@
 package com.example.realtimeweatherlocationtrafficsystem.models;
 
+import android.widget.Toast;
+
 import androidx.annotation.IntRange;
 
 public class Data {
@@ -22,6 +24,16 @@ public class Data {
         this.temperature = getTemperature();
         this.humidity = getHumidity();
         this.air = getAir();
+    }
+
+    public String toString(){
+        return code + " " + temperature + " " + humidity + " " + air;
+    }
+
+    public String toStringFormatDataBase(){
+        String tabs = "\n\t\t\t\t\t\t";
+        return tabs + "air: " + air + tabs + "code: " + code
+                + tabs + "humidity: " + humidity + tabs + "temperature: " + temperature;
     }
 
     public int getCode() {
