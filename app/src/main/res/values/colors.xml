@@ -9,4 +9,5 @@
     <color name="color_orange_light">@android:color/holo_orange_light</color>
     <color name="color_red_light">@android:color/holo_red_light</color>
     <color name="color_gray">#404040</color>
+    <color name="transparent_black">#BE000000</color>
 </resources>

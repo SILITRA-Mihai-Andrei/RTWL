@@ -1,13 +1,9 @@
 package com.example.realtimeweatherlocationtrafficsystem;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
@@ -17,55 +13,38 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.realtimeweatherlocationtrafficsystem.models.BluetoothClientClass;
 import com.example.realtimeweatherlocationtrafficsystem.models.Data;
 import com.example.realtimeweatherlocationtrafficsystem.models.FireBaseManager;
 import com.example.realtimeweatherlocationtrafficsystem.models.Region;
 import com.example.realtimeweatherlocationtrafficsystem.models.Utils;
+import com.example.realtimeweatherlocationtrafficsystem.models.UtilsBluetooth;
 import com.example.realtimeweatherlocationtrafficsystem.models.UtilsFireBase;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.Serializable;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Objects;
-import java.util.Random;
-import java.util.UUID;
 
 public class TerminalActivity extends AppCompatActivity implements Serializable, FireBaseManager.onFireBaseDataNew {
 
     private FireBaseManager fireBaseManager;
+    private boolean development;
+    private BluetoothDevice device;
+
+    private LinearLayout dataBaseLinearLayout;
     private TextView connectedDeviceTextView;
     private TextView statusTextView;
+    private TextView receiveBox;
+    private TextView dataBase;
     private EditText coordinates;
     private EditText code;
     private EditText temperature;
     private EditText humidity;
     private EditText air;
-    private Button sendTestData;
-    private TextView receiveBox;
     private EditText messageToSend;
+    private Button clearTerminal;
+    private Button sendTestData;
     private Button send;
-    private TextView dataBase;
-
-    private boolean development;
-    private BluetoothDevice device;
-    private BluetoothAdapter mBluetoothAdapter;
-    private BluetoothSocket mSocket;
-    private OutputStream mOutputStream;
-    private InputStream mInputStream;
-    private Thread workerThread;
-    private byte[] readBuffer;
-    private int readBufferPosition;
-    private int counter;
-    volatile boolean stopWorker;
-    private android.os.Handler bluetoothHandler;
+    private Button showDataBase;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,26 +56,17 @@ public class TerminalActivity extends AppCompatActivity implements Serializable,
     private void initComponents() {
         fireBaseManager = new FireBaseManager(getBaseContext(), getResources(), this);
         development = (boolean) getIntent().getSerializableExtra("DEVELOPMENT_SESSION_ID");
+        findViews(); //find views
+
         if (!development) {
             device = Objects.requireNonNull(getIntent().getExtras()).getParcelable("BT_DEVICE_SESSION_ID");
-            bluetoothHandler = new android.os.Handler();
-            bluetoothHandler.postDelayed(updateTimerThread, 0);
-            mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+            BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+            Handler handler = UtilsBluetooth.getBluetoothHandler(getBaseContext(), receiveBox, statusTextView);
+            BluetoothClientClass clientClass = new BluetoothClientClass(device, bluetoothAdapter, handler, send, messageToSend);
+            clientClass.start();
         }
-        findViews(); //find views
         setDevelopmentViews();
         setListeners();
-        connectToBluetooth();
-    }
-
-    private void connectBluetooth() throws IOException {
-        UUID uuid = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"); //Standard SerialPortService ID
-        mSocket = device.createRfcommSocketToServiceRecord(uuid);
-        mSocket.connect();
-        mOutputStream = mSocket.getOutputStream();
-        mInputStream = mSocket.getInputStream();
-
-        beginListenForData();
     }
 
     private void setDevelopmentViews() {
@@ -140,16 +110,30 @@ public class TerminalActivity extends AppCompatActivity implements Serializable,
                 }
             });
         } else {
-            send.setOnClickListener(new View.OnClickListener() {
+            clearTerminal.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    //something to send to bluetooth device
+                    receiveBox.setText("");
                 }
             });
         }
+        showDataBase.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(dataBaseLinearLayout.getVisibility()==View.GONE) {
+                    dataBaseLinearLayout.setVisibility(View.VISIBLE);
+                    showDataBase.setText(R.string.hide_data_base);
+                }
+                else{
+                    dataBaseLinearLayout.setVisibility(View.GONE);
+                    showDataBase.setText(R.string.show_data_base);
+                }
+            }
+        });
     }
 
     private void findViews() {
+        dataBaseLinearLayout = findViewById(R.id.data_base_linear_layout);
         connectedDeviceTextView = findViewById(R.id.connected_device);
         statusTextView = findViewById(R.id.status);
         coordinates = findViewById(R.id.coordinates);
@@ -158,86 +142,29 @@ public class TerminalActivity extends AppCompatActivity implements Serializable,
         temperature = findViewById(R.id.temperature);
         humidity = findViewById(R.id.humidity);
         air = findViewById(R.id.air);
-        sendTestData = findViewById(R.id.send_test_data);
         receiveBox = findViewById(R.id.receive_box);
+        dataBase = findViewById(R.id.dataBase);
+        clearTerminal = findViewById(R.id.clear_terminal);
+        sendTestData = findViewById(R.id.send_test_data);
         messageToSend = findViewById(R.id.message_to_send);
         send = findViewById(R.id.send);
-        dataBase = findViewById(R.id.dataBase);
+        showDataBase = findViewById(R.id.show_data_base);
     }
 
-    private void checkConnection() {
-        if (mBluetoothAdapter == null || !mBluetoothAdapter.isEnabled()) {
-            Toast.makeText(this, R.string.check_bluetooth_connection, Toast.LENGTH_SHORT).show();
-            startActivity(new Intent(this, MainActivity.class));
+    @Override
+    public void onBackPressed() {
+        if(dataBaseLinearLayout.getVisibility()==View.VISIBLE){
+            dataBaseLinearLayout.setVisibility(View.GONE);
+            showDataBase.setText(R.string.show_data_base);
         }
-    }
-
-    private Runnable updateTimerThread = new Runnable() {
-        public void run() {
-            bluetoothHandler.postDelayed(this, 2000);
-            checkConnection();
+        else{
+            super.onBackPressed();
         }
-    };
-
-    private void connectToBluetooth() {
-        if (!development) {
-            try {
-                connectBluetooth();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    void beginListenForData() {
-        final Handler handler = new Handler();
-        final byte delimiter = 10; //This is the ASCII code for a newline character
-
-        stopWorker = false;
-        readBufferPosition = 0;
-        readBuffer = new byte[1024];
-        workerThread = new Thread(new Runnable() {
-            public void run() {
-                while (!Thread.currentThread().isInterrupted() && !stopWorker) {
-                    try {
-                        int bytesAvailable = mInputStream.available();
-                        if (bytesAvailable > 0) {
-                            byte[] packetBytes = new byte[bytesAvailable];
-                            mInputStream.read(packetBytes);
-                            for (int i = 0; i < bytesAvailable; i++) {
-                                byte b = packetBytes[i];
-                                if (b == delimiter) {
-                                    byte[] encodedBytes = new byte[readBufferPosition];
-                                    System.arraycopy(readBuffer, 0, encodedBytes, 0, encodedBytes.length);
-                                    final String data = new String(encodedBytes, StandardCharsets.UTF_8);
-                                    readBufferPosition = 0;
-
-                                    handler.post(new Runnable() {
-                                        public void run() {
-                                            receiveBox.setText(data);
-                                        }
-                                    });
-                                } else {
-                                    readBuffer[readBufferPosition++] = b;
-                                }
-                            }
-                        }
-                    } catch (IOException ex) {
-                        stopWorker = true;
-                    }
-                }
-            }
-        });
-        workerThread.start();
     }
 
     @Override
     public void onDataNewFireBase(List<Region> regions) {
         dataBase.setText(UtilsFireBase.regionListToString(regions));
-    }
-
-    void sendData() throws IOException {
-        mOutputStream.write((messageToSend.getText().toString() + "\n").getBytes());
     }
 
     private void setStatus(String status, int color) {
