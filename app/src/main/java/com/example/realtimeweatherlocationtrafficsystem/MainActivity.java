@@ -8,6 +8,7 @@ import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.text.Html;
 import android.view.View;
@@ -52,6 +53,7 @@ public class MainActivity extends AppCompatActivity {
         bluetoothHandler = new android.os.Handler();
         bluetoothHandler.postDelayed(updateTimerThread, 0);
         initComponents();
+        registerReceiver(receiver, new IntentFilter(BluetoothAdapter.ACTION_SCAN_MODE_CHANGED));
     }
 
     @Override
@@ -127,12 +129,13 @@ public class MainActivity extends AppCompatActivity {
     private final BroadcastReceiver receiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
+            if(action==null) return;
             if (BluetoothDevice.ACTION_FOUND.equals(action)) {
                 //Discovery has found a device. Get the BluetoothDevice
                 //object and its info from the Intent.
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 if (device != null) {
-                    if (device.getBondState() != BluetoothDevice.BOND_BONDED){
+                    if (device.getBondState() == BluetoothDevice.BOND_BONDED){
                         devices.add(device);
                         updateBluetoothDevicesListView();
                         Toast.makeText(context, "found", Toast.LENGTH_SHORT).show();
@@ -225,8 +228,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void goToTerminal(View view){
+        /*Intent intent1 = new Intent(this, TesteActivity.class);
+        intent1.putExtra("BT_DEVICE_SESSION_ID", selected_device);
+        startActivity(intent1);*/
         if(selected_device==null && !development.isChecked()){
-            //startActivity(new Intent(this, TesteActivity.class));
             Toast.makeText(this, R.string.please_select_one_device, Toast.LENGTH_SHORT).show();
             return;
         }

@@ -9,4 +9,5 @@
     <dimen name="dim_160dp">160dp</dimen>
     <dimen name="size_18sp">18sp</dimen>
     <dimen name="size_16sp">16sp</dimen>
+    <dimen name="dim_64dp">64dp</dimen>
 </resources>
