@@ -1,18 +1,31 @@
 package com.example.realtimeweatherlocationtrafficsystem;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.FragmentActivity;
 
-import android.graphics.drawable.Drawable;
+import android.annotation.SuppressLint;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothSocket;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.LayoutInflater;
+import android.os.Handler;
+import android.os.Message;
 import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.realtimeweatherlocationtrafficsystem.models.BluetoothClientClass;
 import com.example.realtimeweatherlocationtrafficsystem.models.FireBaseManager;
 import com.example.realtimeweatherlocationtrafficsystem.models.Region;
 import com.example.realtimeweatherlocationtrafficsystem.models.Utils;
+import com.example.realtimeweatherlocationtrafficsystem.models.UtilsBluetooth;
 import com.example.realtimeweatherlocationtrafficsystem.models.UtilsGoogleMaps;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -21,30 +34,52 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 
-import org.w3c.dom.Text;
-
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCallback, FireBaseManager.onFireBaseDataNew, GoogleMap.OnMarkerClickListener {
 
     private final int INDEX_FOR_THE_MOST_COMMON_DATA = 0;
 
     private GoogleMap map;
-    private String device;
-    private List<String> weatherString;
+    private boolean sendDataInBackground;
     private List<Integer> markerIcons;
+    private BluetoothDevice device;
+    private BluetoothSocket socket;
     private FireBaseManager fireBaseManager;
+    private LinearLayout loading;
+    private TextView loading_message;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_google_maps);
+        initDialog();
         initMap();
-        initWeatherString();
-        initMarkerIcons();
-        device = (String) getIntent().getSerializableExtra("BT_DEVICE_SESSION_ID");
         fireBaseManager = new FireBaseManager(getBaseContext(), getResources(), this);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        goToMainActivity();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        goToMainActivity();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (sendDataInBackground) {
+            unregisterReceiver(receiverState);
+            unregisterReceiver(receiverConnection);
+        }
     }
 
     private void initMap() {
@@ -52,15 +87,16 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         assert mapFragment != null;
-        mapFragment.getMapAsync((OnMapReadyCallback) this);
+        mapFragment.getMapAsync(this);
     }
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
         map = googleMap;
+        initMarkerIcons();
         map.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
             public View getInfoWindow(Marker marker) {
-                View window = getLayoutInflater().inflate(R.layout.item_map_windows_info, null);
+                @SuppressLint("InflateParams") final View window = getLayoutInflater().inflate(R.layout.item_map_windows_info, null);
                 Region region = fireBaseManager.getRegion(Integer.parseInt(marker.getId().substring(1))); //Marker id format: "m1, m2, ..., m10"
                 TextView coordinates = window.findViewById(R.id.coordinates);
                 TextView weather = window.findViewById(R.id.weather);
@@ -68,13 +104,25 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
                 TextView humidity = window.findViewById(R.id.humidity);
                 TextView air = window.findViewById(R.id.air);
                 coordinates.setText(Utils.getCoordinatesWithPoint(region.getName()));
-                weather.setText(weatherString.get(UtilsGoogleMaps.getWeatherStringIndex(region.getRecords().get(INDEX_FOR_THE_MOST_COMMON_DATA).getData().getCode())));
+                weather.setText(UtilsGoogleMaps.getWeatherString(
+                        UtilsGoogleMaps.getWeatherStringIndex(
+                                region.getRecords().get(INDEX_FOR_THE_MOST_COMMON_DATA).getData().getCode())
+                        , getBaseContext()));
                 temperature.setText(String.format(getString(R.string.temperature_celsius_placeholder), region.getRecords().get(INDEX_FOR_THE_MOST_COMMON_DATA).getData().getTemperature()));
                 humidity.setText(String.format(getString(R.string.value_percent_placeholder), region.getRecords().get(INDEX_FOR_THE_MOST_COMMON_DATA).getData().getHumidity()));
                 air.setText(String.valueOf(region.getRecords().get(INDEX_FOR_THE_MOST_COMMON_DATA).getData().getAir()));
                 return window;
             }
-            public View getInfoContents(Marker arg0) {return null;}
+
+            public View getInfoContents(Marker arg0) {
+                return null;
+            }
+        });
+        map.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
+            @Override
+            public void onInfoWindowClick(Marker marker) {
+                marker.hideInfoWindow();
+            }
         });
     }
 
@@ -87,15 +135,7 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
                 LatLng location = UtilsGoogleMaps.getCoordinates(regions.get(i).getName());
                 if (location == null) return;
                 int index = UtilsGoogleMaps.getWeatherStringIndex(regions.get(i).getRecords().get(INDEX_FOR_THE_MOST_COMMON_DATA).getData().getCode());
-                map.addMarker(UtilsGoogleMaps.getMarkerOptions(location, "","", markerIcons.get(index)));
-                /*map.addMarker(UtilsGoogleMaps.getMarkerOptions(
-                        location,
-                        UtilsGoogleMaps.getMarkerTitle(
-                                location.latitude + " " + location.longitude,
-                                getString(R.string.marker_title_placeholder),
-                                weatherString.get(index)),
-                        UtilsGoogleMaps.getMarkerDescription(regions.get(i).getRecords().get(0).getData(), getResources()),
-                        markerIcons.get(index)));*/
+                map.addMarker(UtilsGoogleMaps.getMarkerOptions(location, "", "", markerIcons.get(index)));
                 map.addPolygon(UtilsGoogleMaps.getPolygonOptions(location, UtilsGoogleMaps.REGION_AREA, UtilsGoogleMaps.COLOR_REGION_GREEN));
             }
         }
@@ -106,23 +146,135 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
         return false;
     }
 
-    private void initWeatherString(){
-        weatherString = new ArrayList<>();
-        weatherString.add(getString(R.string.weather_sunny));
-        weatherString.add(getString(R.string.weather_sun));
-        weatherString.add(getString(R.string.weather_heat));
-        weatherString.add(getString(R.string.weather_soft_rain));
-        weatherString.add(getString(R.string.weather_moderate_rain));
-        weatherString.add(getString(R.string.weather_torrential_rain));
-        weatherString.add(getString(R.string.weather_soft_wind));
-        weatherString.add(getString(R.string.weather_moderate_wind));
-        weatherString.add(getString(R.string.weather_torrential_wind));
-        weatherString.add(getString(R.string.weather_soft_snow_fall));
-        weatherString.add(getString(R.string.weather_moderate_snow_fall));
-        weatherString.add(getString(R.string.weather_massive_snow_fall));
+    DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+        @Override
+        public void onClick(DialogInterface dialog, int which) {
+            switch (which) {
+                case DialogInterface.BUTTON_POSITIVE:
+                    sendDataInBackground = true;
+                    loading.setVisibility(View.VISIBLE);
+                    registerReceiver(receiverState, new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED));
+                    registerReceiver(receiverConnection, new IntentFilter(BluetoothDevice.ACTION_ACL_DISCONNECTED));
+                    initSendDataInBackgroundComponents();
+                    break;
+
+                case DialogInterface.BUTTON_NEGATIVE:
+                    sendDataInBackground = false;
+                    loading.setVisibility(View.GONE);
+                    break;
+            }
+        }
+    };
+
+    Handler handler = new android.os.Handler(new android.os.Handler.Callback() {
+        @Override
+        public boolean handleMessage(@NonNull Message msg) {
+            switch (msg.what) {
+                case UtilsBluetooth.STATE_CONNECTING:
+                    loading_message.setText(R.string.connection_to_bluetooth_device);
+                    if (loading.getVisibility() == View.GONE) {
+                        loading.setVisibility(View.VISIBLE);
+                    }
+                    break;
+                case UtilsBluetooth.STATE_CONNECTED:
+                    Toast.makeText(getBaseContext(), String.format(getString(R.string.connected_to_placeholder_device), device.getName()), Toast.LENGTH_SHORT).show();
+                    loading.setVisibility(View.GONE);
+                    break;
+                case UtilsBluetooth.STATE_CONNECTION_FAILED:
+                    Toast.makeText(GoogleMapsActivity.this, getString(R.string.connection_failed), Toast.LENGTH_SHORT).show();
+                    goToMainActivity();
+                    break;
+                case UtilsBluetooth.STATE_READING_WRITING_FAILED:
+                    Toast.makeText(GoogleMapsActivity.this,
+                            String.format(getString(R.string.disconected_from_placeholder_device), device.getName()), Toast.LENGTH_SHORT).show();
+                    if(socket.isConnected()) goToMainActivity();
+                    else{
+                        finish();
+                        startActivity(new Intent(GoogleMapsActivity.this, MainActivity.class));
+                    }
+                    break;
+                case UtilsBluetooth.STATE_MESSAGE_RECEIVED:
+                    byte[] readBuffer = (byte[]) msg.obj;
+                    String message = new String(readBuffer, 0, msg.arg1);
+                    Toast.makeText(GoogleMapsActivity.this, String.format(getString(R.string.send_to_database_placeholder), message), Toast.LENGTH_SHORT).show();
+                    break;
+            }
+            return true;
+        }
+    });
+
+    private void initDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(GoogleMapsActivity.this);
+        builder.setMessage(R.string.need_to_connect_to_send)
+                .setPositiveButton("Yes", dialogClickListener)
+                .setNegativeButton("No", dialogClickListener);
+        builder.setTitle(R.string.send_data_background);
+        builder.setCancelable(false);
+        builder.show();
+        loading = findViewById(R.id.loading);
+        loading_message = findViewById(R.id.loading_message);
     }
 
-    private void initMarkerIcons(){
+    private void initSendDataInBackgroundComponents() {
+        device = Objects.requireNonNull(getIntent().getExtras()).getParcelable("BT_DEVICE_SESSION_ID");
+        if (device == null || device.getName().equals("")) {
+            Toast.makeText(GoogleMapsActivity.this, getString(R.string.please_select_one_device), Toast.LENGTH_SHORT).show();
+            startActivity(new Intent(GoogleMapsActivity.this, MainActivity.class));
+            return;
+        }
+        try {
+            socket = device.createRfcommSocketToServiceRecord(UtilsBluetooth.MY_UUID);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        BluetoothClientClass clientClass = new BluetoothClientClass(socket, bluetoothAdapter, handler, null, null);
+        clientClass.start();
+    }
+
+    private final BroadcastReceiver receiverState = new BroadcastReceiver() {
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (action == null) return;
+            if (action.equals(BluetoothAdapter.ACTION_STATE_CHANGED)) {
+                final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR);
+                if (state == BluetoothAdapter.STATE_OFF || state == BluetoothAdapter.STATE_TURNING_OFF) {
+                    goToMainActivity();
+                }
+            }
+        }
+    };
+
+    private final BroadcastReceiver receiverConnection = new BroadcastReceiver() {
+        @SuppressLint("ShowToast")
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (action == null) return;
+            if (action.equals(BluetoothDevice.ACTION_ACL_DISCONNECT_REQUESTED) || action.equals(BluetoothDevice.ACTION_ACL_DISCONNECTED)) {
+                Toast toast = new Toast(getBaseContext());
+                try {
+                    toast.getView().isShown();    // true if visible
+                } catch (Exception e) {         // invisible if exception
+                    toast = Toast.makeText(context,
+                            String.format(getString(R.string.disconected_from_placeholder_device),
+                                    device.getName()), Toast.LENGTH_SHORT);
+                }
+                toast.show();  //finally display it
+                goToMainActivity();
+            }
+        }
+    };
+
+    @Override
+    public void onBackPressed() {
+        if (sendDataInBackground) {
+            goToMainActivity();
+        } else {
+            super.onBackPressed();
+        }
+    }
+
+    private void initMarkerIcons() {
         markerIcons = new ArrayList<>();
         markerIcons.add(R.drawable.sunny);
         markerIcons.add(R.drawable.sun);
@@ -136,5 +288,17 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
         markerIcons.add(R.drawable.soft_snow_fall);
         markerIcons.add(R.drawable.moderate_snow_fall);
         markerIcons.add(R.drawable.massive_snow_fall);
+    }
+
+    public void goToMainActivity() {
+        try {
+            if (socket != null) {
+                socket.close();
+                loading_message.setText(R.string.disconnection_to_bluetooth_device);
+                loading.setVisibility(View.VISIBLE);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

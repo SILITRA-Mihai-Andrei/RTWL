@@ -1,22 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity"
-    android:background="@android:color/black">
+    android:background="@android:color/black"
+    tools:context=".MainActivity">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        android:elevation="4dp"
+        android:backgroundTint="@android:color/black"
+        android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
+        app:layout_constraintTop_toTopOf="parent"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
 
     <TextView
         android:id="@+id/bluetooth_status"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/dim_32dp"
+        android:layout_marginTop="@dimen/dim_16dp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/toolbar" />
 
     <TextView
         android:id="@+id/bluetooth_devices_txt"
@@ -25,7 +35,7 @@
         android:layout_marginTop="@dimen/dim_16dp"
         android:text="@string/choose_the_bluetooth_device"
         app:layout_constraintStart_toStartOf="@+id/ls_bluetooth_devices"
-        app:layout_constraintTop_toBottomOf="@+id/bluetooth_status"/>
+        app:layout_constraintTop_toBottomOf="@+id/bluetooth_status" />
 
     <TextView
         android:id="@+id/no_paired_devices"
@@ -34,8 +44,8 @@
         android:text="@string/no_paired_devices"
         android:textColor="@android:color/holo_red_light"
         android:visibility="gone"
-        app:layout_constraintTop_toBottomOf="@id/bluetooth_devices_txt"
-        app:layout_constraintStart_toStartOf="@id/ls_bluetooth_devices"/>
+        app:layout_constraintStart_toStartOf="@id/ls_bluetooth_devices"
+        app:layout_constraintTop_toBottomOf="@id/bluetooth_devices_txt" />
 
     <TextView
         android:id="@+id/selected_bluetooth_devices"
@@ -43,20 +53,20 @@
         android:layout_height="wrap_content"
         android:visibility="gone"
         app:layout_constraintStart_toStartOf="@+id/ls_bluetooth_devices"
-        app:layout_constraintTop_toBottomOf="@+id/no_paired_devices"/>
+        app:layout_constraintTop_toBottomOf="@+id/no_paired_devices" />
 
     <Button
         android:id="@+id/btn_go_to_bluetooth_settings"
         android:layout_width="@dimen/dim_0dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/dim_8dp"
+        android:background="@drawable/btn_rounded_8dp_dark_gray"
         android:text="@string/go_to_bluetooth_settings"
         android:textColor="@android:color/white"
-        android:background="@drawable/btn_rounded_8dp_dark_gray"
-        android:layout_marginTop="@dimen/dim_8dp"
         android:visibility="gone"
-        app:layout_constraintTop_toBottomOf="@+id/selected_bluetooth_devices"
+        app:layout_constraintEnd_toEndOf="@+id/ls_bluetooth_devices"
         app:layout_constraintStart_toStartOf="@+id/ls_bluetooth_devices"
-        app:layout_constraintEnd_toEndOf="@+id/ls_bluetooth_devices"/>
+        app:layout_constraintTop_toBottomOf="@+id/no_paired_devices" />
 
     <ListView
         android:id="@+id/ls_bluetooth_devices"
@@ -72,40 +82,121 @@
         app:layout_constraintTop_toBottomOf="@+id/selected_bluetooth_devices"
         app:layout_constraintWidth_percent="0.8" />
 
-    <Switch
-        android:id="@+id/development"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/development"
-        android:layout_marginBottom="@dimen/dim_32dp"
-        app:layout_constraintTop_toBottomOf="@id/ls_bluetooth_devices"
-        app:layout_constraintBottom_toTopOf="@id/btn_terminal"
-        app:layout_constraintStart_toStartOf="@id/ls_bluetooth_devices" />
-
     <Button
         android:id="@+id/btn_terminal"
-        android:onClick="goToTerminal"
         android:layout_width="@dimen/dim_0dp"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/dim_16dp"
+        android:background="@drawable/btn_rounded_8dp_dark_gray"
+        android:onClick="goToTerminal"
         android:text="@string/terminal"
         android:textColor="@android:color/white"
-        android:background="@drawable/btn_rounded_8dp_dark_gray"
-        android:layout_marginBottom="@dimen/dim_16dp"
-        app:layout_constraintStart_toStartOf="@+id/ls_bluetooth_devices"
+        app:layout_constraintBottom_toTopOf="@id/btn_google_maps"
         app:layout_constraintEnd_toEndOf="@+id/ls_bluetooth_devices"
-        app:layout_constraintBottom_toTopOf="@id/btn_google_maps"/>
+        app:layout_constraintStart_toStartOf="@+id/ls_bluetooth_devices" />
 
     <Button
         android:id="@+id/btn_google_maps"
-        android:onClick="goToGoogleMaps"
         android:layout_width="@dimen/dim_0dp"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/dim_32dp"
+        android:background="@drawable/btn_rounded_8dp_dark_gray_border_green"
+        android:onClick="goToGoogleMaps"
         android:text="@string/google_maps"
         android:textColor="@color/color_green"
-        android:background="@drawable/btn_rounded_8dp_dark_gray_border_green"
-        android:layout_marginBottom="@dimen/dim_32dp"
-        app:layout_constraintStart_toStartOf="@+id/ls_bluetooth_devices"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@+id/ls_bluetooth_devices"
-        app:layout_constraintBottom_toBottomOf="parent"/>
+        app:layout_constraintStart_toStartOf="@+id/ls_bluetooth_devices" />
+
+    <LinearLayout
+        android:id="@+id/infoLinearLayout"
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:background="@android:color/black"
+        android:elevation="@dimen/dim_16dp">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <View
+                android:id="@+id/blue_line"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/dim_64dp"
+                android:background="@color/blue" />
+
+            <TextView
+                android:id="@+id/victoria"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignTop="@id/blue_line"
+                android:layout_alignBottom="@id/blue_line"
+                android:layout_alignParentStart="true"
+                android:layout_toStartOf="@+id/logo"
+                android:gravity="center"
+                android:text="@string/fiesc"
+                android:textAlignment="center"
+                android:textColor="@android:color/white"
+                android:textStyle="bold" />
+
+            <ImageView
+                android:id="@+id/logo"
+                android:layout_width="@dimen/dim_136dp"
+                android:layout_height="@dimen/dim_160dp"
+                android:layout_centerHorizontal="true"
+                android:contentDescription="@string/stefan_cel_mare_university_suceava"
+                android:src="@drawable/usv" />
+
+            <TextView
+                android:id="@+id/mihai"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignTop="@id/blue_line"
+                android:layout_alignBottom="@+id/blue_line"
+                android:layout_alignParentEnd="true"
+                android:layout_toEndOf="@+id/logo"
+                android:gravity="center"
+                android:text="@string/Y2020"
+                android:textAlignment="center"
+                android:textColor="@android:color/white"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+        </RelativeLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/application_details"
+            android:textColor="@android:color/white"
+            android:textStyle="bold"
+            android:textSize="@dimen/size_18sp"
+            android:textAlignment="center"
+            android:layout_marginTop="@dimen/dim_16dp"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:text="@string/application_details_description"
+            android:textColor="@android:color/white"
+            android:layout_marginTop="@dimen/dim_16dp"
+            android:paddingHorizontal="@dimen/dim_64dp"/>
+
+        <Button
+            android:id="@+id/ok"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/ok"
+            android:layout_gravity="center"
+            android:layout_marginBottom="@dimen/dim_64dp"/>
+
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
