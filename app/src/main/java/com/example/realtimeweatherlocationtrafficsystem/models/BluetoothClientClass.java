@@ -1,6 +1,5 @@
 package com.example.realtimeweatherlocationtrafficsystem.models;
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.os.Handler;
 import android.os.Message;
@@ -17,24 +16,28 @@ public class BluetoothClientClass extends Thread{
     private Button send;
     private EditText message;
 
-    public BluetoothClientClass(BluetoothDevice device, BluetoothAdapter adapter, Handler handler, Button send, EditText message) {
+    public BluetoothClientClass(BluetoothSocket socket, BluetoothAdapter adapter, Handler handler, Button send, EditText message) {
         this.adapter = adapter;
         this.handler = handler;
         this.send = send;
         this.message = message;
-        try {
-            socket = device.createRfcommSocketToServiceRecord(UtilsBluetooth.MY_UUID);
-        } catch (IOException e) {
-            e.printStackTrace();
-            sendHandlerMessage(UtilsBluetooth.STATE_CONNECTION_FAILED);
-        }
+        this.socket = socket;
     }
 
     public void run() {
         try {
             adapter.cancelDiscovery();
-            socket.connect();
-            sendHandlerMessage(UtilsBluetooth.STATE_CONNECTED);
+            sendHandlerMessage(UtilsBluetooth.STATE_CONNECTING);
+            if(socket==null) return;
+            if(!socket.isConnected()){
+                socket.connect();
+            }
+            if(socket.isConnected())
+                sendHandlerMessage(UtilsBluetooth.STATE_CONNECTED);
+            else{
+                sendHandlerMessage(UtilsBluetooth.STATE_CONNECTION_FAILED);
+                return;
+            }
             BluetoothSendReceive sendReceive = new BluetoothSendReceive(socket, handler, send, message);
             sendReceive.start();
         } catch (IOException e) {

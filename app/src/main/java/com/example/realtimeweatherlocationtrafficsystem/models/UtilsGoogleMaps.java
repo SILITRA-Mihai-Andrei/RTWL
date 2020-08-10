@@ -1,17 +1,15 @@
 package com.example.realtimeweatherlocationtrafficsystem.models;
 
-import android.content.res.Resources;
+import android.content.Context;
 import android.graphics.Color;
-import android.text.Html;
-import android.text.Spanned;
-import android.util.Log;
 
 import com.example.realtimeweatherlocationtrafficsystem.R;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolygonOptions;
+
+import java.util.ArrayList;
 
 public class UtilsGoogleMaps {
 
@@ -71,6 +69,22 @@ public class UtilsGoogleMaps {
             else if(Utils.isInRange(weatherCode, MIN_VALUE_THIRD_GRADE+(i*100), MAX_VALUE_THIRD_GRADE+(i*100))) return i+1+((i-1)*2); //2, 5, 7, 11
         }
         return -1;
+    }
+
+    public static String getWeatherString(int weatherCode, Context context){
+        if(weatherCode==0) return context.getString(R.string.weather_sunny);
+        else if(weatherCode==1) return context.getString(R.string.weather_sun);
+        else if(weatherCode==2) return context.getString(R.string.weather_heat);
+        else if(weatherCode==3) return context.getString(R.string.weather_soft_rain);
+        else if(weatherCode==4) return context.getString(R.string.weather_moderate_rain);
+        else if(weatherCode==5) return context.getString(R.string.weather_torrential_rain);
+        else if(weatherCode==6) return context.getString(R.string.weather_soft_wind);
+        else if(weatherCode==7) return context.getString(R.string.weather_moderate_wind);
+        else if(weatherCode==8) return context.getString(R.string.weather_torrential_wind);
+        else if(weatherCode==9) return context.getString(R.string.weather_soft_snow_fall);
+        else if(weatherCode==10) return context.getString(R.string.weather_moderate_snow_fall);
+        else if(weatherCode==11) return context.getString(R.string.weather_massive_snow_fall);
+        else return null;
     }
 
     public static int[] getRegionColor(int color) {

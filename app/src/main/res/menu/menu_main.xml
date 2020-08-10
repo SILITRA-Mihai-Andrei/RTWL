@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:id="@+id/settings"
+        android:icon="@drawable/settings"
+        android:title="@string/settings" />
+
+    <item android:id="@+id/development"
+        android:icon="@drawable/developer"
+        android:title="@string/development" />
+
+    <item android:id="@+id/info"
+        android:icon="@drawable/info"
+        android:title="@string/info" />
+</menu>

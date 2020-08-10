@@ -1,5 +1,6 @@
 <resources>
-    <string name="app_name">Real Time Weather Location Traffic System</string>
+    <string name="app_name">Real Time Weather Location APP</string>
+    <string name="application_details_description">This application is created by TOMA Victoria and SILITRĂ Mihai-Andrei dedicated for Real Time Weather Location Traffic System, carried out under their draft license.</string>
     <string name="google_maps">Google Maps</string>
     <string name="terminal">Terminal</string>
     <string name="bluetooth_not_available">Bluetooth is not available!</string>
@@ -18,7 +19,7 @@
     <string name="status">Status:</string>
     <string name="received">Received:</string>
     <string name="message_to_send">Message to send:</string>
-    <string name="message_to_send_hint">RTWL: 46.20 26.10 155 23 50 45</string>
+    <string name="message_to_send_hint">get data</string>
     <string name="send">Send</string>
     <string name="please_select_one_device">Please select one device!</string>
     <string name="check_bluetooth_connection">Check the bluetooth connection.</string>
@@ -26,7 +27,10 @@
     <string name="development_mode">No connected device. Development mode.</string>
     <string name="first_status_in_development_mode">Send custom and valid data to database using the above fields.</string>
     <string name="connected_to_placeholder_device">Connected to %1$s.</string>
-    <string name="connected_to_device">Connected to </string>
+    <string name="connecting_to_placeholder_device">Connecting to %1$s.</string>
+    <string name="disconected_from_placeholder_device">Disconnectd from %1$s.</string>
+    <string name="chosen_device">You choose </string>
+    <string name="auto_selected">Auto selected</string>
     <string name="invalid_coordinates">Invalid coordinates! Must be as hint format, latitude between -90:90 and longitude between -180:180</string>
     <string name="invalid_code">Invalid code. Must be between 100 and 499.</string>
     <string name="invalid_temperature">Invalid temperature. Must be between -50 and 50.</string>
@@ -63,6 +67,27 @@
     <string name="show_data_base">Show DataBase content</string>
     <string name="hide_data_base">Hide DataBase content</string>
     <string name="clear">CLEAR</string>
-    <string name="waiting_for_data">Waiting for data...</string>
+    <string name="waiting_for_data">Waiting for data…</string>
     <string name="message_send">Message send.</string>
+    <string name="loading">Loading…</string>
+    <string name="loading_points">…</string>
+    <string name="connection_to_bluetooth_device">Connecting to bluetooth device.</string>
+    <string name="disconnection_to_bluetooth_device">Disconnecting from bluetooth device.</string>
+    <string name="connection_failed">Connection failed!</string>
+    <string name="received_message">Message received.</string>
+    <string name="send_data_background">Send data to database in background?</string>
+    <string name="need_to_connect_to_send">You need to connect to a bluetooth device to do so!</string>
+    <string name="send_to_database_placeholder">Send %1$s to your current region.</string>
+    <string name="settings">Settings</string>
+    <string name="info">Info</string>
+    <string name="stefan_cel_mare_university_suceava">Stefan cel Mare University Suceava</string>
+    <string name="application_details">Application details</string>
+    <string name="ok">OK</string>
+    <string name="fiesc">FIESC</string>
+    <string name="Y2020">2020</string>
+    <string name="device_disconnected">Device disconnected!</string>
+    <string name="something_wrong_with_bluetooth_name">Something wrong happened when accesed device name.</string>
+    <string name="please_wait">Please wait!</string>
+    <string name="commands">Commands</string>
+    <string name="bluetooth_commands_title">Bluetooth commands to send:</string>
 </resources>

@@ -10,4 +10,8 @@
     <dimen name="size_18sp">18sp</dimen>
     <dimen name="size_16sp">16sp</dimen>
     <dimen name="dim_64dp">64dp</dimen>
+    <dimen name="size_24sp">24sp</dimen>
+    <dimen name="dim_128dp">128dp</dimen>
+    <dimen name="dim_2dp">2dp</dimen>
+    <dimen name="dim_136dp">136dp</dimen>
 </resources>

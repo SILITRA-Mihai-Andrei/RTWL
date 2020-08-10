@@ -7,6 +7,42 @@
     android:background="@android:color/black"
     tools:context=".TerminalActivity">
 
+    <LinearLayout
+        android:id="@+id/loading"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/black"
+        android:elevation="@dimen/dim_16dp"
+        android:visibility="gone"
+        android:orientation="vertical">
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/loading"
+            android:textAlignment="center"
+            android:textSize="@dimen/size_24sp"
+            android:layout_marginTop="@dimen/dim_128dp"/>
+        <TextView
+            android:id="@+id/loading_message"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/loading_points"
+            android:textAlignment="center"
+            android:textSize="@dimen/size_16sp"
+            android:layout_marginTop="@dimen/dim_16dp"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/please_wait"
+            android:textAlignment="center"
+            android:textSize="@dimen/size_16sp"
+            android:layout_marginBottom="@dimen/dim_16dp"/>
+        <ProgressBar
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            style="?android:attr/progress"/>
+    </LinearLayout>
+
     <View
         android:id="@+id/view"
         android:layout_width="@dimen/dim_0dp"
@@ -70,7 +106,8 @@
                     android:hint="@string/code_hint"
                     android:inputType="numberSigned"
                     android:maxLines="1"
-                    android:textAlignment="center" />
+                    android:textAlignment="center"
+                    android:importantForAutofill="no" />
 
                 <EditText
                     android:id="@+id/temperature"
@@ -82,7 +119,8 @@
                     android:hint="@string/temperature_hint"
                     android:inputType="numberSigned"
                     android:maxLines="1"
-                    android:textAlignment="center" />
+                    android:textAlignment="center"
+                    android:importantForAutofill="no" />
 
                 <EditText
                     android:id="@+id/humidity"
@@ -94,7 +132,8 @@
                     android:hint="@string/humidity_hint"
                     android:inputType="numberSigned"
                     android:maxLines="1"
-                    android:textAlignment="center" />
+                    android:textAlignment="center"
+                    android:importantForAutofill="no" />
 
                 <EditText
                     android:id="@+id/air"
@@ -105,7 +144,8 @@
                     android:hint="@string/air_hint"
                     android:inputType="numberSigned"
                     android:maxLines="1"
-                    android:textAlignment="center" />
+                    android:textAlignment="center"
+                    android:importantForAutofill="no" />
 
             </LinearLayout>
 
@@ -159,20 +199,37 @@
                 <TextView
                     android:id="@+id/receive_box"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent" />
+                    android:layout_height="wrap_content" />
             </ScrollView>
 
-            <TextView
-                android:layout_width="wrap_content"
+
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/dim_16dp"
-                android:text="@string/message_to_send" />
+                android:layout_marginTop="@dimen/dim_16dp">
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/message_to_send"
+                    android:layout_gravity="center"/>
+                <TextView
+                    android:id="@+id/commands"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/commands"
+                    android:paddingHorizontal="@dimen/dim_8dp"
+                    android:layout_gravity="center"
+                    android:paddingVertical="@dimen/dim_4dp"
+                    android:background="@color/color_gray"/>
+            </LinearLayout>
 
             <EditText
                 android:id="@+id/message_to_send"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/message_to_send_hint"
+                android:autofillHints="@string/message_to_send_hint"
                 android:inputType="textNoSuggestions" />
 
             <Button

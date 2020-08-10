@@ -26,6 +26,9 @@ public class Utils {
     public final static int COLOR_GREEN = 2;
     public final static int COLOR_BLUE = 3;
 
+    //bluetooth
+    public final static int MAX_RECEIVE_BOX_LENGTH = 1024; //6400
+
     private static int blinkTextViewRepeats = -1;
 
     public static int isDataValid(String coordinates, String code, String temperature, String humidity, String air) {
@@ -166,5 +169,9 @@ public class Utils {
 
     public static String getCurrentDateAndTime() {
         return android.text.format.DateFormat.format("yy:MM:dd:kk:mm", new java.util.Date()).toString();
+    }
+
+    public static String getTime() {
+        return android.text.format.DateFormat.format("kk:mm:ss", new java.util.Date()).toString();
     }
 }
