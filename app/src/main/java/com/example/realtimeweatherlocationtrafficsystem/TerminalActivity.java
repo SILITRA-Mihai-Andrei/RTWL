@@ -84,7 +84,7 @@ public class TerminalActivity extends AppCompatActivity implements Serializable,
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if(!development) {
+        if (!development) {
             unregisterReceiver(receiverState);
             unregisterReceiver(receiverConnection);
         }
@@ -107,7 +107,9 @@ public class TerminalActivity extends AppCompatActivity implements Serializable,
                 e.printStackTrace();
                 try {
                     socket = device.createRfcommSocketToServiceRecord(UtilsBluetooth.MY_UUID);
-                }catch (IOException e1){e1.printStackTrace();}
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
             }
             BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
             BluetoothClientClass clientClass = new BluetoothClientClass(socket, bluetoothAdapter, handler, send, messageToSend);
@@ -236,7 +238,7 @@ public class TerminalActivity extends AppCompatActivity implements Serializable,
                 case UtilsBluetooth.STATE_READING_WRITING_FAILED:
                     Toast.makeText(TerminalActivity.this,
                             String.format(getString(R.string.disconected_from_placeholder_device), device.getName()), Toast.LENGTH_SHORT).show();
-                    if(socket.isConnected()) goToMainActivity(new View(getBaseContext()));
+                    if (socket.isConnected()) goToMainActivity(new View(getBaseContext()));
                     else {
                         finish();
                         //startActivity(new Intent(TerminalActivity.this, MainActivity.class));
@@ -244,12 +246,25 @@ public class TerminalActivity extends AppCompatActivity implements Serializable,
                     break;
                 case UtilsBluetooth.STATE_MESSAGE_RECEIVED:
                     byte[] readBuffer = (byte[]) msg.obj;
-                    if(readBuffer==null) break;
+                    if (readBuffer == null) break;
                     String message = new String(readBuffer, 0, msg.arg1);
-                    if(message.isEmpty()) break;
-                    if(isFinalMessage(message)){
-                        String response = UtilsBluetooth.getReceivedMessage(receiveBox.getText().toString(), lastUnfinishedMessage+message, getBaseContext());
-                        if(!(response==null || response.isEmpty())) receiveBox.setText(response);
+                    if (message.isEmpty()) break;
+                    if (isFinalMessage(message)) {
+                        String response = UtilsBluetooth.getReceivedMessage(receiveBox.getText().toString(), lastUnfinishedMessage + message, getBaseContext());
+                        if (!(response == null || response.isEmpty())) {
+                            String[] splited = response.split("@");
+                            receiveBox.setText(splited[0]);
+                            if (splited.length == 2) {
+                                String[] d = splited[1].split(" ");
+                                int validity = Utils.isDataValid(d[0] + " " + d[1], d[2], d[3], d[4], d[5].replace(UtilsBluetooth.BLUETOOTH_RECEIVE_DELIMITER, ""));
+                                if (validity == Utils.VALID)
+                                    fireBaseManager.setValue(Utils.getCoordinatesForDataBase(d[0] + " " + d[1]), Utils.getCurrentDateAndTime(),
+                                            new Data(Utils.getInt(d[2]),
+                                                    Utils.getInt(d[3]),
+                                                    Utils.getInt(d[4]),
+                                                    Utils.getInt(d[5].replace(UtilsBluetooth.BLUETOOTH_RECEIVE_DELIMITER, ""))));
+                            }
+                        }
                         lastUnfinishedMessage = "";
                     }
                     setStatus(getString(R.string.received_message), R.color.color_green);
@@ -282,7 +297,7 @@ public class TerminalActivity extends AppCompatActivity implements Serializable,
             if (action == null) return;
             if (action.equals(BluetoothDevice.ACTION_ACL_DISCONNECT_REQUESTED) || action.equals(BluetoothDevice.ACTION_ACL_DISCONNECTED)) {
                 Toast toast = new Toast(getBaseContext());
-                try{
+                try {
                     toast.getView().isShown();    // true if visible
                 } catch (Exception e) {         // invisible if exception
                     toast = Toast.makeText(context,
@@ -295,8 +310,8 @@ public class TerminalActivity extends AppCompatActivity implements Serializable,
         }
     };
 
-    private boolean isFinalMessage(String string){
-        if(string.contains(UtilsBluetooth.BLUETOOTH_RECEIVE_DELIMITER)){
+    private boolean isFinalMessage(String string) {
+        if (string.contains(UtilsBluetooth.BLUETOOTH_RECEIVE_DELIMITER)) {
             return true;
         }
         lastUnfinishedMessage = string;
@@ -305,11 +320,10 @@ public class TerminalActivity extends AppCompatActivity implements Serializable,
 
     @Override
     public void onBackPressed() {
-        if(development){
+        if (development) {
             super.onBackPressed();
             goToMainActivity(new View(this));
-        }
-        else if (dataBaseLinearLayout.getVisibility() == View.VISIBLE) {
+        } else if (dataBaseLinearLayout.getVisibility() == View.VISIBLE) {
             dataBaseLinearLayout.setVisibility(View.GONE);
             showDataBase.setText(R.string.show_data_base);
         } else {
@@ -324,14 +338,13 @@ public class TerminalActivity extends AppCompatActivity implements Serializable,
 
     private void setStatus(String status, int color) {
         statusTextView.setText(status);
-        //Utils.blinkTextView(statusTextView, statusTextView.getCurrentTextColor(), Utils.getColorARGB(color), 150, 8);
+        Utils.blinkTextView(statusTextView, statusTextView.getCurrentTextColor(), Utils.getColorARGB(color), 150, 8);
     }
 
     public void goToMainActivity(View view) {
-        if(development) {
+        if (development) {
             finish();
-        }
-        else {
+        } else {
             try {
                 if (socket != null) {
                     socket.close();

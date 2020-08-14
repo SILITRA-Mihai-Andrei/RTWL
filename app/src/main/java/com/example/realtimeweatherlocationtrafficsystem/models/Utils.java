@@ -7,11 +7,7 @@ import android.os.Handler;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
-
 import com.example.realtimeweatherlocationtrafficsystem.R;
-import com.google.android.gms.maps.model.LatLng;
-
-import javax.xml.transform.Templates;
 
 public class Utils {
 

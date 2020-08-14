@@ -1,7 +1,5 @@
 package com.example.realtimeweatherlocationtrafficsystem.models;
 
-import android.content.Context;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -14,7 +12,7 @@ public class UtilsFireBase {
         List<Record> recordsList = new ArrayList<>();
         Iterator<Map.Entry<String, Data>> it = records.entrySet().iterator();
         while (it.hasNext()) {
-            Map.Entry<String, Data> item = (Map.Entry<String, Data>)it.next();
+            Map.Entry<String, Data> item = it.next();
             recordsList.add(new Record(item.getKey(), item.getValue()));
             it.remove(); // avoids a ConcurrentModificationException
         }

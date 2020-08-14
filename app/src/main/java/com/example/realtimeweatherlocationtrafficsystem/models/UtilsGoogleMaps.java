@@ -9,8 +9,6 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolygonOptions;
 
-import java.util.ArrayList;
-
 public class UtilsGoogleMaps {
 
     public static final float DEFAULT_ZOOM = 14f;
