@@ -2,8 +2,10 @@ package com.example.realtimeweatherlocationtrafficsystem;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentActivity;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -13,6 +15,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
+import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -27,12 +31,16 @@ import com.example.realtimeweatherlocationtrafficsystem.models.Region;
 import com.example.realtimeweatherlocationtrafficsystem.models.Utils;
 import com.example.realtimeweatherlocationtrafficsystem.models.UtilsBluetooth;
 import com.example.realtimeweatherlocationtrafficsystem.models.UtilsGoogleMaps;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -42,12 +50,16 @@ import java.util.Objects;
 public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCallback, FireBaseManager.onFireBaseDataNew, GoogleMap.OnMarkerClickListener {
 
     private final int INDEX_FOR_THE_MOST_COMMON_DATA = 0;
+    private final int REQUEST_PERMISSION_CODE = 1;
 
     private GoogleMap map;
+    private Location currentLocation;
+    private FusedLocationProviderClient fusedLocationProviderClient;
     private boolean sendDataInBackground;
     private List<Integer> markerIcons;
     private BluetoothDevice device;
     private BluetoothSocket socket;
+    private String lastUnfinishedMessage = "";
     private FireBaseManager fireBaseManager;
     private LinearLayout loading;
     private TextView loading_message;
@@ -57,6 +69,8 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_google_maps);
         initDialog();
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
+        fetchLastLocation();
         initMap();
         fireBaseManager = new FireBaseManager(getBaseContext(), getResources(), this);
     }
@@ -93,6 +107,13 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
     @Override
     public void onMapReady(GoogleMap googleMap) {
         map = googleMap;
+        if (ActivityCompat.checkSelfPermission(this,
+                android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this,
+                android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        map.setMyLocationEnabled(true);
         initMarkerIcons();
         map.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
             public View getInfoWindow(Marker marker) {
@@ -130,7 +151,6 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
     public void onDataNewFireBase(List<Region> regions) {
         if (map != null) {
             map.clear();
-            map.moveCamera(CameraUpdateFactory.newLatLngZoom(UtilsGoogleMaps.getCoordinates(regions.get(0).getName()), 14f));
             for (int i = 0; i < regions.size(); i++) {
                 LatLng location = UtilsGoogleMaps.getCoordinates(regions.get(i).getName());
                 if (location == null) return;
@@ -182,26 +202,70 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
                     break;
                 case UtilsBluetooth.STATE_CONNECTION_FAILED:
                     Toast.makeText(GoogleMapsActivity.this, getString(R.string.connection_failed), Toast.LENGTH_SHORT).show();
-                    goToMainActivity();
+                    finish();
                     break;
                 case UtilsBluetooth.STATE_READING_WRITING_FAILED:
                     Toast.makeText(GoogleMapsActivity.this,
                             String.format(getString(R.string.disconected_from_placeholder_device), device.getName()), Toast.LENGTH_SHORT).show();
-                    if(socket.isConnected()) goToMainActivity();
-                    else{
+                    if (socket.isConnected()) goToMainActivity();
+                    else {
                         finish();
-                        startActivity(new Intent(GoogleMapsActivity.this, MainActivity.class));
                     }
                     break;
                 case UtilsBluetooth.STATE_MESSAGE_RECEIVED:
                     byte[] readBuffer = (byte[]) msg.obj;
+                    if (readBuffer == null) break;
                     String message = new String(readBuffer, 0, msg.arg1);
-                    Toast.makeText(GoogleMapsActivity.this, String.format(getString(R.string.send_to_database_placeholder), message), Toast.LENGTH_SHORT).show();
+                    if (message.isEmpty()) break;
+                    if (isFinalMessage(message)) {
+                        String response = UtilsBluetooth.getReceivedMessage(null, lastUnfinishedMessage + message, getBaseContext());
+                        if (!(response == null || response.isEmpty() || response.length() <= 11))
+                            Toast.makeText(GoogleMapsActivity.this, response.substring(0, response.length() - 1)
+                                    + "\n\n" + response.length() + "\n", Toast.LENGTH_SHORT).show();
+                        lastUnfinishedMessage = "";
+                    }
                     break;
             }
             return true;
         }
     });
+
+    private void fetchLastLocation() {
+        if (ActivityCompat.checkSelfPermission(this,
+                android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this,
+                android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_PERMISSION_CODE);
+            return;
+        }
+        Task<Location> task = fusedLocationProviderClient.getLastLocation();
+        task.addOnSuccessListener(new OnSuccessListener<Location>() {
+            @Override
+            public void onSuccess(Location location) {
+                if(location!=null){
+                    currentLocation = location;
+                    map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude()), UtilsGoogleMaps.DEFAULT_ZOOM));
+                }
+            }
+        });
+    }
+
+    public void onRequestPermissionsResult(int requestCode, @NonNull  String[] permissions, @NonNull int[] grantResults){
+        if (requestCode == REQUEST_PERMISSION_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                fetchLastLocation();
+            }
+        }
+    }
+
+    private boolean isFinalMessage(String string){
+        if(string.contains(UtilsBluetooth.BLUETOOTH_RECEIVE_DELIMITER)){
+            return true;
+        }
+        lastUnfinishedMessage = string;
+        return false;
+    }
+
 
     private void initDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(GoogleMapsActivity.this);
@@ -293,12 +357,13 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
     public void goToMainActivity() {
         try {
             if (socket != null) {
-                socket.close();
                 loading_message.setText(R.string.disconnection_to_bluetooth_device);
                 loading.setVisibility(View.VISIBLE);
+                socket.close();
             }
         } catch (IOException e) {
             e.printStackTrace();
+            finish();
         }
     }
 }

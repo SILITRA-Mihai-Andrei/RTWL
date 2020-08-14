@@ -5,7 +5,6 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
-import android.app.Dialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
@@ -232,7 +231,7 @@ public class TerminalActivity extends AppCompatActivity implements Serializable,
                     break;
                 case UtilsBluetooth.STATE_CONNECTION_FAILED:
                     Toast.makeText(TerminalActivity.this, getString(R.string.connection_failed), Toast.LENGTH_SHORT).show();
-                    goToMainActivity(new View(getBaseContext()));
+                    finish();
                     break;
                 case UtilsBluetooth.STATE_READING_WRITING_FAILED:
                     Toast.makeText(TerminalActivity.this,
@@ -240,7 +239,7 @@ public class TerminalActivity extends AppCompatActivity implements Serializable,
                     if(socket.isConnected()) goToMainActivity(new View(getBaseContext()));
                     else {
                         finish();
-                        startActivity(new Intent(TerminalActivity.this, MainActivity.class));
+                        //startActivity(new Intent(TerminalActivity.this, MainActivity.class));
                     }
                     break;
                 case UtilsBluetooth.STATE_MESSAGE_RECEIVED:
@@ -249,9 +248,8 @@ public class TerminalActivity extends AppCompatActivity implements Serializable,
                     String message = new String(readBuffer, 0, msg.arg1);
                     if(message.isEmpty()) break;
                     if(isFinalMessage(message)){
-                        String[] response = UtilsBluetooth.getReceivedMessage(receiveBox.getText().toString(), lastUnfinishedMessage+message, getBaseContext());
-                        Toast.makeText(TerminalActivity.this, response[0], Toast.LENGTH_SHORT).show();
-                        if(!(response[0]==null || response[0].isEmpty())) receiveBox.setText(response[0]);
+                        String response = UtilsBluetooth.getReceivedMessage(receiveBox.getText().toString(), lastUnfinishedMessage+message, getBaseContext());
+                        if(!(response==null || response.isEmpty())) receiveBox.setText(response);
                         lastUnfinishedMessage = "";
                     }
                     setStatus(getString(R.string.received_message), R.color.color_green);
@@ -309,6 +307,7 @@ public class TerminalActivity extends AppCompatActivity implements Serializable,
     public void onBackPressed() {
         if(development){
             super.onBackPressed();
+            goToMainActivity(new View(this));
         }
         else if (dataBaseLinearLayout.getVisibility() == View.VISIBLE) {
             dataBaseLinearLayout.setVisibility(View.GONE);
@@ -329,14 +328,19 @@ public class TerminalActivity extends AppCompatActivity implements Serializable,
     }
 
     public void goToMainActivity(View view) {
-        try {
-            if (socket!=null){
-                socket.close();
-                loading_message.setText(R.string.disconnection_to_bluetooth_device);
-                loading.setVisibility(View.VISIBLE);
+        if(development) {
+            finish();
+        }
+        else {
+            try {
+                if (socket != null) {
+                    socket.close();
+                    loading_message.setText(R.string.disconnection_to_bluetooth_device);
+                    loading.setVisibility(View.VISIBLE);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 }
