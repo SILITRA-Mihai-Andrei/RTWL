@@ -26,6 +26,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.realtimeweatherlocationtrafficsystem.models.BluetoothClientClass;
+import com.example.realtimeweatherlocationtrafficsystem.models.Data;
 import com.example.realtimeweatherlocationtrafficsystem.models.FireBaseManager;
 import com.example.realtimeweatherlocationtrafficsystem.models.Region;
 import com.example.realtimeweatherlocationtrafficsystem.models.Utils;
@@ -219,9 +220,24 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
                     if (message.isEmpty()) break;
                     if (isFinalMessage(message)) {
                         String response = UtilsBluetooth.getReceivedMessage(null, lastUnfinishedMessage + message, getBaseContext());
-                        if (!(response == null || response.isEmpty() || response.length() <= 11))
-                            Toast.makeText(GoogleMapsActivity.this, response.substring(0, response.length() - 1)
+                        if (!(response == null || response.isEmpty() || response.length() <= 11)){
+                            String[] splited = response.split("@");
+                            Toast.makeText(GoogleMapsActivity.this, splited[0].substring(0, splited[0].length() - 1)
                                     + "\n\n" + response.length() + "\n", Toast.LENGTH_SHORT).show();
+                            if(splited.length == 2) {
+                                String[] d = splited[1].split(" ");
+                                int validity = Utils.isDataValid(d[0]+" "+d[1], d[2], d[3], d[4], d[5].replace(UtilsBluetooth.BLUETOOTH_RECEIVE_DELIMITER, ""));
+                                if(validity == Utils.VALID)
+                                    fireBaseManager.setValue(
+                                            Utils.getCoordinatesForDataBase(d[0]+" "+d[1]), Utils.getCurrentDateAndTime(),
+                                            new Data(Utils.getInt(d[2]),
+                                            Utils.getInt(d[3]),
+                                            Utils.getInt(d[4]),
+                                            Utils.getInt(d[5].replace(UtilsBluetooth.BLUETOOTH_RECEIVE_DELIMITER, ""))));
+                                else
+                                    Toast.makeText(GoogleMapsActivity.this, Utils.getInvalidMessage(validity, getBaseContext()), Toast.LENGTH_SHORT).show();
+                            }
+                        }
                         lastUnfinishedMessage = "";
                     }
                     break;

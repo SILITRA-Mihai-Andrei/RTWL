@@ -75,6 +75,7 @@ public class UtilsBluetooth {
                         + "\n\t-\tTemperature: " + string[3]
                         + "\n\t-\tHumidity: "+string[4]
                         +"\n\t-\tAir: "+string[5]+"\n";
+                result = result + "@" + message;
             }
         }
         else if(message.contains(STATES_STRING.substring(STATE_ERROR, STATE_ERROR+2))){
@@ -117,10 +118,12 @@ public class UtilsBluetooth {
             result = "Unknown command!\n";
         }
         else result = null;
-        result = time + result;
-        if(currentTextBox!=null && message.length() + currentTextBox.length() <= Utils.MAX_RECEIVE_BOX_LENGTH) {
-            result = currentTextBox + result;
+        if(result!=null) {
+            result = time + result;
+            if(currentTextBox!=null && message.length() + currentTextBox.length() <= Utils.MAX_RECEIVE_BOX_LENGTH) {
+                return currentTextBox + result;
+            }
         }
-        return result;
+        return null;
     }
 }

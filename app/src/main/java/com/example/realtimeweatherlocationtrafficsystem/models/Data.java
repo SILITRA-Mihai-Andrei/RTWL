@@ -1,8 +1,6 @@
 package com.example.realtimeweatherlocationtrafficsystem.models;
 
-import android.widget.Toast;
-
-import androidx.annotation.IntRange;
+import androidx.annotation.NonNull;
 
 public class Data {
     private int code;
@@ -10,7 +8,7 @@ public class Data {
     private int humidity;
     private int air;
 
-    public Data() {}
+    public Data() {} //need this for firebase assignation
 
     public Data(int code, int temperature, int humidity, int air) {
         this.code = code;
@@ -19,13 +17,14 @@ public class Data {
         this.air = air;
     }
 
-    public Data(Data data) {
+    public Data(Data data) { //need this for firebase assignation
         this.code = data.getCode();
-        this.temperature = getTemperature();
-        this.humidity = getHumidity();
-        this.air = getAir();
+        this.temperature = data.getTemperature();
+        this.humidity = data.getHumidity();
+        this.air = data.getAir();
     }
 
+    @NonNull
     public String toString(){
         return code + " " + temperature + " " + humidity + " " + air;
     }
@@ -40,31 +39,18 @@ public class Data {
         return code;
     }
 
-    public void setCode(int code) {
-        this.code = code;
-    }
 
     public int getTemperature() {
         return temperature;
     }
 
-    public void setTemperature(int temperature) {
-        this.temperature = temperature;
-    }
 
     public int getHumidity() {
         return humidity;
-    }
-
-    public void setHumidity(int humidity) {
-        this.humidity = humidity;
     }
 
     public int getAir() {
         return air;
     }
 
-    public void setAir(int air) {
-        this.air = air;
-    }
 }

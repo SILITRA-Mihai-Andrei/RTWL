@@ -1,6 +1,7 @@
 package com.example.realtimeweatherlocationtrafficsystem.models;
 
-import java.util.ArrayList;
+import androidx.annotation.NonNull;
+
 import java.util.List;
 
 public class Region {
@@ -13,6 +14,7 @@ public class Region {
         this.records = records;
     }
 
+    @NonNull
     public String toString(){
         StringBuilder result = new StringBuilder(name + ":\n");
         for(int i=0; i<records.size(); i++){
