@@ -103,7 +103,7 @@
         android:background="@drawable/btn_rounded_8dp_dark_gray_border_green"
         android:onClick="goToGoogleMaps"
         android:text="@string/google_maps"
-        android:textColor="@color/color_green"
+        android:textColor="@color/color_green_light"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@+id/ls_bluetooth_devices"
         app:layout_constraintStart_toStartOf="@+id/ls_bluetooth_devices" />

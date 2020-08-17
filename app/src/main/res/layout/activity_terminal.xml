@@ -260,7 +260,7 @@
             android:layout_height="wrap_content"
             android:text="@string/data_base"
             android:textAlignment="center"
-            android:textColor="@color/color_green"
+            android:textColor="@color/color_green_light"
             android:textStyle="bold"
             android:layout_marginTop="@dimen/dim_16dp"/>
 

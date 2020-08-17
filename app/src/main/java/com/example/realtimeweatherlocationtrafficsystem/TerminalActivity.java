@@ -228,7 +228,7 @@ public class TerminalActivity extends AppCompatActivity implements Serializable,
                     break;
                 case UtilsBluetooth.STATE_CONNECTED:
                     connectedDeviceTextView.setText(String.format(getString(R.string.connected_to_placeholder_device), device.getName()));
-                    setStatus(String.format(getString(R.string.connected_to_placeholder_device), device.getName()), R.color.color_green);
+                    setStatus(String.format(getString(R.string.connected_to_placeholder_device), device.getName()), R.color.color_green_light);
                     loading.setVisibility(View.GONE);
                     break;
                 case UtilsBluetooth.STATE_CONNECTION_FAILED:
@@ -267,7 +267,7 @@ public class TerminalActivity extends AppCompatActivity implements Serializable,
                         }
                         lastUnfinishedMessage = "";
                     }
-                    setStatus(getString(R.string.received_message), R.color.color_green);
+                    setStatus(getString(R.string.received_message), R.color.color_green_light);
                     break;
                 case UtilsBluetooth.STATE_MESSAGE_SEND:
                     setStatus(TerminalActivity.this.getResources().getString(R.string.message_send), R.color.blue);

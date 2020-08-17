@@ -1,23 +1,8 @@
 package com.example.realtimeweatherlocationtrafficsystem.models;
 
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 public class UtilsFireBase {
-
-    public static List<Record> getFireBaseRecord(Map<String, Data> records) {
-        if (records == null) return null;
-        List<Record> recordsList = new ArrayList<>();
-        Iterator<Map.Entry<String, Data>> it = records.entrySet().iterator();
-        while (it.hasNext()) {
-            Map.Entry<String, Data> item = it.next();
-            recordsList.add(new Record(item.getKey(), item.getValue()));
-            it.remove(); // avoids a ConcurrentModificationException
-        }
-        return recordsList;
-    }
 
     public static int indexOfRegionList(List<Region> regions, Region region) {
         if(regions==null || regions.size()==0 || region==null) return -1;
@@ -30,11 +15,13 @@ public class UtilsFireBase {
     public static String regionListToString(List<Region> regions) {
         StringBuilder result = new StringBuilder();
         for (int i = 0; i < regions.size(); i++) {
-            result.append("> ").append(regions.get(i).getName()).append("\n");
-            for (int j = 0; j < regions.get(i).getRecords().size(); j++) {
-                result.append("\t\t# ").append(regions.get(i).getRecords().get(j).getTime())
-                        .append(regions.get(i).getRecords().get(j).getData().toStringFormatDataBase()).append("\n");
-            }
+            result.append("> ").append(regions.get(i).getName())
+                .append("weather: ").append("\n\t\t- ").append(regions.get(i).getWeather().getWeather())
+                .append("danger: ").append("\n\t\t- ").append(regions.get(i).getWeather().getDanger())
+                .append("temperature: ").append("\n\t\t- ").append(regions.get(i).getWeather().getTemperature())
+                .append("humidity: ").append("\n\t\t- ").append(regions.get(i).getWeather().getHumidity())
+                .append("air: ").append("\n\t\t- ").append(regions.get(i).getWeather().getAir())
+                .append('\n');
         }
         return result.toString();
     }
