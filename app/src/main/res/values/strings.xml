@@ -60,10 +60,10 @@
     <string name="unknown">Unknown</string>
     <string name="region">Region</string>
     <string name="temperature">Temperature:</string>
-    <string name="temperature_celsius_placeholder">%1$d\u2103:</string>
+    <string name="temperature_celsius_placeholder">%1$.1f\u2103:</string>
     <string name="humidity">Humidity:</string>
     <string name="air_quality">Air quality:</string>
-    <string name="value_percent_placeholder">%1$d%%</string>
+    <string name="value_percent_placeholder">%1$.1f%%</string>
     <string name="show_data_base">Show DataBase content</string>
     <string name="hide_data_base">Hide DataBase content</string>
     <string name="clear">CLEAR</string>

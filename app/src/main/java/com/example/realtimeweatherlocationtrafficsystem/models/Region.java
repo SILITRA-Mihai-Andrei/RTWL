@@ -2,37 +2,26 @@ package com.example.realtimeweatherlocationtrafficsystem.models;
 
 import androidx.annotation.NonNull;
 
-import java.util.List;
-
 public class Region {
 
     private String name;
-    private List<Record> records;
+    private Weather weather;
 
-    public Region(String name, List<Record> records) {
+    public Region(String name, Weather weather) {
         this.name = name;
-        this.records = records;
+        this.weather = weather;
     }
 
     @NonNull
     public String toString(){
-        StringBuilder result = new StringBuilder(name + ":\n");
-        for(int i=0; i<records.size(); i++){
-            result.append("\t").append(records.get(i).getTime()).append(": ").append(records.get(i).getData().toString());
-        }
-        return result.toString();
+        return name + ":\n\t" + weather.toStringFormatDataBase();
     }
 
     public String getName() {
         return name;
     }
 
-    public List<Record> getRecords() {
-        return records;
-    }
-
-    public void setRecords(List<Record> records) {
-        if(records==null) return;
-        this.records = records;
+    public Weather getWeather() {
+        return weather;
     }
 }

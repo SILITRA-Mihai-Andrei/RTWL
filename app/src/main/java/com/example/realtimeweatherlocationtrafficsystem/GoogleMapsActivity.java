@@ -22,6 +22,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -32,12 +33,14 @@ import com.example.realtimeweatherlocationtrafficsystem.models.Region;
 import com.example.realtimeweatherlocationtrafficsystem.models.Utils;
 import com.example.realtimeweatherlocationtrafficsystem.models.UtilsBluetooth;
 import com.example.realtimeweatherlocationtrafficsystem.models.UtilsGoogleMaps;
+import com.example.realtimeweatherlocationtrafficsystem.models.Weather;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -50,7 +53,6 @@ import java.util.Objects;
 
 public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCallback, FireBaseManager.onFireBaseDataNew, GoogleMap.OnMarkerClickListener {
 
-    private final int INDEX_FOR_THE_MOST_COMMON_DATA = 0;
     private final int REQUEST_PERMISSION_CODE = 1;
 
     private GoogleMap map;
@@ -119,20 +121,34 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
         map.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
             public View getInfoWindow(Marker marker) {
                 @SuppressLint("InflateParams") final View window = getLayoutInflater().inflate(R.layout.item_map_windows_info, null);
-                Region region = fireBaseManager.getRegion(Integer.parseInt(marker.getId().substring(1))); //Marker id format: "m1, m2, ..., m10"
+                Region region;
+                try {
+                    region = fireBaseManager.getRegion(marker.getTitle());
+                    if (region == null)
+                        return null;
+                } catch (IndexOutOfBoundsException e) {
+                    return null;
+                }
                 TextView coordinates = window.findViewById(R.id.coordinates);
                 TextView weather = window.findViewById(R.id.weather);
                 TextView temperature = window.findViewById(R.id.temperature);
                 TextView humidity = window.findViewById(R.id.humidity);
                 TextView air = window.findViewById(R.id.air);
+                ProgressBar airBar = window.findViewById(R.id.airBar);
                 coordinates.setText(Utils.getCoordinatesWithPoint(region.getName()));
-                weather.setText(UtilsGoogleMaps.getWeatherString(
-                        UtilsGoogleMaps.getWeatherStringIndex(
-                                region.getRecords().get(INDEX_FOR_THE_MOST_COMMON_DATA).getData().getCode())
-                        , getBaseContext()));
-                temperature.setText(String.format(getString(R.string.temperature_celsius_placeholder), region.getRecords().get(INDEX_FOR_THE_MOST_COMMON_DATA).getData().getTemperature()));
-                humidity.setText(String.format(getString(R.string.value_percent_placeholder), region.getRecords().get(INDEX_FOR_THE_MOST_COMMON_DATA).getData().getHumidity()));
-                air.setText(String.valueOf(region.getRecords().get(INDEX_FOR_THE_MOST_COMMON_DATA).getData().getAir()));
+                Weather weatherObj = region.getWeather();
+                weather.setText(weatherObj.getWeather());
+                int index = UtilsGoogleMaps.getWeatherStringIndex(weatherObj.getWeather(), getBaseContext());
+                if ((index + 2) % 3 == 0) { //get weather index; 1, 4, 7, 10 are moderate
+                    weather.setTextColor(getResources().getColor(R.color.color_orange_light));
+                } else if ((index + 1) % 3 == 0) { //get weather index; 2, 5, 8, 11 are dangerous
+                    weather.setTextColor(getResources().getColor(R.color.color_red_dark));
+                }
+                temperature.setText(String.format(getString(R.string.temperature_celsius_placeholder), weatherObj.getTemperature()));
+                humidity.setText(String.format(getString(R.string.value_percent_placeholder), weatherObj.getHumidity()));
+                air.setText(String.format(getString(R.string.value_percent_placeholder), weatherObj.getAir()));
+                if (weatherObj.getAir() >= 3 && weatherObj.getAir() <= 100)
+                    airBar.setProgress((int) weatherObj.getAir());
                 return window;
             }
 
@@ -153,10 +169,13 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
         if (map != null) {
             map.clear();
             for (int i = 0; i < regions.size(); i++) {
-                LatLng location = UtilsGoogleMaps.getCoordinates(regions.get(i).getName());
+                Region region = regions.get(i);
+                LatLng location = UtilsGoogleMaps.getCoordinates(region.getName());
                 if (location == null) return;
-                int index = UtilsGoogleMaps.getWeatherStringIndex(regions.get(i).getRecords().get(INDEX_FOR_THE_MOST_COMMON_DATA).getData().getCode());
-                map.addMarker(UtilsGoogleMaps.getMarkerOptions(location, "", "", markerIcons.get(index)));
+                map.clear();
+                map.addMarker(UtilsGoogleMaps.getMarkerOptions(location, region.getName(), "",
+                        markerIcons.get(UtilsGoogleMaps.getWeatherStringIndex(
+                                region.getWeather().getWeather(), getBaseContext()))));
                 map.addPolygon(UtilsGoogleMaps.getPolygonOptions(location, UtilsGoogleMaps.REGION_AREA, UtilsGoogleMaps.COLOR_REGION_GREEN));
             }
         }
@@ -220,20 +239,20 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
                     if (message.isEmpty()) break;
                     if (isFinalMessage(message)) {
                         String response = UtilsBluetooth.getReceivedMessage(null, lastUnfinishedMessage + message, getBaseContext());
-                        if (!(response == null || response.isEmpty() || response.length() <= 11)){
+                        if (!(response == null || response.isEmpty() || response.length() <= 11)) {
                             String[] splited = response.split("@");
                             Toast.makeText(GoogleMapsActivity.this, splited[0].substring(0, splited[0].length() - 1)
                                     + "\n\n" + response.length() + "\n", Toast.LENGTH_SHORT).show();
-                            if(splited.length == 2) {
+                            if (splited.length == 2) {
                                 String[] d = splited[1].split(" ");
-                                int validity = Utils.isDataValid(d[0]+" "+d[1], d[2], d[3], d[4], d[5].replace(UtilsBluetooth.BLUETOOTH_RECEIVE_DELIMITER, ""));
-                                if(validity == Utils.VALID)
+                                int validity = Utils.isDataValid(d[0] + " " + d[1], d[2], d[3], d[4], d[5].replace(UtilsBluetooth.BLUETOOTH_RECEIVE_DELIMITER, ""));
+                                if (validity == Utils.VALID)
                                     fireBaseManager.setValue(
-                                            Utils.getCoordinatesForDataBase(d[0]+" "+d[1]), Utils.getCurrentDateAndTime(),
+                                            Utils.getCoordinatesForDataBase(d[0] + " " + d[1]), Utils.getCurrentDateAndTime(),
                                             new Data(Utils.getInt(d[2]),
-                                            Utils.getInt(d[3]),
-                                            Utils.getInt(d[4]),
-                                            Utils.getInt(d[5].replace(UtilsBluetooth.BLUETOOTH_RECEIVE_DELIMITER, ""))));
+                                                    Utils.getInt(d[3]),
+                                                    Utils.getInt(d[4]),
+                                                    Utils.getInt(d[5].replace(UtilsBluetooth.BLUETOOTH_RECEIVE_DELIMITER, ""))));
                                 else
                                     Toast.makeText(GoogleMapsActivity.this, Utils.getInvalidMessage(validity, getBaseContext()), Toast.LENGTH_SHORT).show();
                             }
@@ -258,7 +277,7 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
         task.addOnSuccessListener(new OnSuccessListener<Location>() {
             @Override
             public void onSuccess(Location location) {
-                if(location!=null){
+                if (location != null) {
                     currentLocation = location;
                     map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude()), UtilsGoogleMaps.DEFAULT_ZOOM));
                 }
@@ -266,7 +285,7 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
         });
     }
 
-    public void onRequestPermissionsResult(int requestCode, @NonNull  String[] permissions, @NonNull int[] grantResults){
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (requestCode == REQUEST_PERMISSION_CODE) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 fetchLastLocation();
@@ -274,8 +293,8 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
         }
     }
 
-    private boolean isFinalMessage(String string){
-        if(string.contains(UtilsBluetooth.BLUETOOTH_RECEIVE_DELIMITER)){
+    private boolean isFinalMessage(String string) {
+        if (string.contains(UtilsBluetooth.BLUETOOTH_RECEIVE_DELIMITER)) {
             return true;
         }
         lastUnfinishedMessage = string;

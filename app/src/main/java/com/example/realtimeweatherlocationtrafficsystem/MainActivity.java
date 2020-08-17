@@ -165,6 +165,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setBluetoothDevices() {
+        if(mBluetoothAdapter == null) return;
         mBluetoothAdapter.startDiscovery();
         Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
         devices = new ArrayList<>();
@@ -195,7 +196,7 @@ public class MainActivity extends AppCompatActivity {
         } else if (mode == BLUETOOTH_IS_ON) {
             ENABLE_BLUETOOTH_IN_PROGRESS = false;
             bluetoothStatusTextView.setText(R.string.bluetooth_is_on);
-            bluetoothStatusTextView.setTextColor(getResources().getColor(R.color.color_green));
+            bluetoothStatusTextView.setTextColor(getResources().getColor(R.color.color_green_light));
             getBluetoothDevice(UtilsBluetooth.MAIN_BLUETOOTH_DEVICE, true);
             setPairedDevicesView(PAIRED_DEVICES);
             if (devices != null && devices.size() == 0 && !DISCOVERY_BLUETOOTH_IN_PROGRESS) {
@@ -247,7 +248,7 @@ public class MainActivity extends AppCompatActivity {
     private Spanned getHtmlStringFormat(int string) {
         if(selected_device==null) return null;
         return Html.fromHtml(
-                getResources().getString(string) + " <font color=" + getResources().getColor(R.color.color_green) + "><b>"
+                getResources().getString(string) + " <font color=" + getResources().getColor(R.color.color_green_light) + "><b>"
                         + selected_device.getName() + "</b></font>.");
     }
 

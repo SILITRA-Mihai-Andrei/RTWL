@@ -11,7 +11,7 @@ import com.google.android.gms.maps.model.PolygonOptions;
 
 public class UtilsGoogleMaps {
 
-    public static final float DEFAULT_ZOOM = 14f;
+    public static final float DEFAULT_ZOOM = 1f;
 
     public static final int COLOR_REGION_RED = 1;
     public static final int COLOR_REGION_GREEN = 2;
@@ -54,6 +54,7 @@ public class UtilsGoogleMaps {
     }
 
     public static MarkerOptions getMarkerOptions(LatLng coordinate, String title, String description, int icon) {
+        if(coordinate==null || icon == -1) return null;
         return new MarkerOptions()
                 .position(coordinate)
                 .title(title)
@@ -69,6 +70,22 @@ public class UtilsGoogleMaps {
             else if(Utils.isInRange(weatherCode, MIN_VALUE_THIRD_GRADE+(i*100), MAX_VALUE_THIRD_GRADE+(i*100))) return i+1+((i-1)*2); //2, 5, 7, 11
         }
         return -1;
+    }
+
+    public static int getWeatherStringIndex(String weather, Context context){
+        if(weather.equals(context.getString(R.string.weather_sunny))) return 0;
+        else if(weather.equals(context.getString(R.string.weather_sun))) return 1;
+        else if(weather.equals(context.getString(R.string.weather_heat))) return 2;
+        else if(weather.equals(context.getString(R.string.weather_soft_rain))) return 3;
+        else if(weather.equals(context.getString(R.string.weather_moderate_rain))) return 4;
+        else if(weather.equals(context.getString(R.string.weather_torrential_rain))) return 5;
+        else if(weather.equals(context.getString(R.string.weather_soft_wind))) return 6;
+        else if(weather.equals(context.getString(R.string.weather_moderate_wind))) return 7;
+        else if(weather.equals(context.getString(R.string.weather_torrential_wind))) return 8;
+        else if(weather.equals(context.getString(R.string.weather_soft_snow_fall))) return 9;
+        else if(weather.equals(context.getString(R.string.weather_moderate_snow_fall))) return 10;
+        else if(weather.equals(context.getString(R.string.weather_massive_snow_fall))) return 11;
+        else return -1;
     }
 
     public static String getWeatherString(int weatherCode, Context context){

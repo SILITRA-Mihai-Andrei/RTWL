@@ -5,22 +5,23 @@ import android.content.res.Resources;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+
+import com.example.realtimeweatherlocationtrafficsystem.GoogleMapsActivity;
 import com.example.realtimeweatherlocationtrafficsystem.R;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 public class FireBaseManager {
 
-    private DatabaseReference databaseReference;
+    public static final String dataPath = "data/";
+    public static final String weatherPath = "weather/";
+
     private List<Region> regions = new ArrayList<>();
     private Context context;
     private Resources resources;
@@ -31,7 +32,7 @@ public class FireBaseManager {
     }
 
     public FireBaseManager(Context context, Resources resources, onFireBaseDataNew onFireBaseDataNew){
-        databaseReference = FirebaseDatabase.getInstance().getReference().child("data/");
+        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference().child(weatherPath);
         this.context = context;
         this.resources = resources;
         this.onFireBaseDataNew = onFireBaseDataNew;
@@ -43,16 +44,14 @@ public class FireBaseManager {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 for (DataSnapshot ds : snapshot.getChildren()) {
-                    Map<String, Data> dictionary = ds.getValue(new GenericTypeIndicator<LinkedHashMap<String, Data>>() {});
-                    List<Record> records = UtilsFireBase.getFireBaseRecord(dictionary);
-                    Region region = new Region(ds.getKey(), records);
-                    int index = UtilsFireBase.indexOfRegionList(regions, region);
-                    if(index>=0){
-                        regions.get(index).setRecords(records);
+                    Region region = new Region(ds.getKey(), ds.getValue(Weather.class));
+                    for(int i=0; i<regions.size(); i++){
+                        if(regions.get(i).getName().equals(region.getName())){
+                            regions.add(i, region);
+                            break;
+                        }
                     }
-                    else{
-                        regions.add(region);
-                    }
+                    regions.add(region);
                 }
                 onFireBaseDataNew.onDataNewFireBase(regions);
             }
@@ -68,11 +67,15 @@ public class FireBaseManager {
 
     public void setValue(String region, String time, Data data){
         if(region==null || time==null || data==null) return;
-        databaseReference.child(region).child(time).setValue(data);
+        FirebaseDatabase.getInstance().getReference().child(dataPath).child(region).child(time).setValue(data);
     }
 
-    public Region getRegion(int index){
-        return regions.get(index);
+    public Region getRegion(String name){
+        if (name == null) return null;
+        for (int i=0; i<regions.size(); i++){
+            if(regions.get(i).getName().equals(name))
+                return regions.get(i);
+        }
+        return null;
     }
-
 }

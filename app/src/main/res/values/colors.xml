@@ -5,9 +5,11 @@
     <color name="colorAccent">#03DAC5</color>
 
     <color name="cyan">#00DDCC</color>
-    <color name="color_green">#76FF03</color>
+    <color name="color_green_light">#76FF03</color>
     <color name="color_orange_light">@android:color/holo_orange_light</color>
+    <color name="color_orange_dark">@android:color/holo_orange_dark</color>
     <color name="color_red_light">@android:color/holo_red_light</color>
+    <color name="color_red_dark">@android:color/holo_red_dark</color>
     <color name="color_gray">#404040</color>
     <color name="blue">#021473</color>
 </resources>
