@@ -2,7 +2,6 @@ package com.example.realtimeweatherlocationtrafficsystem.models;
 
 import android.content.Context;
 import android.graphics.Color;
-
 import com.example.realtimeweatherlocationtrafficsystem.R;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
@@ -11,7 +10,8 @@ import com.google.android.gms.maps.model.PolygonOptions;
 
 public class UtilsGoogleMaps {
 
-    public static final float DEFAULT_ZOOM = 1f;
+    public static final float DEFAULT_ZOOM = 15f;
+    public static final float MAX_ZOOM_REGION = 16f;
 
     public static final int COLOR_REGION_RED = 1;
     public static final int COLOR_REGION_GREEN = 2;
@@ -42,13 +42,13 @@ public class UtilsGoogleMaps {
                 .strokeWidth(5f);
     }
 
-    public static LatLng getCoordinates(String coordinate) {
+    public static LatLng getCoordinates(String coordinate, int decimals) {
         String[] splitedCoordinates = Utils.getCoordinatesSplited(coordinate);
         if (splitedCoordinates == null || !Utils.isCoordinatesValid(coordinate)) return null;
         String result1 = splitedCoordinates[1];
         String result3 = splitedCoordinates[3];
-        if (result1.length() >= 2) result1 = result1.substring(0, 2) + "00000000000";
-        if (result3.length() >= 2) result3 = result3.substring(0, 2) + "00000000000";
+        if (result1.length() >= decimals) result1 = result1.substring(0, decimals) + "00000000000";
+        if (result3.length() >= decimals) result3 = result3.substring(0, decimals) + "00000000000";
         return new LatLng(Double.parseDouble(splitedCoordinates[0] + "." + result1),
                 Double.parseDouble(splitedCoordinates[2] + "." + result3));
     }
@@ -70,6 +70,29 @@ public class UtilsGoogleMaps {
             else if(Utils.isInRange(weatherCode, MIN_VALUE_THIRD_GRADE+(i*100), MAX_VALUE_THIRD_GRADE+(i*100))) return i+1+((i-1)*2); //2, 5, 7, 11
         }
         return -1;
+    }
+
+    public static boolean isPointInRegion(String region, String point, double areaDistance){
+        region = Utils.getCoordinatesWithPoint(region);
+        if(region==null) return false;
+        LatLng regionCoords = getCoordinates(region, 3);
+        if(regionCoords==null) return false;
+        point = Utils.getCoordinatesWithPoint(point);
+        if (point==null) return false;
+        LatLng pointCoords = getCoordinates(point, 3);
+        if (pointCoords==null) return false;
+        return  //left-top point
+                pointCoords.latitude <= regionCoords.latitude+areaDistance
+                &&  pointCoords.longitude >= regionCoords.longitude-areaDistance
+                //right-top point
+                && pointCoords.latitude <= regionCoords.latitude+areaDistance
+                &&  pointCoords.longitude <= regionCoords.longitude+areaDistance
+                //left-top point
+                && pointCoords.latitude >= regionCoords.latitude-areaDistance
+                &&  pointCoords.longitude >= regionCoords.longitude-areaDistance
+                //left-top point
+                && pointCoords.latitude >= regionCoords.latitude-areaDistance
+                &&  pointCoords.longitude <= regionCoords.longitude+areaDistance;
     }
 
     public static int getWeatherStringIndex(String weather, Context context){

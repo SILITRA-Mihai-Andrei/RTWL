@@ -151,7 +151,7 @@ public class TerminalActivity extends AppCompatActivity implements Serializable,
                             humidity.getText().toString(), air.getText().toString());
                     if (result == Utils.VALID) {
                         setStatus(Utils.getInvalidMessage(result, getBaseContext()), Utils.COLOR_GREEN);
-                        fireBaseManager.setValue(Utils.getCoordinatesForDataBase(coordinates.getText().toString()), Utils.getCurrentDateAndTime(),
+                        fireBaseManager.setValue(Utils.getCoordinatesForDataBase(coordinates.getText().toString(), 2), Utils.getCurrentDateAndTime(),
                                 new Data(Utils.getInt(code.getText().toString()),
                                         Utils.getInt(temperature.getText().toString()),
                                         Utils.getInt(humidity.getText().toString()),
@@ -258,7 +258,7 @@ public class TerminalActivity extends AppCompatActivity implements Serializable,
                                 String[] d = splited[1].split(" ");
                                 int validity = Utils.isDataValid(d[0] + " " + d[1], d[2], d[3], d[4], d[5].replace(UtilsBluetooth.BLUETOOTH_RECEIVE_DELIMITER, ""));
                                 if (validity == Utils.VALID)
-                                    fireBaseManager.setValue(Utils.getCoordinatesForDataBase(d[0] + " " + d[1]), Utils.getCurrentDateAndTime(),
+                                    fireBaseManager.setValue(Utils.getCoordinatesForDataBase(d[0] + " " + d[1], 2), Utils.getCurrentDateAndTime(),
                                             new Data(Utils.getInt(d[2]),
                                                     Utils.getInt(d[3]),
                                                     Utils.getInt(d[4]),
