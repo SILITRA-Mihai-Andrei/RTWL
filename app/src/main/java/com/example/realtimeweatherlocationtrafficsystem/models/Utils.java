@@ -75,6 +75,9 @@ public class Utils {
     }
 
     public static boolean isNumber(String number) {
+        if(number.length() >= String.valueOf(Integer.MAX_VALUE).length()){
+            number = number.substring(0, 9);
+        }
         try {
             Integer.parseInt(number);
             return true;
@@ -97,14 +100,14 @@ public class Utils {
         return result;
     }
 
-    public static String getCoordinatesForDataBase(String coordinates){
+    public static String getCoordinatesForDataBase(String coordinates, int decimals){
         if(isCoordinatesValid(coordinates)){
             String[] result = getCoordinatesSplited(coordinates);
             if(result==null) return null;
             String result1 = result[1];
             String result3 = result[3];
-            if(result1.length()>=2) result1 = result1.substring(0, 2);
-            if(result3.length()>=2) result3 = result3.substring(0, 2);
+            if(result1.length()>=decimals) result1 = result1.substring(0, decimals);
+            if(result3.length()>=decimals) result3 = result3.substring(0, decimals);
             return result[0] + " " + result1 + " " + result[2] + " " + result3;
         }
         return null;

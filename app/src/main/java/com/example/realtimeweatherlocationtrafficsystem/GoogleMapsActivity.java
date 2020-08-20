@@ -21,6 +21,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -40,7 +41,6 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -51,7 +51,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCallback, FireBaseManager.onFireBaseDataNew, GoogleMap.OnMarkerClickListener {
+public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCallback, FireBaseManager.onFireBaseDataNew
+        , GoogleMap.OnMarkerClickListener, GoogleMap.OnCameraIdleListener {
 
     private final int REQUEST_PERMISSION_CODE = 1;
 
@@ -60,12 +61,14 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
     private FusedLocationProviderClient fusedLocationProviderClient;
     private boolean sendDataInBackground;
     private List<Integer> markerIcons;
+    private List<Region> regions;
     private BluetoothDevice device;
     private BluetoothSocket socket;
     private String lastUnfinishedMessage = "";
     private FireBaseManager fireBaseManager;
     private LinearLayout loading;
     private TextView loading_message;
+    private ImageView regionWeatherIcon;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -110,12 +113,25 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
     @Override
     public void onMapReady(GoogleMap googleMap) {
         map = googleMap;
+        if (map == null) goToMainActivity();
+        ImageView mapType = findViewById(R.id.mapType);
+        regionWeatherIcon = findViewById(R.id.regionWeatherIcon);
+        regions = new ArrayList<>();
+        map.setOnCameraIdleListener(this);
         if (ActivityCompat.checkSelfPermission(this,
                 android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(this,
                 android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
+        mapType.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (map.getMapType() == GoogleMap.MAP_TYPE_HYBRID)
+                    map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+                else map.setMapType(map.getMapType() + 1);
+            }
+        });
         map.setMyLocationEnabled(true);
         initMarkerIcons();
         map.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
@@ -165,14 +181,16 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
     }
 
     @Override
-    public void onDataNewFireBase(List<Region> regions) {
+    public void onDataNewFireBase(List<Region> regionsReceived) {
         if (map != null) {
             map.clear();
-            for (int i = 0; i < regions.size(); i++) {
-                Region region = regions.get(i);
-                LatLng location = UtilsGoogleMaps.getCoordinates(region.getName());
+            regions.clear();
+            for (int i = 0; i < regionsReceived.size(); i++) {
+                Region region = regionsReceived.get(i);
+                regions.add(region);
+                LatLng location = UtilsGoogleMaps.getCoordinates(region.getName(), 2);
                 if (location == null) return;
-                map.clear();
+                //map.clear();
                 map.addMarker(UtilsGoogleMaps.getMarkerOptions(location, region.getName(), "",
                         markerIcons.get(UtilsGoogleMaps.getWeatherStringIndex(
                                 region.getWeather().getWeather(), getBaseContext()))));
@@ -248,7 +266,7 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
                                 int validity = Utils.isDataValid(d[0] + " " + d[1], d[2], d[3], d[4], d[5].replace(UtilsBluetooth.BLUETOOTH_RECEIVE_DELIMITER, ""));
                                 if (validity == Utils.VALID)
                                     fireBaseManager.setValue(
-                                            Utils.getCoordinatesForDataBase(d[0] + " " + d[1]), Utils.getCurrentDateAndTime(),
+                                            Utils.getCoordinatesForDataBase(d[0] + " " + d[1], 2), Utils.getCurrentDateAndTime(),
                                             new Data(Utils.getInt(d[2]),
                                                     Utils.getInt(d[3]),
                                                     Utils.getInt(d[4]),
@@ -283,6 +301,23 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
                 }
             }
         });
+    }
+
+    @Override
+    public void onCameraIdle() {
+        if (map == null || regions == null || markerIcons == null || regionWeatherIcon == null)
+            return;
+        if (map.getCameraPosition().zoom >= UtilsGoogleMaps.MAX_ZOOM_REGION) {
+            LatLng point = map.getCameraPosition().target;
+            String pointCoordinates = Utils.getCoordinatesForDataBase(point.latitude + " " + point.longitude, 9);
+            for (int i = 0; i < regions.size(); i++) {
+                if (UtilsGoogleMaps.isPointInRegion(regions.get(i).getName(), pointCoordinates, UtilsGoogleMaps.REGION_AREA)) {
+                    regionWeatherIcon.setImageResource(markerIcons.get(i));
+                    return;
+                }
+            }
+        }
+        regionWeatherIcon.setImageDrawable(null);
     }
 
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
