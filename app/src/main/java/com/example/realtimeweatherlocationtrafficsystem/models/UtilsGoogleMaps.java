@@ -10,9 +10,6 @@ import com.google.android.gms.maps.model.PolygonOptions;
 
 public class UtilsGoogleMaps {
 
-    public static final float DEFAULT_ZOOM = 15f;
-    public static final float MAX_ZOOM_REGION = 16f;
-
     public static final int COLOR_REGION_RED = 1;
     public static final int COLOR_REGION_GREEN = 2;
     public static final int COLOR_REGION_BLUE = 3;

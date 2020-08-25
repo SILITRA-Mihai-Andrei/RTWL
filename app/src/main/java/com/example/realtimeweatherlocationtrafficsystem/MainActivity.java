@@ -100,7 +100,7 @@ public class MainActivity extends AppCompatActivity {
             public boolean onMenuItemClick(MenuItem item) {
 
                 if (item.getItemId() == R.id.settings) {
-                    Toast.makeText(MainActivity.this, "Settings (MUST IMPLEMENT)", Toast.LENGTH_SHORT).show();
+                    startActivity(new Intent(MainActivity.this, SettingsActivity.class));
                 } else if (item.getItemId() == R.id.development) {
                     startActivityAndSend(TerminalActivity.class, true);
                 } else if (item.getItemId() == R.id.info) {
@@ -165,7 +165,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setBluetoothDevices() {
-        if(mBluetoothAdapter == null) return;
+        if (mBluetoothAdapter == null) return;
         mBluetoothAdapter.startDiscovery();
         Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
         devices = new ArrayList<>();
@@ -224,19 +224,18 @@ public class MainActivity extends AppCompatActivity {
 
     private void getBluetoothDevice(String device, boolean autoSelect) {
         String[] deviceSplited = device.split("\n");
-        if(devices==null) return;
+        if (devices == null) return;
         if (deviceSplited.length != 2 && !autoSelect) {
             Toast.makeText(this, R.string.something_wrong_with_bluetooth_name, Toast.LENGTH_SHORT).show();
             return;
         }
         for (int i = 0; i < devices.size(); i++) {
             if (devices.get(i).getName().equals(deviceSplited[0])) {
-                if(autoSelect){
+                if (autoSelect) {
                     selected_device = devices.get(i);
                     selectedBluetoothDevice.setText(getHtmlStringFormat(R.string.auto_selected));
                     selectedBluetoothDevice.setVisibility(View.VISIBLE);
-                }
-                else if (devices.get(i).getAddress().equals(deviceSplited[1])) {
+                } else if (devices.get(i).getAddress().equals(deviceSplited[1])) {
                     selected_device = devices.get(i);
                     selectedBluetoothDevice.setText(getHtmlStringFormat(R.string.chosen_device));
                     selectedBluetoothDevice.setVisibility(View.VISIBLE);
@@ -246,7 +245,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private Spanned getHtmlStringFormat(int string) {
-        if(selected_device==null) return null;
+        if (selected_device == null) return null;
         return Html.fromHtml(
                 getResources().getString(string) + " <font color=" + getResources().getColor(R.color.color_green_light) + "><b>"
                         + selected_device.getName() + "</b></font>.");
@@ -254,10 +253,9 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        if(infoLinearLayout.getVisibility()==View.VISIBLE){
+        if (infoLinearLayout.getVisibility() == View.VISIBLE) {
             infoLinearLayout.setVisibility(View.GONE);
-        }
-        else {
+        } else {
             super.onBackPressed();
             this.finishAffinity();
         }
