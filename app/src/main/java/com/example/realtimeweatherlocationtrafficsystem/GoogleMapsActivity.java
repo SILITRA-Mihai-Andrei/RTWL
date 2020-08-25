@@ -15,6 +15,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
@@ -55,7 +56,9 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
         , GoogleMap.OnMarkerClickListener, GoogleMap.OnCameraIdleListener {
 
     private final int REQUEST_PERMISSION_CODE = 1;
+    private final String MAP_DEFAULT_ZOOM = "15";
 
+    private SharedPreferences googleMapsPreferences;
     private GoogleMap map;
     private Location currentLocation;
     private FusedLocationProviderClient fusedLocationProviderClient;
@@ -74,6 +77,7 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_google_maps);
+        googleMapsPreferences = getSharedPreferences(getString(R.string.preference_google_maps_key), MODE_PRIVATE);
         initDialog();
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
         fetchLastLocation();
@@ -297,7 +301,12 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
             public void onSuccess(Location location) {
                 if (location != null) {
                     currentLocation = location;
-                    map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude()), UtilsGoogleMaps.DEFAULT_ZOOM));
+                    map.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                            new LatLng(currentLocation.getLatitude(),
+                                    currentLocation.getLongitude()),
+                                    Float.parseFloat(googleMapsPreferences.getString(getString(
+                                            R.string.maps_default_zoom_key),
+                                            MAP_DEFAULT_ZOOM))));
                 }
             }
         });
@@ -307,12 +316,13 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
     public void onCameraIdle() {
         if (map == null || regions == null || markerIcons == null || regionWeatherIcon == null)
             return;
-        if (map.getCameraPosition().zoom >= UtilsGoogleMaps.MAX_ZOOM_REGION) {
+        if (map.getCameraPosition().zoom >= Float.parseFloat(googleMapsPreferences.getString(getString(R.string.maps_max_zoom_region_key), "16"))) {
             LatLng point = map.getCameraPosition().target;
             String pointCoordinates = Utils.getCoordinatesForDataBase(point.latitude + " " + point.longitude, 9);
             for (int i = 0; i < regions.size(); i++) {
                 if (UtilsGoogleMaps.isPointInRegion(regions.get(i).getName(), pointCoordinates, UtilsGoogleMaps.REGION_AREA)) {
-                    regionWeatherIcon.setImageResource(markerIcons.get(i));
+                    regionWeatherIcon.setImageResource(markerIcons.get(
+                            UtilsGoogleMaps.getWeatherStringIndex(regions.get(i).getWeather().getWeather(), getBaseContext())));
                     return;
                 }
             }

@@ -23,7 +23,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.NoActionBar">
-
+        <activity
+            android:name=".SettingsActivity"
+            android:label="Settings"/>
         <activity android:name=".TesteActivity" /> <!-- for Google Maps -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
@@ -34,23 +36,20 @@
 
         <activity
             android:name=".TerminalActivity"
-            android:screenOrientation="portrait"
-            android:noHistory="true">
-
-        </activity>
-
-        <activity android:name=".GoogleMapsActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize"/>
-
+            android:noHistory="true"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name=".GoogleMapsActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize" />
         <activity
             android:name=".MainActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
     </application>
 
 </manifest>
