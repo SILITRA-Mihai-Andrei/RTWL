@@ -50,21 +50,37 @@
 
     <ImageView
         android:id="@+id/mapType"
-        android:layout_width="@dimen/dim_52dp"
-        android:layout_height="@dimen/dim_52dp"
-        android:src="@drawable/google_maps"
-        android:layout_alignBottom="@id/map"
+        android:layout_width="@dimen/dim_32dp"
+        android:layout_height="@dimen/dim_32dp"
         android:layout_alignEnd="@id/map"
+        android:layout_alignBottom="@id/map"
         android:layout_marginEnd="@dimen/dim_8dp"
-        android:layout_marginBottom="@dimen/dim_8dp"/>
+        android:layout_marginBottom="@dimen/dim_8dp"
+        android:src="@drawable/google_maps" />
+
+    <ImageView
+        android:id="@+id/location"
+        android:layout_width="@dimen/dim_32dp"
+        android:layout_height="@dimen/dim_32dp"
+        android:layout_alignBottom="@id/mapType"
+        android:layout_toStartOf="@id/mapType"
+        android:layout_marginEnd="@dimen/dim_8dp"
+        android:src="@drawable/location_untracked" />
 
     <ImageView
         android:id="@+id/regionWeatherIcon"
-        android:layout_width="@dimen/dim_52dp"
-        android:layout_height="@dimen/dim_52dp"
+        android:layout_width="@dimen/dim_32dp"
+        android:layout_height="@dimen/dim_32dp"
         android:layout_marginBottom="@dimen/dim_8dp"
         android:layout_above="@id/mapType"
         android:layout_alignStart="@id/mapType"
         android:layout_alignEnd="@id/mapType"/>
+
+    <!-- Button hidden for sending command to microcontroller -->
+    <Button
+        android:id="@+id/send"
+        android:layout_width="@dimen/dim_0dp"
+        android:layout_height="@dimen/dim_0dp"
+        android:visibility="gone"/>
 
 </RelativeLayout>

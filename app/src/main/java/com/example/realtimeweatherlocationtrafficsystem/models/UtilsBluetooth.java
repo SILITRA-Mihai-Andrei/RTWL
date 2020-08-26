@@ -18,11 +18,16 @@ public class UtilsBluetooth {
     public final static String BLUETOOTH_RECEIVE_DELIMITER = "\r";
     public final static String BLUETOOTH_RECEIVE_STATE_DELIMITER = ":";
 
+    public final static String COMMAND_GET_GPS_COORDINATES_INTEGER = "3";
+    public final static String COMMAND_DISABLE_GET_GPS_COORDINATES_INTEGER = "4";
+
     public final static String BLUETOOTH_COMMANDS_LIST =
             "-1\t\t|\t\trs\t\t\t|\t\treset\nSoft reset Arduino\n------------------------------------\n" +
             " 0\t\t|\t\tgr\t\t|\t\tping\nGet response from Arduino\n------------------------------------\n" +
             " 1\t\t|\t\tgd\t\t|\t\tget data\nGet sensors value\n------------------------------------\n" +
-            " 2\t\t|\t\tpd\t\t|\t\tproxy fail\nWarn proxy sensor failure\n------------------------------------\n";
+            " 2\t\t|\t\tpd\t\t|\t\tproxy fail\nWarn proxy sensor failure\n------------------------------------\n" +
+            " 3\t\t|\t\tgc\t\t|\t\tget coordinates\nSet Arduino to send GPS coordinates every second\n------------------------------------\n" +
+            " 4\t\t|\t\tdgc\t\t|\t\tdisable get coordinates\nDisable get coordinates feature\n------------------------------------\n";
 
     public final static String STATE_START = "RTWL:START"+BLUETOOTH_RECEIVE_DELIMITER;
     public final static String STATE_PING = "PONG!"+BLUETOOTH_RECEIVE_DELIMITER;
@@ -39,7 +44,9 @@ public class UtilsBluetooth {
     public final static int STATE_WEATHER_CODE_INVALID = 18;
     public final static int STATE_AIR_SENSOR_NOT_WORKING = 20;
     public final static int STATE_AIR_SENSOR_INVALID_DATA = 22;
-    public final static int UNKNOWN_COMMAND = 24;
+    public final static int STATE_GET_GPS_COORDINATES_ENABLED = 24;
+    public final static int STATE_GET_GPS_COORDINATES_DISABLED = 26;
+    public final static int UNKNOWN_COMMAND = 28;
     public final static String STATES_STRING =
             "E"+BLUETOOTH_RECEIVE_DELIMITER+
             "G"+BLUETOOTH_RECEIVE_STATE_DELIMITER+
@@ -53,6 +60,8 @@ public class UtilsBluetooth {
             "c"+BLUETOOTH_RECEIVE_STATE_DELIMITER+
             "A"+BLUETOOTH_RECEIVE_STATE_DELIMITER+
             "a"+BLUETOOTH_RECEIVE_STATE_DELIMITER+
+            "L"+BLUETOOTH_RECEIVE_STATE_DELIMITER+
+            "l"+BLUETOOTH_RECEIVE_STATE_DELIMITER+
             "u"+BLUETOOTH_RECEIVE_STATE_DELIMITER;
 
     public static String getReceivedMessage(String currentTextBox, String message, Context context) {
@@ -113,6 +122,12 @@ public class UtilsBluetooth {
         }
         else if(message.contains(STATES_STRING.substring(STATE_AIR_SENSOR_INVALID_DATA, STATE_AIR_SENSOR_INVALID_DATA+2))){
             result = "Invalid air quality sensor value Received value: " + message.split(":")[1];
+        }
+        else if(message.contains(STATES_STRING.substring(STATE_GET_GPS_COORDINATES_ENABLED, STATE_GET_GPS_COORDINATES_ENABLED+2))){
+            result = "Get coordinates every second feature is enabled!\n";
+        }
+        else if(message.contains(STATES_STRING.substring(STATE_GET_GPS_COORDINATES_DISABLED, STATE_GET_GPS_COORDINATES_DISABLED+2))){
+            result = "Get coordinates every second feature is disabled!\n";
         }
         else if(message.contains(STATES_STRING.substring(UNKNOWN_COMMAND, UNKNOWN_COMMAND+2))){
             result = "Unknown command!\n";
