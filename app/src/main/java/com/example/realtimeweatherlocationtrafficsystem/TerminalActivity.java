@@ -230,6 +230,9 @@ public class TerminalActivity extends AppCompatActivity implements Serializable,
                     connectedDeviceTextView.setText(String.format(getString(R.string.connected_to_placeholder_device), device.getName()));
                     setStatus(String.format(getString(R.string.connected_to_placeholder_device), device.getName()), R.color.color_green_light);
                     loading.setVisibility(View.GONE);
+                    //send to Arduino command to disable get coordinates every second feature
+                    messageToSend.setText(UtilsBluetooth.COMMAND_DISABLE_GET_GPS_COORDINATES_INTEGER);
+                    send.performClick();
                     break;
                 case UtilsBluetooth.STATE_CONNECTION_FAILED:
                     Toast.makeText(TerminalActivity.this, getString(R.string.connection_failed), Toast.LENGTH_SHORT).show();

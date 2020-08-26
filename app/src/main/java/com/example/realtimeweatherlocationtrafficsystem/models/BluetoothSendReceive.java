@@ -44,6 +44,14 @@ public class BluetoothSendReceive extends Thread {
                     sendHandlerMessage(UtilsBluetooth.STATE_MESSAGE_SEND);
                 }
             });
+        } else if (send != null) {
+            send.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    write(send.getText().toString().getBytes());
+                    sendHandlerMessage(UtilsBluetooth.STATE_MESSAGE_SEND);
+                }
+            });
         }
     }
 
@@ -57,19 +65,18 @@ public class BluetoothSendReceive extends Thread {
         int bytes;
 
         while (true) try {
-            if(!socket.isConnected()) {
+            if (!socket.isConnected()) {
                 sendHandlerMessage(UtilsBluetooth.STATE_READING_WRITING_FAILED);
                 return;
             }
-            if(inputStream.available()>0){
+            if (inputStream.available() > 0) {
                 bytes = inputStream.read(buffer);
-                if(bytes==-1) {
+                if (bytes == -1) {
                     sendHandlerMessage(UtilsBluetooth.STATE_READING_WRITING_FAILED);
                     return;
                 }
                 handler.obtainMessage(UtilsBluetooth.STATE_MESSAGE_RECEIVED, bytes, -1, buffer).sendToTarget();
-            }
-            else{
+            } else {
                 SystemClock.sleep(250);
             }
         } catch (IOException e) {
@@ -78,10 +85,10 @@ public class BluetoothSendReceive extends Thread {
     }
 
     public void write(byte[] bytes) {
-        if(bytes.length == 0) return;
-        try{
+        if (bytes.length == 0) return;
+        try {
             outputStream.write(bytes);
-        }catch (IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
             sendHandlerMessage(UtilsBluetooth.STATE_READING_WRITING_FAILED);
         }

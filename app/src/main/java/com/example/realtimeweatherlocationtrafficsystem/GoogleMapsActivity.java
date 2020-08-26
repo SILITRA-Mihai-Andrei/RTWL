@@ -18,10 +18,12 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.location.LocationListener;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -53,16 +55,16 @@ import java.util.List;
 import java.util.Objects;
 
 public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCallback, FireBaseManager.onFireBaseDataNew
-        , GoogleMap.OnMarkerClickListener, GoogleMap.OnCameraIdleListener {
+        , GoogleMap.OnMarkerClickListener, GoogleMap.OnCameraIdleListener, LocationListener {
 
     private final int REQUEST_PERMISSION_CODE = 1;
-    private final String MAP_DEFAULT_ZOOM = "15";
 
     private SharedPreferences googleMapsPreferences;
     private GoogleMap map;
     private Location currentLocation;
     private FusedLocationProviderClient fusedLocationProviderClient;
     private boolean sendDataInBackground;
+    private boolean locationTracked = false;
     private List<Integer> markerIcons;
     private List<Region> regions;
     private BluetoothDevice device;
@@ -72,11 +74,14 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
     private LinearLayout loading;
     private TextView loading_message;
     private ImageView regionWeatherIcon;
+    private ImageView locationTrackIcon;
+    private Button send;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_google_maps);
+        initComponents();
         googleMapsPreferences = getSharedPreferences(getString(R.string.preference_google_maps_key), MODE_PRIVATE);
         initDialog();
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
@@ -118,8 +123,8 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
     public void onMapReady(GoogleMap googleMap) {
         map = googleMap;
         if (map == null) goToMainActivity();
+        moveMapCamera(map.getCameraPosition().target.latitude, map.getCameraPosition().target.longitude, 15f);
         ImageView mapType = findViewById(R.id.mapType);
-        regionWeatherIcon = findViewById(R.id.regionWeatherIcon);
         regions = new ArrayList<>();
         map.setOnCameraIdleListener(this);
         if (ActivityCompat.checkSelfPermission(this,
@@ -136,7 +141,16 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
                 else map.setMapType(map.getMapType() + 1);
             }
         });
+        locationTrackIcon.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (locationTracked) setLocationTrack(false);
+                else setLocationTrack(true);
+            }
+        });
         map.setMyLocationEnabled(true);
+        googleMap.getUiSettings().setMyLocationButtonEnabled(true);
+        googleMap.getUiSettings().setCompassEnabled(true);
         initMarkerIcons();
         map.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
             public View getInfoWindow(Marker marker) {
@@ -239,6 +253,10 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
                     }
                     break;
                 case UtilsBluetooth.STATE_CONNECTED:
+                    //send command to Arduino to enable GPS get coordinates every second feature
+                    send.setText(UtilsBluetooth.COMMAND_GET_GPS_COORDINATES_INTEGER);
+                    send.performClick();
+                    send.setText("");
                     Toast.makeText(getBaseContext(), String.format(getString(R.string.connected_to_placeholder_device), device.getName()), Toast.LENGTH_SHORT).show();
                     loading.setVisibility(View.GONE);
                     break;
@@ -296,17 +314,14 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
             return;
         }
         Task<Location> task = fusedLocationProviderClient.getLastLocation();
+        if (task == null) return;
+        setLocationTrack(true);
         task.addOnSuccessListener(new OnSuccessListener<Location>() {
             @Override
             public void onSuccess(Location location) {
-                if (location != null) {
+                if (location != null && locationTracked) {
                     currentLocation = location;
-                    map.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                            new LatLng(currentLocation.getLatitude(),
-                                    currentLocation.getLongitude()),
-                                    Float.parseFloat(googleMapsPreferences.getString(getString(
-                                            R.string.maps_default_zoom_key),
-                                            MAP_DEFAULT_ZOOM))));
+                    moveMapCamera(currentLocation.getLatitude(), currentLocation.getLongitude(), map.getCameraPosition().zoom);
                 }
             }
         });
@@ -355,8 +370,6 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
         builder.setTitle(R.string.send_data_background);
         builder.setCancelable(false);
         builder.show();
-        loading = findViewById(R.id.loading);
-        loading_message = findViewById(R.id.loading_message);
     }
 
     private void initSendDataInBackgroundComponents() {
@@ -372,7 +385,7 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
             e.printStackTrace();
         }
         BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        BluetoothClientClass clientClass = new BluetoothClientClass(socket, bluetoothAdapter, handler, null, null);
+        BluetoothClientClass clientClass = new BluetoothClientClass(socket, bluetoothAdapter, handler, send, null);
         clientClass.start();
     }
 
@@ -410,12 +423,62 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
     };
 
     @Override
+    public void onLocationChanged(Location location) {
+        Toast.makeText(this, location.getLatitude() + " " + location.getLongitude(), Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onStatusChanged(String provider, int status, Bundle extras) {
+        Toast.makeText(this, status + " = OnStatusChanged", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onProviderEnabled(String provider) {
+        setLocationTrack(true);
+    }
+
+    @Override
+    public void onProviderDisabled(String provider) {
+        setLocationTrack(false);
+    }
+
+    private void setLocationTrack(boolean tracked) {
+        locationTracked = tracked;
+        if (tracked) {
+            locationTrackIcon.setImageResource(R.drawable.location_track);
+            if (currentLocation != null) {
+                moveMapCamera(currentLocation.getLatitude(), currentLocation.getLongitude(), map.getCameraPosition().zoom);
+                map.setTrafficEnabled(true);
+            }
+        } else {
+            locationTrackIcon.setImageResource(R.drawable.location_untracked);
+            map.setTrafficEnabled(false);
+        }
+    }
+
+    private void moveMapCamera(double lat, double lon, float zoom) {
+        if (zoom == -1f)
+            zoom = Float.parseFloat(googleMapsPreferences.getString(getString(
+                    R.string.maps_default_zoom_key), "15f"));
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                new LatLng(lat, lon), zoom));
+    }
+
+    @Override
     public void onBackPressed() {
         if (sendDataInBackground) {
             goToMainActivity();
         } else {
             super.onBackPressed();
         }
+    }
+
+    private void initComponents() {
+        loading = findViewById(R.id.loading);
+        locationTrackIcon = findViewById(R.id.location);
+        loading_message = findViewById(R.id.loading_message);
+        regionWeatherIcon = findViewById(R.id.regionWeatherIcon);
+        send = findViewById(R.id.send);
     }
 
     private void initMarkerIcons() {
