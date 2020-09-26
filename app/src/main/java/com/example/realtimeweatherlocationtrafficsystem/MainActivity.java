@@ -2,7 +2,11 @@ package com.example.realtimeweatherlocationtrafficsystem;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
@@ -10,6 +14,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.Html;
 import android.text.Spanned;
@@ -39,6 +44,9 @@ public class MainActivity extends AppCompatActivity {
     public static boolean ENABLE_BLUETOOTH_IN_PROGRESS = false;
     public static boolean DISCOVERY_BLUETOOTH_IN_PROGRESS = false;
 
+    private final static String CHANNEL_ID = "Notification_ID";
+    private final static int NOTIFICATION_ID = 1;
+
     //for bluetooth
     private BluetoothAdapter mBluetoothAdapter;
     private ArrayList<BluetoothDevice> devices;
@@ -51,11 +59,23 @@ public class MainActivity extends AppCompatActivity {
     //for toolbar menu
     private LinearLayout infoLinearLayout;
 
+    NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
+            .setSmallIcon(R.drawable.alert)
+            .setContentTitle("ALERT")
+            //.setContentText("Thank you!")
+            .setStyle(new NotificationCompat.BigTextStyle()
+                    .bigText("Region 47.66 26.24 - dangerous wind!"))
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initComponents();
+        //create notification
+        createNotificationChannel();
+        //show notification
+        showNotification(NOTIFICATION_ID);
         registerReceiver(receiver, new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED));
     }
 
@@ -249,6 +269,28 @@ public class MainActivity extends AppCompatActivity {
         return Html.fromHtml(
                 getResources().getString(string) + " <font color=" + getResources().getColor(R.color.color_green_light) + "><b>"
                         + selected_device.getName() + "</b></font>.");
+    }
+
+    private void createNotificationChannel() {
+        // Create the NotificationChannel, but only on API 26+ because
+        // the NotificationChannel class is new and not in the support library
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = getString(R.string.channel_name);
+            String description = getString(R.string.channel_description);
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
+            channel.setDescription(description);
+            // Register the channel with the system; you can't change the importance
+            // or other notification behaviors after this
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            assert notificationManager != null;
+            notificationManager.createNotificationChannel(channel);
+        }
+    }
+
+    private void showNotification(int notificationID){
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+        notificationManager.notify(notificationID, builder.build());
     }
 
     @Override
