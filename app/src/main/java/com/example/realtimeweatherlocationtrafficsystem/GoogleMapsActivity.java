@@ -67,6 +67,7 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
     private boolean locationTracked = false;
     private List<Integer> markerIcons;
     private List<Region> regions;
+    private List<Boolean> polygons = new ArrayList<>();
     private BluetoothDevice device;
     private BluetoothSocket socket;
     private String lastUnfinishedMessage = "";
@@ -208,11 +209,17 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
                 regions.add(region);
                 LatLng location = UtilsGoogleMaps.getCoordinates(region.getName(), 2);
                 if (location == null) return;
-                //map.clear();
                 map.addMarker(UtilsGoogleMaps.getMarkerOptions(location, region.getName(), "",
                         markerIcons.get(UtilsGoogleMaps.getWeatherStringIndex(
                                 region.getWeather().getWeather(), getBaseContext()))));
-                map.addPolygon(UtilsGoogleMaps.getPolygonOptions(location, UtilsGoogleMaps.REGION_AREA, UtilsGoogleMaps.COLOR_REGION_GREEN));
+                int color = UtilsGoogleMaps.COLOR_REGION_GREEN;
+                int index = UtilsGoogleMaps.getWeatherStringIndex(region.getWeather().getWeather(), this);
+                if(index == 1 || index == 4 || index == 7) color = UtilsGoogleMaps.COLOR_REGION_ORANGE;
+                else if(index == 2 || index == 5 || index == 8) color = UtilsGoogleMaps.COLOR_REGION_RED;
+                map.addPolygon(UtilsGoogleMaps.getPolygonOptions(location, UtilsGoogleMaps.REGION_AREA, color));
+                String buff = "";
+                for(Region reg : regionsReceived) buff += reg.getName() + "\n";
+                //Toast.makeText(this, regionsReceived.size() +"", Toast.LENGTH_SHORT).show();
             }
         }
     }

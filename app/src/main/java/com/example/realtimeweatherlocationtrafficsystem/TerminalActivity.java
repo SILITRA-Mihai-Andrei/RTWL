@@ -275,9 +275,11 @@ public class TerminalActivity extends AppCompatActivity implements Serializable,
                                             UtilsBluetooth.MUST_GET_LOCATION,
                                             UtilsBluetooth.MUST_GET_LOCATION_STRING);
                                 }
-                                splited[0] = splited[0].replace(
-                                        UtilsBluetooth.MUST_GET_LOCATION,
-                                        currentLocation.getLatitude() + " " + currentLocation.getLongitude());
+                                else{
+                                    splited[0] = splited[0].replace(
+                                            UtilsBluetooth.MUST_GET_LOCATION,
+                                            currentLocation.getLatitude() + " " + currentLocation.getLongitude());
+                                }
                             }
                             receiveBox.setText(receiveBox.getText() + splited[0]);
                             if (splited.length == 2) {

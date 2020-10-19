@@ -12,7 +12,7 @@ public class UtilsGoogleMaps {
 
     public static final int COLOR_REGION_RED = 1;
     public static final int COLOR_REGION_GREEN = 2;
-    public static final int COLOR_REGION_BLUE = 3;
+    public static final int COLOR_REGION_ORANGE = 3;
     public static final double REGION_AREA = 0.005;
 
     public static final int MIN_VALUE_FIRST_GRADE = 0;
@@ -134,9 +134,9 @@ public class UtilsGoogleMaps {
             result[0] = Color.argb(40, 0, 255, 0);
             result[1] = Color.argb(32, 0, 255, 0);
             return result;
-        } else if (color == COLOR_REGION_BLUE) {
-            result[0] = Color.argb(40, 0, 0, 255);
-            result[1] = Color.argb(32, 0, 0, 255);
+        } else if (color == COLOR_REGION_ORANGE) {
+            result[0] = Color.argb(40, 255, 180, 20);
+            result[1] = Color.argb(32, 255, 180, 20);
             return result;
         } else
             return null;
