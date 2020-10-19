@@ -1,6 +1,8 @@
 package com.example.realtimeweatherlocationtrafficsystem.models;
 
 import android.content.Context;
+import android.widget.Toast;
+
 import java.util.UUID;
 
 public class UtilsBluetooth {
@@ -12,6 +14,8 @@ public class UtilsBluetooth {
     public final static int STATE_MESSAGE_RECEIVED = 5;
     public final static int STATE_MESSAGE_SEND = 6;
 
+    public final static String MUST_GET_LOCATION = "#";
+    public final static String MUST_GET_LOCATION_STRING = "GPS module not working! Mobile location will be used.";
     public final static int BLUETOOTH_BUFFER_SIZE = 128;
     public final static UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb");
     public final static String MAIN_BLUETOOTH_DEVICE = "HC-05";
@@ -64,7 +68,7 @@ public class UtilsBluetooth {
             "l"+BLUETOOTH_RECEIVE_STATE_DELIMITER+
             "u"+BLUETOOTH_RECEIVE_STATE_DELIMITER;
 
-    public static String getReceivedMessage(String currentTextBox, String message, Context context) {
+    public static String getReceivedMessage(String message, Context context) {
         if (message == null) return null;
         /* first string is the message which is displayed
          * second string is the action which must be treated; null means no action * */
@@ -79,8 +83,14 @@ public class UtilsBluetooth {
         else if(message.contains(".")){
             String[] string = message.split(" ");
             if(string.length==6){
-                result = string[0] + " "+string[1]
-                        + "\n\t-\t" + UtilsGoogleMaps.getWeatherString(UtilsGoogleMaps.getWeatherStringIndex(Integer.parseInt(string[2])), context)
+                if(message.contains("0.0 0.0 ")){
+                    result = MUST_GET_LOCATION;
+                }
+                else{
+                    result = string[0] + " "+string[1];
+                }
+                result +=
+                          "\n\t-\t" + UtilsGoogleMaps.getWeatherString(UtilsGoogleMaps.getWeatherStringIndex(Integer.parseInt(string[2])), context)
                         + "\n\t-\tTemperature: " + string[3]
                         + "\n\t-\tHumidity: "+string[4]
                         +"\n\t-\tAir: "+string[5]+"\n";
@@ -134,10 +144,7 @@ public class UtilsBluetooth {
         }
         else result = null;
         if(result!=null) {
-            result = time + result;
-            if(currentTextBox!=null && message.length() + currentTextBox.length() <= Utils.MAX_RECEIVE_BOX_LENGTH) {
-                return currentTextBox + result;
-            }
+            return time + result;
         }
         return null;
     }
