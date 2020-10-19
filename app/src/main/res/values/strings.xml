@@ -107,13 +107,13 @@
     <string name="maps_max_zoom_region">Max region zoom</string>
 
     <!-- Preference keys -->
-    <string name="preference_bluetooth_key">RTWL_BLUETOOTH_SETTINGS_KEY</string>
-    <string name="preference_google_maps_key">RTWL_GOOGLE_MAPS_SETTINGS_KEY</string>
-    <string name="bluetooth_main_device_key">RTWL_MAIN_DEVICE_KEY</string>
-    <string name="bluetooth_receive_delimiter_key">RTWL_BLUETOOTH_RECEIVE_DELIMITER_KEY</string>
-    <string name="bluetooth_receive_state_delimiter_key">RTWL_BLUETOOTH_RECEIVE_STATE_DELIMITER_KEY</string>
-    <string name="maps_default_zoom_key">RTWL_MAP_DEFAULT_ZOOM_KEY</string>
-    <string name="maps_max_zoom_region_key">RTWL_MAX_ZOOM_REGION_KEY</string>
+    <string name="preference_bluetooth_key">RTWL@BLUETOOTH_SETTINGS_KEY</string>
+    <string name="preference_google_maps_key">RTWL@GOOGLE_MAPS_SETTINGS_KEY</string>
+    <string name="bluetooth_main_device_key">RTWL@MAIN_DEVICE_KEY</string>
+    <string name="bluetooth_receive_delimiter_key">RTWL@BLUETOOTH_RECEIVE_DELIMITER_KEY</string>
+    <string name="bluetooth_receive_state_delimiter_key">RTWL@BLUETOOTH_RECEIVE_STATE_DELIMITER_KEY</string>
+    <string name="maps_default_zoom_key">RTWL@MAP_DEFAULT_ZOOM_KEY</string>
+    <string name="maps_max_zoom_region_key">RTWL@MAX_ZOOM_REGION_KEY</string>
     <string name="channel_name">channel_name</string>
     <string name="channel_description">channel_description</string>
 </resources>

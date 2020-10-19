@@ -75,7 +75,7 @@ public class MainActivity extends AppCompatActivity {
         //create notification
         createNotificationChannel();
         //show notification
-        showNotification(NOTIFICATION_ID);
+        //showNotification(NOTIFICATION_ID);
         registerReceiver(receiver, new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED));
     }
 

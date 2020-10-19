@@ -96,10 +96,10 @@ public class SettingsActivity extends AppCompatActivity {
             if (mapsDefaultZoom != null) {
                 final String key = getString(R.string.maps_default_zoom_key);
                 mapsDefaultZoom.setOnBindEditTextListener(getOnBindEditText(InputType.TYPE_NUMBER_FLAG_DECIMAL));
-                float value = Float.parseFloat(google_maps_settings.getString(key, "-1"));
-                if (value == -1f) {
-                    value = 15f;
-                    google_maps_settings_editor.putFloat(key, value);
+                String value = google_maps_settings.getString(key, null);
+                if (value == null) {
+                    value = "15f";
+                    google_maps_settings_editor.putString(key, value);
                 }
                 mapsDefaultZoom.setSummaryProvider(getSummary(key, value, TYPE_EDIT_TEXT_PREF, PREF_VALUE_STRING));
                 mapsDefaultZoom.setOnPreferenceChangeListener(getPreferenceChangeListener(mapsDefaultZoom, google_maps_settings_editor, key, PREF_VALUE_STRING));
@@ -108,10 +108,10 @@ public class SettingsActivity extends AppCompatActivity {
             if (mapsMaxRegionZoom != null) {
                 final String key = getString(R.string.maps_max_zoom_region_key);
                 mapsMaxRegionZoom.setOnBindEditTextListener(getOnBindEditText(InputType.TYPE_NUMBER_FLAG_DECIMAL));
-                float value = Float.parseFloat(google_maps_settings.getString(key, "-1"));
-                if (value == -1f) {
-                    value = 16f;
-                    google_maps_settings_editor.putFloat(key, value);
+                String value = google_maps_settings.getString(key, null);
+                if (value == null) {
+                    value = "16f";
+                    google_maps_settings_editor.putString(key, value);
                 }
                 mapsMaxRegionZoom.setSummaryProvider(getSummary(key, value, TYPE_EDIT_TEXT_PREF, PREF_VALUE_STRING));
                 mapsMaxRegionZoom.setOnPreferenceChangeListener(getPreferenceChangeListener(mapsMaxRegionZoom, google_maps_settings_editor, key, PREF_VALUE_STRING));

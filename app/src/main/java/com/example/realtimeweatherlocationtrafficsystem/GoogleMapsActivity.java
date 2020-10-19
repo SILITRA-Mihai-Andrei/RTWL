@@ -278,7 +278,7 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
                     String message = new String(readBuffer, 0, msg.arg1);
                     if (message.isEmpty()) break;
                     if (isFinalMessage(message)) {
-                        String response = UtilsBluetooth.getReceivedMessage(null, lastUnfinishedMessage + message, getBaseContext());
+                        String response = UtilsBluetooth.getReceivedMessage( lastUnfinishedMessage + message, getBaseContext());
                         if (!(response == null || response.isEmpty() || response.length() <= 11)) {
                             String[] splited = response.split("@");
                             Toast.makeText(GoogleMapsActivity.this, splited[0].substring(0, splited[0].length() - 1)
