@@ -19,9 +19,11 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.provider.Settings;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -58,6 +60,7 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
         , GoogleMap.OnMarkerClickListener, GoogleMap.OnCameraIdleListener, LocationListener {
 
     private final int REQUEST_PERMISSION_CODE = 1;
+    private final int MAX_FAILURES_GPS = 2;
 
     private SharedPreferences googleMapsPreferences;
     private GoogleMap map;
@@ -77,6 +80,7 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
     private ImageView regionWeatherIcon;
     private ImageView locationTrackIcon;
     private Button send;
+    private int counterFailureGPS = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -289,6 +293,10 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
                             if (splited.length == 2) {
                                 /* Check if the coordinates received are valid */
                                 if(splited[1].contains(UtilsBluetooth.INVALID_GPS_COORDINATES)){
+                                    if(counterFailureGPS++ >= MAX_FAILURES_GPS && !Utils.isLocationEnabled(getContentResolver())){
+                                        currentLocation = null;
+                                        counterFailureGPS = 0;
+                                    }
                                     /* Check if the location of this phone is updated */
                                     if(currentLocation != null){
                                         /* Use the coordinates of this phone */
@@ -296,15 +304,22 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
                                                 currentLocation.getLatitude() + " " + currentLocation.getLongitude());
                                     }
                                 }
+                                else if(locationTracked){
+                                    String[] data = splited[1].split(" ");
+                                    double lat = currentLocation==null ? Float.parseFloat(data[0]) : currentLocation.getLatitude();
+                                    double lon = currentLocation==null ? Float.parseFloat(data[1]) : currentLocation.getLongitude();
+                                    moveMapCamera(lat, lon, map.getCameraPosition().zoom);
+                                }
+
+                                String[] d = splited[1].split(" ");
 
                                 /* Check again if the coordinates are valid */
-                                if(splited[1].contains(UtilsBluetooth.INVALID_GPS_COORDINATES)){
+                                if(splited[1].contains(UtilsBluetooth.INVALID_GPS_COORDINATES) && currentLocation == null){
                                     /* The coordinates are still invalid - the location of this phone is not working */
                                     received.setText(R.string.gps_module_gps_phone_not_working);
                                     break;
                                 }
 
-                                String[] d = splited[1].split(" ");
                                 if(currentLocation != null) {
                                     splited[0] = splited[0].replace(UtilsBluetooth.MUST_GET_LOCATION, "Region: " +
                                             String.format("%.2f", currentLocation.getLatitude()) + " " + String.format("%.2f", currentLocation.getLongitude()));
@@ -392,7 +407,6 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
         lastUnfinishedMessage = string;
         return false;
     }
-
 
     private void initDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(GoogleMapsActivity.this);

@@ -74,7 +74,7 @@ public class UtilsBluetooth {
         /* first string is the message which is displayed
          * second string is the action which must be treated; null means no action * */
         String result = "";
-        String time = Utils.getTime() + ": \n";
+        String time = ">>> " + Utils.getTime() + ": \n";
         if (message.contains(STATE_START)) {
             result = "RTWL System started\n";
         }
