@@ -16,4 +16,5 @@
     <dimen name="dim_136dp">136dp</dimen>
     <dimen name="size_22sp">22sp</dimen>
     <dimen name="dim_52dp">52dp</dimen>
+    <dimen name="dim_90dp">90dp</dimen>
 </resources>

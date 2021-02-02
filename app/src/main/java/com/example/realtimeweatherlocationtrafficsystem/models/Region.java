@@ -21,7 +21,7 @@ public class Region {
         return name;
     }
 
-    public Weather getWeather() {
+    public Weather  getWeather() {
         return weather;
     }
 }

@@ -10,6 +10,11 @@ import com.google.android.gms.maps.model.PolygonOptions;
 
 public class UtilsGoogleMaps {
 
+    public static final String[] DIRECTIONS = {"N", "NE", "EN",
+                                                "E", "ES", "SE",
+                                                "S", "SW", "WS",
+                                                "WN", "NW", "N"};
+
     public static final int COLOR_REGION_RED = 1;
     public static final int COLOR_REGION_GREEN = 2;
     public static final int COLOR_REGION_ORANGE = 3;
@@ -90,6 +95,13 @@ public class UtilsGoogleMaps {
                 //left-top point
                 && pointCoords.latitude >= regionCoords.latitude-areaDistance
                 &&  pointCoords.longitude <= regionCoords.longitude+areaDistance;
+    }
+
+    public static String getDirection(int degrees){
+        if(degrees >= 0 && degrees <= 360){
+            return DIRECTIONS[(degrees - 15) / 30];
+        }
+        return DIRECTIONS[0];
     }
 
     public static int getWeatherStringIndex(String weather, Context context){

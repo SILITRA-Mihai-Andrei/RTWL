@@ -48,6 +48,17 @@
         android:layout_height="match_parent"
         android:name="com.google.android.gms.maps.SupportMapFragment" />
 
+    <TextView
+        android:id="@+id/received"
+        android:layout_width="@dimen/dim_128dp"
+        android:layout_height="100dp"
+        android:layout_alignBottom="@id/map"
+        android:layout_alignParentStart="@id/map"
+        android:background="@color/color_gray_transparent2"
+        android:padding="@dimen/dim_4dp"
+        android:textSize="10sp"
+        android:visibility="gone"/>
+
     <ImageView
         android:id="@+id/mapType"
         android:layout_width="@dimen/dim_32dp"

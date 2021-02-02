@@ -15,10 +15,11 @@ public class UtilsBluetooth {
     public final static int STATE_MESSAGE_SEND = 6;
 
     public final static String MUST_GET_LOCATION = "#";
-    public final static String MUST_GET_LOCATION_STRING = "GPS module not working! Mobile location will be used.";
+    public final static String MUST_GET_LOCATION_STRING = "GPS module not working! \nMobile location will be used.";
     public final static int BLUETOOTH_BUFFER_SIZE = 128;
     public final static UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb");
     public final static String MAIN_BLUETOOTH_DEVICE = "HC-05";
+    public final static String INVALID_GPS_COORDINATES = "0.0 0.0";
     public final static String BLUETOOTH_RECEIVE_DELIMITER = "\r";
     public final static String BLUETOOTH_RECEIVE_STATE_DELIMITER = ":";
 
@@ -73,7 +74,7 @@ public class UtilsBluetooth {
         /* first string is the message which is displayed
          * second string is the action which must be treated; null means no action * */
         String result = "";
-        String time = "<" + Utils.getTime() + "> ";
+        String time = Utils.getTime() + ": \n";
         if (message.contains(STATE_START)) {
             result = "RTWL System started\n";
         }
@@ -82,18 +83,20 @@ public class UtilsBluetooth {
         }
         else if(message.contains(".")){
             String[] string = message.split(" ");
-            if(string.length==6){
-                if(message.contains("0.0 0.0 ")){
+            if(string.length==8){
+                if(message.contains(INVALID_GPS_COORDINATES+" ")){
                     result = MUST_GET_LOCATION;
                 }
                 else{
-                    result = string[0] + " "+string[1];
+                    result = "Region: " + string[0] + " " + string[1];
                 }
                 result +=
                           "\n\t-\t" + UtilsGoogleMaps.getWeatherString(UtilsGoogleMaps.getWeatherStringIndex(Integer.parseInt(string[2])), context)
                         + "\n\t-\tTemperature: " + string[3]
                         + "\n\t-\tHumidity: "+string[4]
-                        +"\n\t-\tAir: "+string[5]+"\n";
+                        + "\n\t-\tAir: "+string[5]
+                        + "\n\t-\tSpeed: "+(string[6].equals("-1") ? "unknown":string[6])
+                        + "\n\t-\tDirection: "+(string[7].contains("U") ? "unknown":string[7])+"\n";
                 result = result + "@" + message;
             }
         }
@@ -143,6 +146,8 @@ public class UtilsBluetooth {
             result = "Unknown command!\n";
         }
         else result = null;
+        if(result != null && result.length() == 0)
+            return null;
         if(result!=null) {
             return time + result;
         }
