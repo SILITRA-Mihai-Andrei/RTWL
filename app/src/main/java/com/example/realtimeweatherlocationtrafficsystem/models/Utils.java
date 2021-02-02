@@ -1,12 +1,17 @@
 package com.example.realtimeweatherlocationtrafficsystem.models;
 
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.Handler;
+import android.provider.Settings;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.example.realtimeweatherlocationtrafficsystem.GoogleMapsActivity;
 import com.example.realtimeweatherlocationtrafficsystem.R;
 
 public class Utils {
@@ -117,6 +122,16 @@ public class Utils {
         String[] splitedCoordinates = getCoordinatesSplited(coordinates);
         if(splitedCoordinates==null) return null;
         return splitedCoordinates[0]+"."+splitedCoordinates[1]+" "+splitedCoordinates[2]+"."+splitedCoordinates[3];
+    }
+
+    public static boolean isLocationEnabled(ContentResolver contentResolver){
+        int locationMode = 0;
+        try {
+            locationMode = Settings.Secure.getInt(contentResolver, Settings.Secure.LOCATION_MODE);
+        } catch (Settings.SettingNotFoundException e) {
+            e.printStackTrace();
+        }
+        return locationMode != Settings.Secure.LOCATION_MODE_OFF;
     }
 
     public static void blinkTextView(final TextView textView, final int currentColor, final int color, final int duration, final int repeats) {
