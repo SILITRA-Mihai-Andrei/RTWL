@@ -16,6 +16,7 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class FireBaseManager {
 
@@ -43,15 +44,20 @@ public class FireBaseManager {
         return new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
+                boolean found = false;
                 for (DataSnapshot ds : snapshot.getChildren()) {
                     Region region = new Region(ds.getKey(), ds.getValue(Weather.class));
+                    found = false;
                     for(int i=0; i<regions.size(); i++){
                         if(regions.get(i).getName().equals(region.getName())){
-                            regions.add(i, region);
+                            regions.set(i, region);
+                            found = true;
                             break;
                         }
                     }
-                    regions.add(region);
+                    if(!found){
+                        regions.add(region);
+                    }
                 }
                 onFireBaseDataNew.onDataNewFireBase(regions);
             }

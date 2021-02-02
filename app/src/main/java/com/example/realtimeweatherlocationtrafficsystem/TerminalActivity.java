@@ -54,6 +54,7 @@ public class TerminalActivity extends AppCompatActivity implements Serializable,
     private LinearLayout loading;
     private TextView loading_message;
     private LinearLayout dataBaseLinearLayout;
+    private LinearLayout messageToSendLabel;
     private TextView connectedDeviceTextView;
     private TextView statusTextView;
     private TextView receiveBox;
@@ -66,6 +67,7 @@ public class TerminalActivity extends AppCompatActivity implements Serializable,
     private EditText air;
     private EditText messageToSend;
     private Button clearTerminal;
+    private Button expandTerminal;
     private Button sendTestData;
     private Button send;
     private Button showDataBase;
@@ -176,6 +178,19 @@ public class TerminalActivity extends AppCompatActivity implements Serializable,
                     receiveBox.setText("");
                 }
             });
+            expandTerminal.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    int visibility = View.GONE;
+                    if(messageToSendLabel.getVisibility()==View.GONE){
+                        visibility = View.VISIBLE;
+                    }
+                    messageToSendLabel.setVisibility(visibility);
+                    messageToSend.setVisibility(visibility);
+                    send.setVisibility(visibility);
+                    showDataBase.setVisibility(visibility);
+                }
+            });
         }
         showDataBase.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -205,6 +220,7 @@ public class TerminalActivity extends AppCompatActivity implements Serializable,
         loading = findViewById(R.id.loading);
         loading_message = findViewById(R.id.loading_message);
         dataBaseLinearLayout = findViewById(R.id.data_base_linear_layout);
+        messageToSendLabel = findViewById(R.id.message_to_send_label);
         connectedDeviceTextView = findViewById(R.id.connected_device);
         statusTextView = findViewById(R.id.status);
         coordinates = findViewById(R.id.coordinates);
@@ -217,6 +233,7 @@ public class TerminalActivity extends AppCompatActivity implements Serializable,
         commands = findViewById(R.id.commands);
         dataBase = findViewById(R.id.dataBase);
         clearTerminal = findViewById(R.id.clear_terminal);
+        expandTerminal = findViewById(R.id.expand_terminal);
         sendTestData = findViewById(R.id.send_test_data);
         messageToSend = findViewById(R.id.message_to_send);
         send = findViewById(R.id.send);
@@ -263,8 +280,9 @@ public class TerminalActivity extends AppCompatActivity implements Serializable,
                     if (message.isEmpty()) break;
                     if (isFinalMessage(message)) {
                         String response = UtilsBluetooth.getReceivedMessage(lastUnfinishedMessage + message, getBaseContext());
-                        if (!(response == null || response.isEmpty())) {
-                            if(response.split(">")[1].length() <= 3) break;
+                        if (response != null) {
+                            if(response.isEmpty()) break;
+                            if(response.split(": ")[1].length() <= 3) break;
                             String[] splited = response.split("@");
                             if (receiveBox.getText().length() + splited[0].length() > Utils.MAX_RECEIVE_BOX_LENGTH) {
                                 receiveBox.setText("");
@@ -275,9 +293,11 @@ public class TerminalActivity extends AppCompatActivity implements Serializable,
                                             UtilsBluetooth.MUST_GET_LOCATION,
                                             UtilsBluetooth.MUST_GET_LOCATION_STRING);
                                 }
-                                splited[0] = splited[0].replace(
-                                        UtilsBluetooth.MUST_GET_LOCATION,
-                                        currentLocation.getLatitude() + " " + currentLocation.getLongitude());
+                                else{
+                                    splited[0] = splited[0].replace(
+                                            UtilsBluetooth.MUST_GET_LOCATION,
+                                            currentLocation.getLatitude() + " " + currentLocation.getLongitude());
+                                }
                             }
                             receiveBox.setText(receiveBox.getText() + splited[0]);
                             if (splited.length == 2) {

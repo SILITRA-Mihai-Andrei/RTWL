@@ -14,6 +14,7 @@
     <color name="color_red_dark_transparent">#BFFF0000</color>
     <color name="color_gray">#404040</color>
     <color name="color_gray_transparent">#BF404040</color>
+    <color name="color_gray_transparent2">#BF000000</color>
     <color name="color_light_gray">@android:color/darker_gray</color>
     <color name="blue">#021473</color>
 </resources>

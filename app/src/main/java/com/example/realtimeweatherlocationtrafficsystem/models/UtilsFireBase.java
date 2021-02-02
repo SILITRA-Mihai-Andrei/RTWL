@@ -15,12 +15,13 @@ public class UtilsFireBase {
     public static String regionListToString(List<Region> regions) {
         StringBuilder result = new StringBuilder();
         for (int i = 0; i < regions.size(); i++) {
-            result.append("> ").append(regions.get(i).getName())
-                .append("weather: ").append("\n\t\t- ").append(regions.get(i).getWeather().getWeather())
-                .append("danger: ").append("\n\t\t- ").append(regions.get(i).getWeather().getDanger())
-                .append("temperature: ").append("\n\t\t- ").append(regions.get(i).getWeather().getTemperature())
-                .append("humidity: ").append("\n\t\t- ").append(regions.get(i).getWeather().getHumidity())
-                .append("air: ").append("\n\t\t- ").append(regions.get(i).getWeather().getAir())
+            String danger = regions.get(i).getWeather().getDanger();
+            result.append(regions.get(i).getName())
+                .append("\n\t\t").append(regions.get(i).getWeather().getWeather())
+                .append("\n\t\tdanger: ").append(danger==null ? "none" : danger)
+                .append("\n\t\ttemperature: ").append(regions.get(i).getWeather().getTemperature())
+                .append("\n\t\thumidity: ").append(regions.get(i).getWeather().getHumidity())
+                .append("\n\t\tair: ").append(regions.get(i).getWeather().getAir())
                 .append('\n');
         }
         return result.toString();

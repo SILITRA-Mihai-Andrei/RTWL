@@ -21,7 +21,7 @@
     <string name="received">Received:</string>
     <string name="message_to_send">Message to send:</string>
     <string name="message_to_send_hint">get data</string>
-    <string name="send">Send</string>
+    <string name="send_command">Send command</string>
     <string name="please_select_one_device">Please select one device!</string>
     <string name="check_bluetooth_connection">Check the bluetooth connection.</string>
     <string name="development">Development</string>
@@ -51,7 +51,7 @@
     <string name="weather_heat">Heat</string>
     <string name="weather_soft_rain">Soft rain</string>
     <string name="weather_moderate_rain">Moderate rain</string>
-    <string name="weather_torrential_rain">Torrential Rain</string>
+    <string name="weather_torrential_rain">Torrential rain</string>
     <string name="weather_soft_wind">Soft wind</string>
     <string name="weather_moderate_wind">Moderate wind</string>
     <string name="weather_torrential_wind">Torrential wind</string>
@@ -116,4 +116,6 @@
     <string name="maps_max_zoom_region_key">RTWL@MAX_ZOOM_REGION_KEY</string>
     <string name="channel_name">channel_name</string>
     <string name="channel_description">channel_description</string>
+    <string name="expand">EXPAND</string>
+    <string name="gps_module_gps_phone_not_working">GPS module is not working. The location on this phone is not working.</string>
 </resources>

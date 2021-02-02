@@ -73,6 +73,7 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
     private FireBaseManager fireBaseManager;
     private LinearLayout loading;
     private TextView loading_message;
+    private TextView received;
     private ImageView regionWeatherIcon;
     private ImageView locationTrackIcon;
     private Button send;
@@ -208,11 +209,14 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
                 regions.add(region);
                 LatLng location = UtilsGoogleMaps.getCoordinates(region.getName(), 2);
                 if (location == null) return;
-                //map.clear();
                 map.addMarker(UtilsGoogleMaps.getMarkerOptions(location, region.getName(), "",
                         markerIcons.get(UtilsGoogleMaps.getWeatherStringIndex(
                                 region.getWeather().getWeather(), getBaseContext()))));
-                map.addPolygon(UtilsGoogleMaps.getPolygonOptions(location, UtilsGoogleMaps.REGION_AREA, UtilsGoogleMaps.COLOR_REGION_GREEN));
+                int color = UtilsGoogleMaps.COLOR_REGION_GREEN;
+                int index = UtilsGoogleMaps.getWeatherStringIndex(region.getWeather().getWeather(), this);
+                if(index == 1 || index == 4 || index == 7) color = UtilsGoogleMaps.COLOR_REGION_ORANGE;
+                else if(index == 2 || index == 5 || index == 8) color = UtilsGoogleMaps.COLOR_REGION_RED;
+                map.addPolygon(UtilsGoogleMaps.getPolygonOptions(location, UtilsGoogleMaps.REGION_AREA, color));
             }
         }
     }
@@ -243,6 +247,7 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
     };
 
     Handler handler = new android.os.Handler(new android.os.Handler.Callback() {
+        @SuppressLint("DefaultLocale")
         @Override
         public boolean handleMessage(@NonNull Message msg) {
             switch (msg.what) {
@@ -281,10 +286,37 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
                         String response = UtilsBluetooth.getReceivedMessage( lastUnfinishedMessage + message, getBaseContext());
                         if (!(response == null || response.isEmpty() || response.length() <= 11)) {
                             String[] splited = response.split("@");
-                            Toast.makeText(GoogleMapsActivity.this, splited[0].substring(0, splited[0].length() - 1)
-                                    + "\n\n" + response.length() + "\n", Toast.LENGTH_SHORT).show();
                             if (splited.length == 2) {
+                                /* Check if the coordinates received are valid */
+                                if(splited[1].contains(UtilsBluetooth.INVALID_GPS_COORDINATES)){
+                                    /* Check if the location of this phone is updated */
+                                    if(currentLocation != null){
+                                        /* Use the coordinates of this phone */
+                                        splited[1] = splited[1].replace(UtilsBluetooth.INVALID_GPS_COORDINATES,
+                                                currentLocation.getLatitude() + " " + currentLocation.getLongitude());
+                                    }
+                                }
+
+                                /* Check again if the coordinates are valid */
+                                if(splited[1].contains(UtilsBluetooth.INVALID_GPS_COORDINATES)){
+                                    /* The coordinates are still invalid - the location of this phone is not working */
+                                    received.setText(R.string.gps_module_gps_phone_not_working);
+                                    break;
+                                }
+
                                 String[] d = splited[1].split(" ");
+                                if(currentLocation != null) {
+                                    splited[0] = splited[0].replace(UtilsBluetooth.MUST_GET_LOCATION, "Region: " +
+                                            String.format("%.2f", currentLocation.getLatitude()) + " " + String.format("%.2f", currentLocation.getLongitude()));
+                                }
+                                else{
+                                    splited[0] = splited[0].replace(UtilsBluetooth.MUST_GET_LOCATION, "");
+                                }
+                                String displyData = splited[0].split(": \n")[1];
+                                displyData = displyData.replace("Speed: unknown", "Speed: " + (int) currentLocation.getSpeed());
+                                displyData = displyData.replace("Direction: unknown", "Direction: " + UtilsGoogleMaps.getDirection((int) currentLocation.getBearing()));
+                                received.setText(displyData);
+
                                 int validity = Utils.isDataValid(d[0] + " " + d[1], d[2], d[3], d[4], d[5].replace(UtilsBluetooth.BLUETOOTH_RECEIVE_DELIMITER, ""));
                                 if (validity == Utils.VALID)
                                     fireBaseManager.setValue(
@@ -387,6 +419,7 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
         BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         BluetoothClientClass clientClass = new BluetoothClientClass(socket, bluetoothAdapter, handler, send, null);
         clientClass.start();
+        received.setVisibility(View.VISIBLE);
     }
 
     private final BroadcastReceiver receiverState = new BroadcastReceiver() {
@@ -477,6 +510,7 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
         loading = findViewById(R.id.loading);
         locationTrackIcon = findViewById(R.id.location);
         loading_message = findViewById(R.id.loading_message);
+        received = findViewById(R.id.received);
         regionWeatherIcon = findViewById(R.id.regionWeatherIcon);
         send = findViewById(R.id.send);
     }

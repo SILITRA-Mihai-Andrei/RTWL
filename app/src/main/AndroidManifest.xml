@@ -26,7 +26,7 @@
         <activity
             android:name=".SettingsActivity"
             android:label="Settings"/>
-        <activity android:name=".TesteActivity" /> <!-- for Google Maps -->
+        <!-- for Google Maps -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyCqrctnfF6Bsidj-Td50Zjnxqeg-AX61p0" />
