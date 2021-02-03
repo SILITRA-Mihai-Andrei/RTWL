@@ -327,7 +327,7 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
                                 else{
                                     splited[0] = splited[0].replace(UtilsBluetooth.MUST_GET_LOCATION, "");
                                 }
-                                String displyData = splited[0].split(": \n")[1];
+                                String displyData = splited[0].split(UtilsBluetooth.MESSAGE_TIME_END)[1];
                                 displyData = displyData.replace("Speed: unknown", "Speed: " + (int) currentLocation.getSpeed());
                                 displyData = displyData.replace("Direction: unknown", "Direction: " + UtilsGoogleMaps.getDirection((int) currentLocation.getBearing()));
                                 received.setText(displyData);

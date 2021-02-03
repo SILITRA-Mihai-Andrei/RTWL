@@ -118,4 +118,5 @@
     <string name="channel_description">channel_description</string>
     <string name="expand">EXPAND</string>
     <string name="gps_module_gps_phone_not_working">GPS module is not working. The location on this phone is not working.</string>
+    <string name="no_location_valid">GPS module is not working. \nLocation on this module is not working. \nCan\'t send data to database!\n</string>
 </resources>
