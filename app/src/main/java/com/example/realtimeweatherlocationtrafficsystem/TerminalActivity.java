@@ -182,7 +182,7 @@ public class TerminalActivity extends AppCompatActivity implements Serializable,
                 @Override
                 public void onClick(View v) {
                     int visibility = View.GONE;
-                    if(messageToSendLabel.getVisibility()==View.GONE){
+                    if (messageToSendLabel.getVisibility() == View.GONE) {
                         visibility = View.VISIBLE;
                     }
                     messageToSendLabel.setVisibility(visibility);
@@ -281,30 +281,38 @@ public class TerminalActivity extends AppCompatActivity implements Serializable,
                     if (isFinalMessage(message)) {
                         String response = UtilsBluetooth.getReceivedMessage(lastUnfinishedMessage + message, getBaseContext());
                         if (response != null) {
-                            if(response.isEmpty()) break;
-                            if(response.split(": ")[1].length() <= 3) break;
+                            if (response.isEmpty()) break;
+                            if (response.split(UtilsBluetooth.MESSAGE_TIME_END)[1].length() <= 3) break;
                             String[] splited = response.split("@");
                             if (receiveBox.getText().length() + splited[0].length() > Utils.MAX_RECEIVE_BOX_LENGTH) {
                                 receiveBox.setText("");
                             }
                             if (splited[0].contains(UtilsBluetooth.MUST_GET_LOCATION)) {
-                                if(currentLocation == null){
+                                if (currentLocation == null) {
                                     splited[0] = splited[0].replace(
                                             UtilsBluetooth.MUST_GET_LOCATION,
                                             UtilsBluetooth.MUST_GET_LOCATION_STRING);
-                                }
-                                else{
+                                } else {
                                     splited[0] = splited[0].replace(
                                             UtilsBluetooth.MUST_GET_LOCATION,
                                             currentLocation.getLatitude() + " " + currentLocation.getLongitude());
                                 }
                             }
-                            receiveBox.setText(receiveBox.getText() + splited[0]);
+                            receiveBox.setText(receiveBox.getText() + splited[0] + "\n");
                             if (splited.length == 2) {
                                 String[] d = splited[1].split(" ");
-                                int validity = Utils.isDataValid(d[0] + " " + d[1], d[2], d[3], d[4], d[5].replace(UtilsBluetooth.BLUETOOTH_RECEIVE_DELIMITER, ""));
+                                if (currentLocation == null && d[0].equals("0.0") && d[1].equals("0.0")) {
+                                    receiveBox.setText(receiveBox.getText() + getString(R.string.no_location_valid) + "\n");
+                                    break;
+                                }
+                                String lat=null, lon=null;
+                                if (currentLocation != null) {
+                                    lat = d[0].equals("0.0") ? currentLocation.getLatitude() + "" : d[0];
+                                    lon = d[1].equals("0.0") ? currentLocation.getLongitude() + "" : d[1];
+                                }
+                                int validity = Utils.isDataValid(lat + " " + lon, d[2], d[3], d[4], d[5].replace(UtilsBluetooth.BLUETOOTH_RECEIVE_DELIMITER, ""));
                                 if (validity == Utils.VALID)
-                                    fireBaseManager.setValue(Utils.getCoordinatesForDataBase(d[0] + " " + d[1], 2), Utils.getCurrentDateAndTime(),
+                                    fireBaseManager.setValue(Utils.getCoordinatesForDataBase(lat + " " + lon, 2), Utils.getCurrentDateAndTime(),
                                             new Data(Utils.getInt(d[2]),
                                                     Utils.getInt(d[3]),
                                                     Utils.getInt(d[4]),
@@ -367,12 +375,12 @@ public class TerminalActivity extends AppCompatActivity implements Serializable,
     private void fetchLastLocation() {
         if (ActivityCompat.checkSelfPermission(TerminalActivity.this,
                 Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-            || ActivityCompat.checkSelfPermission(TerminalActivity.this,
+                || ActivityCompat.checkSelfPermission(TerminalActivity.this,
                 Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        if(locationManager == null) return;
+        if (locationManager == null) return;
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 0, this);
     }
 

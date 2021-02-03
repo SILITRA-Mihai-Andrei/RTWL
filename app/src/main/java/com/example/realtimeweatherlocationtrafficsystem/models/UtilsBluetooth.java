@@ -14,6 +14,8 @@ public class UtilsBluetooth {
     public final static int STATE_MESSAGE_RECEIVED = 5;
     public final static int STATE_MESSAGE_SEND = 6;
 
+    public final static String MESSAGE_TIME_END = "] \n";
+
     public final static String MUST_GET_LOCATION = "#";
     public final static String MUST_GET_LOCATION_STRING = "GPS module not working! \nMobile location will be used.";
     public final static int BLUETOOTH_BUFFER_SIZE = 128;
@@ -74,7 +76,7 @@ public class UtilsBluetooth {
         /* first string is the message which is displayed
          * second string is the action which must be treated; null means no action * */
         String result = "";
-        String time = ">>> " + Utils.getTime() + ": \n";
+        String time = "[" + Utils.getTime() + MESSAGE_TIME_END;
         if (message.contains(STATE_START)) {
             result = "RTWL System started\n";
         }
