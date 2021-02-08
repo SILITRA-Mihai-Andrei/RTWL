@@ -6,47 +6,12 @@
     android:layout_height="match_parent"
     tools:context=".GoogleMapsActivity">
 
-    <LinearLayout
-        android:id="@+id/loading"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@android:color/black"
-        android:elevation="@dimen/dim_16dp"
-        android:visibility="gone"
-        android:orientation="vertical">
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/loading"
-            android:textAlignment="center"
-            android:textSize="@dimen/size_24sp"
-            android:layout_marginTop="@dimen/dim_128dp"/>
-        <TextView
-            android:id="@+id/loading_message"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/loading_points"
-            android:textAlignment="center"
-            android:textSize="@dimen/size_16sp"
-            android:layout_marginTop="@dimen/dim_16dp"/>
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/please_wait"
-            android:textAlignment="center"
-            android:textSize="@dimen/size_16sp"
-            android:layout_marginBottom="@dimen/dim_16dp"/>
-        <ProgressBar
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            style="?android:attr/progress"/>
-    </LinearLayout>
-
     <fragment
         android:id="@+id/map"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:name="com.google.android.gms.maps.SupportMapFragment" />
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        tools:ignore="FragmentTagUsage" />
 
     <TextView
         android:id="@+id/received"
@@ -57,35 +22,41 @@
         android:background="@color/color_gray_transparent2"
         android:padding="@dimen/dim_4dp"
         android:textSize="10sp"
-        android:visibility="gone"/>
+        android:visibility="gone"
+        tools:ignore="SmallSp" />
 
     <ImageView
         android:id="@+id/mapType"
         android:layout_width="@dimen/dim_32dp"
         android:layout_height="@dimen/dim_32dp"
-        android:layout_alignEnd="@id/map"
-        android:layout_alignBottom="@id/map"
-        android:layout_marginEnd="@dimen/dim_8dp"
-        android:layout_marginBottom="@dimen/dim_8dp"
-        android:src="@drawable/google_maps" />
+        android:layout_alignStart="@id/map"
+        android:layout_alignTop="@id/map"
+        android:layout_marginStart="@dimen/dim_8dp"
+        android:layout_marginTop="@dimen/dim_8dp"
+        android:src="@drawable/google_maps"
+        android:contentDescription="@string/change_the_map_type" />
 
     <ImageView
         android:id="@+id/location"
         android:layout_width="@dimen/dim_32dp"
         android:layout_height="@dimen/dim_32dp"
-        android:layout_alignBottom="@id/mapType"
-        android:layout_toStartOf="@id/mapType"
-        android:layout_marginEnd="@dimen/dim_8dp"
-        android:src="@drawable/location_untracked" />
+        android:layout_alignStart="@id/map"
+        android:layout_below="@id/mapType"
+        android:layout_marginStart="@dimen/dim_8dp"
+        android:layout_marginTop="@dimen/dim_8dp"
+        android:src="@drawable/location_untracked"
+        android:contentDescription="@string/active_track_location" />
 
     <ImageView
         android:id="@+id/regionWeatherIcon"
         android:layout_width="@dimen/dim_32dp"
         android:layout_height="@dimen/dim_32dp"
-        android:layout_marginBottom="@dimen/dim_8dp"
-        android:layout_above="@id/mapType"
-        android:layout_alignStart="@id/mapType"
-        android:layout_alignEnd="@id/mapType"/>
+        android:layout_marginStart="@dimen/dim_8dp"
+        android:layout_marginTop="@dimen/dim_8dp"
+        android:src="@drawable/sun"
+        android:layout_alignStart="@id/map"
+        android:layout_below="@id/location"
+        android:contentDescription="@string/the_current_region_weather" />
 
     <!-- Button hidden for sending command to microcontroller -->
     <Button

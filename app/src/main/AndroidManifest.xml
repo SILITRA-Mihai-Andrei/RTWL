@@ -9,6 +9,8 @@
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
 
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+
     <permission android:name="android.permission.BLUETOOTH" />
     <permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <permission
@@ -23,9 +25,16 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.NoActionBar">
+
+        <service android:name=".services.BluetoothService" />
+        <service android:name=".services.FireBaseService" />
+        <service android:name=".services.LocationService" />
+
+        <receiver android:name=".models.BluetoothReceiveReply"/>
+
         <activity
             android:name=".SettingsActivity"
-            android:label="Settings"/>
+            android:label="Settings" />
         <!-- for Google Maps -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
@@ -37,7 +46,7 @@
         <activity
             android:name=".TerminalActivity"
             android:noHistory="true"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait" />
         <activity
             android:name=".GoogleMapsActivity"
             android:configChanges="orientation|keyboardHidden|screenSize" />
@@ -46,7 +55,6 @@
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>

@@ -13,6 +13,9 @@ public class UtilsFireBase {
     }
 
     public static String regionListToString(List<Region> regions) {
+        if(regions == null){
+            return "No data.";
+        }
         StringBuilder result = new StringBuilder();
         for (int i = 0; i < regions.size(); i++) {
             String danger = regions.get(i).getWeather().getDanger();
