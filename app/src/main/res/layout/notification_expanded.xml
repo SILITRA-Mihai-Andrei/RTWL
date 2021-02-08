@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/NotificationStyle"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/dim_4dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentTop="true" />
+
+    <ImageView
+        android:id="@+id/logo"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:layout_alignParentStart="true"
+        android:layout_below="@id/title"
+        android:src="@mipmap/ic_launcher"
+        android:contentDescription="@string/app_name" />
+
+    <TextView
+        android:id="@+id/region"
+        style="@style/TextAppearance.Compat.Notification.Title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@id/logo"
+        android:layout_alignParentEnd="true"
+        android:layout_marginStart="@dimen/dim_8dp"
+        android:layout_toEndOf="@id/logo" />
+
+    <TextView
+        android:id="@+id/weather"
+        style="@style/TextAppearance.Compat.Notification.Title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/region"
+        android:layout_alignParentEnd="true"
+        android:layout_marginStart="@dimen/dim_8dp"
+        android:layout_toEndOf="@id/logo"
+        android:textStyle="bold" />
+
+    <ImageView
+        android:id="@+id/temperatureImage"
+        android:layout_width="15dp"
+        android:layout_height="15dp"
+        android:layout_alignBottom="@id/temperatureLabel"
+        android:layout_below="@id/logo"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="8dp"
+        android:src="@drawable/temperature"
+        android:contentDescription="@string/temperature_label" />
+
+    <TextView
+        android:id="@+id/temperatureLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/logo"
+        android:layout_toEndOf="@id/temperatureImage"
+        android:layout_marginStart="0dp"
+        android:layout_marginTop="8dp"
+        android:text="@string/temperature_dots"
+        style="@style/NotificationStyle"/>
+
+    <TextView
+        android:id="@+id/temperature"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/logo"
+        android:layout_marginTop="@dimen/dim_8dp"
+        android:layout_toEndOf="@id/temperatureLabel"
+        style="@style/NotificationStyle"/>
+
+    <ImageView
+        android:id="@+id/humidityImage"
+        android:layout_width="15dp"
+        android:layout_height="15dp"
+        android:layout_below="@id/logo"
+        android:layout_alignBottom="@id/humidityLabel"
+        android:layout_toStartOf="@id/humidityLabel"
+        android:layout_marginTop="8dp"
+        android:src="@drawable/humidity"
+        android:contentDescription="@string/humidity_label" />
+
+    <TextView
+        android:id="@+id/humidityLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/logo"
+        android:layout_marginTop="@dimen/dim_8dp"
+        android:layout_toStartOf="@id/humidity"
+        android:text="@string/humidity_dots"
+        style="@style/NotificationStyle"/>
+
+    <TextView
+        android:id="@+id/humidity"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/logo"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="@dimen/dim_8dp"
+        style="@style/NotificationStyle"/>
+
+    <ImageView
+        android:id="@+id/speedImage"
+        android:layout_width="15dp"
+        android:layout_height="15dp"
+        android:layout_alignBottom="@id/speedLabel"
+        android:layout_below="@id/temperatureImage"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="8dp"
+        android:src="@drawable/speed"
+        android:contentDescription="@string/speed_label" />
+
+    <TextView
+        android:id="@+id/speedLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/temperatureLabel"
+        android:layout_toEndOf="@id/speedImage"
+        android:layout_marginTop="@dimen/dim_8dp"
+        android:text="@string/speed_dots"
+        style="@style/NotificationStyle"/>
+
+    <TextView
+        android:id="@+id/speed"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/temperatureLabel"
+        android:layout_marginTop="@dimen/dim_8dp"
+        android:layout_toEndOf="@id/speedLabel"
+        style="@style/NotificationStyle"/>
+
+    <ImageView
+        android:id="@+id/directionImage"
+        android:layout_width="15dp"
+        android:layout_height="15dp"
+        android:layout_alignBottom="@id/directionLabel"
+        android:layout_below="@id/temperatureImage"
+        android:layout_toStartOf="@id/directionLabel"
+        android:layout_marginTop="8dp"
+        android:src="@drawable/direction"
+        android:contentDescription="@string/direction_label" />
+
+    <TextView
+        android:id="@+id/directionLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/temperatureLabel"
+        android:layout_marginTop="@dimen/dim_8dp"
+        android:layout_toStartOf="@id/direction"
+        android:text="@string/direction_dots"
+        style="@style/NotificationStyle"/>
+
+    <TextView
+        android:id="@+id/direction"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/temperatureLabel"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="@dimen/dim_8dp"
+        style="@style/NotificationStyle"/>
+
+    <ImageView
+        android:id="@+id/pollutionImage"
+        android:layout_width="15dp"
+        android:layout_height="15dp"
+        android:layout_alignBottom="@id/airLabel"
+        android:layout_below="@id/speedImage"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="8dp"
+        android:src="@drawable/pollution"
+        android:contentDescription="@string/pollution_label" />
+
+    <TextView
+        android:id="@+id/airLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/speedLabel"
+        android:layout_toEndOf="@id/pollutionImage"
+        android:layout_marginTop="@dimen/dim_8dp"
+        android:text="@string/pollution_dots"
+        style="@style/NotificationStyle"/>
+
+    <TextView
+        android:id="@+id/air"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/speedLabel"
+        android:layout_toEndOf="@id/airLabel"
+        android:layout_marginTop="@dimen/dim_8dp"
+        style="@style/NotificationStyle"/>
+
+</RelativeLayout>

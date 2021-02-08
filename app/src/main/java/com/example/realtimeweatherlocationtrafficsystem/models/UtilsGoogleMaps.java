@@ -2,6 +2,7 @@ package com.example.realtimeweatherlocationtrafficsystem.models;
 
 import android.content.Context;
 import android.graphics.Color;
+
 import com.example.realtimeweatherlocationtrafficsystem.R;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
@@ -11,13 +12,13 @@ import com.google.android.gms.maps.model.PolygonOptions;
 public class UtilsGoogleMaps {
 
     public static final String[] DIRECTIONS = {"N", "NE", "EN",
-                                                "E", "ES", "SE",
-                                                "S", "SW", "WS",
-                                                "WN", "NW", "N"};
+            "E", "ES", "SE",
+            "S", "SW", "WS",
+            "WN", "NW", "N"};
 
-    public static final int COLOR_REGION_RED = 1;
-    public static final int COLOR_REGION_GREEN = 2;
-    public static final int COLOR_REGION_ORANGE = 3;
+    public static final int COLOR_REGION_RED = 0;
+    public static final int COLOR_REGION_GREEN = 1;
+    public static final int COLOR_REGION_ORANGE = 2;
     public static final double REGION_AREA = 0.005;
 
     public static final int MIN_VALUE_FIRST_GRADE = 0;
@@ -56,7 +57,7 @@ public class UtilsGoogleMaps {
     }
 
     public static MarkerOptions getMarkerOptions(LatLng coordinate, String title, String description, int icon) {
-        if(coordinate==null || icon == -1) return null;
+        if (coordinate == null || icon == -1) return null;
         return new MarkerOptions()
                 .position(coordinate)
                 .title(title)
@@ -65,75 +66,111 @@ public class UtilsGoogleMaps {
                 .anchor(0.5f, 0.5f);
     }
 
-    public static int getWeatherStringIndex(int weatherCode){
-        for(int i=1; i<=4; i++){
-            if(Utils.isInRange(weatherCode, MIN_VALUE_FIRST_GRADE+(i*100), MAX_VALUE_FIRST_GRADE+(i*100))) return (i-1)+((i-1)*2); //0, 3, 6, 9
-            else if(Utils.isInRange(weatherCode, MIN_VALUE_SECOND_GRADE+(i*100), MAX_VALUE_SECOND_GRADE+(i*100))) return i+((i-1)*2); //1, 4, 7, 10
-            else if(Utils.isInRange(weatherCode, MIN_VALUE_THIRD_GRADE+(i*100), MAX_VALUE_THIRD_GRADE+(i*100))) return i+1+((i-1)*2); //2, 5, 7, 11
+    public static int getWeatherStringIndex(int weatherCode) {
+        for (int i = 1; i <= 4; i++) {
+            if (Utils.isInRange(weatherCode, MIN_VALUE_FIRST_GRADE + (i * 100), MAX_VALUE_FIRST_GRADE + (i * 100)))
+                return (i - 1) + ((i - 1) * 2); //0, 3, 6, 9
+            else if (Utils.isInRange(weatherCode, MIN_VALUE_SECOND_GRADE + (i * 100), MAX_VALUE_SECOND_GRADE + (i * 100)))
+                return i + ((i - 1) * 2); //1, 4, 7, 10
+            else if (Utils.isInRange(weatherCode, MIN_VALUE_THIRD_GRADE + (i * 100), MAX_VALUE_THIRD_GRADE + (i * 100)))
+                return i + 1 + ((i - 1) * 2); //2, 5, 7, 11
         }
         return -1;
     }
 
-    public static boolean isPointInRegion(String region, String point, double areaDistance){
-        region = Utils.getCoordinatesWithPoint(region);
-        if(region==null) return false;
-        LatLng regionCoords = getCoordinates(region, 3);
-        if(regionCoords==null) return false;
-        point = Utils.getCoordinatesWithPoint(point);
-        if (point==null) return false;
-        LatLng pointCoords = getCoordinates(point, 3);
-        if (pointCoords==null) return false;
-        return  //left-top point
-                pointCoords.latitude <= regionCoords.latitude+areaDistance
-                &&  pointCoords.longitude >= regionCoords.longitude-areaDistance
-                //right-top point
-                && pointCoords.latitude <= regionCoords.latitude+areaDistance
-                &&  pointCoords.longitude <= regionCoords.longitude+areaDistance
-                //left-top point
-                && pointCoords.latitude >= regionCoords.latitude-areaDistance
-                &&  pointCoords.longitude >= regionCoords.longitude-areaDistance
-                //left-top point
-                && pointCoords.latitude >= regionCoords.latitude-areaDistance
-                &&  pointCoords.longitude <= regionCoords.longitude+areaDistance;
+    public static int getWeatherGrade(String weather, Context context) {
+        int index = getWeatherStringIndex(weather, context);
+        if (index == -1) return -1;
+        return index / 3 ;
     }
 
-    public static String getDirection(int degrees){
-        if(degrees >= 0 && degrees <= 360){
+    public static boolean isPointInRegion(String region, String point, double areaDistance) {
+        region = Utils.getCoordinatesWithPoint(region);
+        if (region == null) return false;
+        LatLng regionCoords = getCoordinates(region, 3);
+        if (regionCoords == null) return false;
+        point = Utils.getCoordinatesWithPoint(point);
+        if (point == null) return false;
+        LatLng pointCoords = getCoordinates(point, 3);
+        if (pointCoords == null) return false;
+        return  //left-top point
+                pointCoords.latitude <= regionCoords.latitude + areaDistance
+                        && pointCoords.longitude >= regionCoords.longitude - areaDistance
+                        //right-top point
+                        && pointCoords.latitude <= regionCoords.latitude + areaDistance
+                        && pointCoords.longitude <= regionCoords.longitude + areaDistance
+                        //left-top point
+                        && pointCoords.latitude >= regionCoords.latitude - areaDistance
+                        && pointCoords.longitude >= regionCoords.longitude - areaDistance
+                        //left-top point
+                        && pointCoords.latitude >= regionCoords.latitude - areaDistance
+                        && pointCoords.longitude <= regionCoords.longitude + areaDistance;
+    }
+
+    public static String getDirection(int degrees) {
+        if (degrees >= 0 && degrees <= 360) {
             return DIRECTIONS[(degrees - 15) / 30];
         }
         return DIRECTIONS[0];
     }
 
-    public static int getWeatherStringIndex(String weather, Context context){
-        if(weather.equals(context.getString(R.string.weather_sunny))) return 0;
-        else if(weather.equals(context.getString(R.string.weather_sun))) return 1;
-        else if(weather.equals(context.getString(R.string.weather_heat))) return 2;
-        else if(weather.equals(context.getString(R.string.weather_soft_rain))) return 3;
-        else if(weather.equals(context.getString(R.string.weather_moderate_rain))) return 4;
-        else if(weather.equals(context.getString(R.string.weather_torrential_rain))) return 5;
-        else if(weather.equals(context.getString(R.string.weather_soft_wind))) return 6;
-        else if(weather.equals(context.getString(R.string.weather_moderate_wind))) return 7;
-        else if(weather.equals(context.getString(R.string.weather_torrential_wind))) return 8;
-        else if(weather.equals(context.getString(R.string.weather_soft_snow_fall))) return 9;
-        else if(weather.equals(context.getString(R.string.weather_moderate_snow_fall))) return 10;
-        else if(weather.equals(context.getString(R.string.weather_massive_snow_fall))) return 11;
+    public static int getWeatherStringIndex(String weather, Context context) {
+        if (weather.equals(context.getString(R.string.weather_sunny))) return 0;
+        else if (weather.equals(context.getString(R.string.weather_sun))) return 1;
+        else if (weather.equals(context.getString(R.string.weather_heat))) return 2;
+        else if (weather.equals(context.getString(R.string.weather_soft_rain))) return 3;
+        else if (weather.equals(context.getString(R.string.weather_moderate_rain))) return 4;
+        else if (weather.equals(context.getString(R.string.weather_torrential_rain))) return 5;
+        else if (weather.equals(context.getString(R.string.weather_soft_wind))) return 6;
+        else if (weather.equals(context.getString(R.string.weather_moderate_wind))) return 7;
+        else if (weather.equals(context.getString(R.string.weather_torrential_wind))) return 8;
+        else if (weather.equals(context.getString(R.string.weather_soft_snow_fall))) return 9;
+        else if (weather.equals(context.getString(R.string.weather_moderate_snow_fall))) return 10;
+        else if (weather.equals(context.getString(R.string.weather_massive_snow_fall))) return 11;
         else return -1;
     }
 
-    public static String getWeatherString(int weatherCode, Context context){
-        if(weatherCode==0) return context.getString(R.string.weather_sunny);
-        else if(weatherCode==1) return context.getString(R.string.weather_sun);
-        else if(weatherCode==2) return context.getString(R.string.weather_heat);
-        else if(weatherCode==3) return context.getString(R.string.weather_soft_rain);
-        else if(weatherCode==4) return context.getString(R.string.weather_moderate_rain);
-        else if(weatherCode==5) return context.getString(R.string.weather_torrential_rain);
-        else if(weatherCode==6) return context.getString(R.string.weather_soft_wind);
-        else if(weatherCode==7) return context.getString(R.string.weather_moderate_wind);
-        else if(weatherCode==8) return context.getString(R.string.weather_torrential_wind);
-        else if(weatherCode==9) return context.getString(R.string.weather_soft_snow_fall);
-        else if(weatherCode==10) return context.getString(R.string.weather_moderate_snow_fall);
-        else if(weatherCode==11) return context.getString(R.string.weather_massive_snow_fall);
+    public static String getWeatherString(int weatherCode, Context context) {
+        if (weatherCode == 0) return context.getString(R.string.weather_sunny);
+        else if (weatherCode == 1) return context.getString(R.string.weather_sun);
+        else if (weatherCode == 2) return context.getString(R.string.weather_heat);
+        else if (weatherCode == 3) return context.getString(R.string.weather_soft_rain);
+        else if (weatherCode == 4) return context.getString(R.string.weather_moderate_rain);
+        else if (weatherCode == 5) return context.getString(R.string.weather_torrential_rain);
+        else if (weatherCode == 6) return context.getString(R.string.weather_soft_wind);
+        else if (weatherCode == 7) return context.getString(R.string.weather_moderate_wind);
+        else if (weatherCode == 8) return context.getString(R.string.weather_torrential_wind);
+        else if (weatherCode == 9) return context.getString(R.string.weather_soft_snow_fall);
+        else if (weatherCode == 10) return context.getString(R.string.weather_moderate_snow_fall);
+        else if (weatherCode == 11) return context.getString(R.string.weather_massive_snow_fall);
         else return null;
+    }
+
+    public static int getWeatherIcon(int index) {
+        if (index == 0) return R.drawable.sunny;
+        else if (index == 1) return R.drawable.sun;
+        else if (index == 2) return R.drawable.heat;
+        else if (index == 3) return R.drawable.soft_rain;
+        else if (index == 4) return R.drawable.moderate_rain;
+        else if (index == 5) return R.drawable.torrential_rain;
+        else if (index == 6) return R.drawable.soft_wind;
+        else if (index == 7) return R.drawable.moderate_wind;
+        else if (index == 8) return R.drawable.torrential_wind;
+        else if (index == 9) return R.drawable.soft_snow_fall;
+        else if (index == 10) return R.drawable.moderate_snow_fall;
+        else if (index == 11) return R.drawable.massive_snow_fall;
+        else return -1;
+    }
+
+    public static int getWeatherTextColor(int grade) {
+        if (grade == 0) {
+            return Color.argb(255, 0, 255, 0);
+        } else if (grade == 1) {
+            return Color.argb(255, 255, 180, 20);
+        } else if (grade == 2) {
+            return Color.argb(255, 255, 0, 0);
+        } else
+            return Color.argb(255, 0, 0, 0);
     }
 
     public static int[] getRegionColor(int color) {

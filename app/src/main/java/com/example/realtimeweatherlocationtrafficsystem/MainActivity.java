@@ -2,11 +2,11 @@ package com.example.realtimeweatherlocationtrafficsystem;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.core.app.NotificationCompat;
-import androidx.core.app.NotificationManagerCompat;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
+import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
@@ -14,7 +14,8 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.Build;
+import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.text.Html;
 import android.text.Spanned;
@@ -29,12 +30,23 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.realtimeweatherlocationtrafficsystem.models.UtilsBluetooth;
+import com.example.realtimeweatherlocationtrafficsystem.services.BluetoothService;
+import com.example.realtimeweatherlocationtrafficsystem.services.FireBaseService;
+import com.example.realtimeweatherlocationtrafficsystem.services.LocationService;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
+
+    public static final String BT_DEVICE_SESSION_ID = "BT_DEVICE_SESSION_ID";
+    public static final String DEVELOPMENT_SESSION_ID = "DEVELOPMENT_SESSION_ID";
+
+    public static final String SERVICE_KEY = "FireBase-activities-KEY";
+    public static final String SERVICE_MESSAGE_ID_KEY = "FireBase-activities-Message-ID-KEY";
+    public static final int SERVICE_MESSAGE_ID_LOCATION = 200;
+    public static final int SERVICE_MESSAGE_ID_REGIONS = 201;
 
     private final static int BLUETOOTH_IS_OFF = 1;
     private final static int BLUETOOTH_IS_NOT_AVAILABLE = 2;
@@ -44,8 +56,10 @@ public class MainActivity extends AppCompatActivity {
     public static boolean ENABLE_BLUETOOTH_IN_PROGRESS = false;
     public static boolean DISCOVERY_BLUETOOTH_IN_PROGRESS = false;
 
-    private final static String CHANNEL_ID = "Notification_ID";
-    private final static int NOTIFICATION_ID = 1;
+    private Intent fireBaseServiceIntent;
+    private Intent locationServiceIntent;
+    private LinearLayout loading;
+    private TextView loading_message;
 
     //for bluetooth
     private BluetoothAdapter mBluetoothAdapter;
@@ -55,43 +69,90 @@ public class MainActivity extends AppCompatActivity {
     private TextView noPairedDevices;
     private TextView selectedBluetoothDevice;
     private Button goToBluetoothSettings;
+    private TextView connectedDeviceLabel;
+    private Button sendBackground;
     private ListView bluetoothDevicesListView;
     //for toolbar menu
     private LinearLayout infoLinearLayout;
-
-    NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
-            .setSmallIcon(R.drawable.alert)
-            .setContentTitle("ALERT")
-            //.setContentText("Thank you!")
-            .setStyle(new NotificationCompat.BigTextStyle()
-                    .bigText("Region 47.66 26.24 - dangerous wind!"))
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initComponents();
-        //create notification
-        createNotificationChannel();
-        //show notification
-        //
-        // showNotification(NOTIFICATION_ID);
-        registerReceiver(receiver, new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED));
+        openBackgroundService();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         initBluetoothDevicesListView();
+        // This registers messageReceiver to receive messages.
+        LocalBroadcastManager.getInstance(this).registerReceiver(messageReceiver, new IntentFilter(BluetoothService.SERVICE_KEY));
+        if (ActivityCompat.checkSelfPermission(this,
+                android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this,
+                android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 0);
+        }
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        //Unregister the ACTION_FOUND receiver.
-        unregisterReceiver(receiver);
+    protected void onPause() {
+        // Unregister since the activity is not visible
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(messageReceiver);
+        super.onPause();
     }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        openBackgroundService();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(messageReceiver);
+        closeBackgroundService();
+    }
+
+    // Handling the received Intents from BluetoothService Service
+    private BroadcastReceiver messageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // Extract data included in the Intent
+            int messageID = intent.getIntExtra(BluetoothService.SERVICE_MESSAGE_ID_KEY, -1);
+
+            if (messageID == -1) return;
+            switch (messageID) {
+                case BluetoothService.SERVICE_MESSAGE_ID_CONNECTING:
+                    loading_message.setText(R.string.connection_to_bluetooth_device);
+                    loading.setVisibility(View.VISIBLE);
+                    break;
+                case BluetoothService.SERVICE_MESSAGE_ID_CONNECTION_FAILED:
+                case BluetoothService.SERVICE_MESSAGE_ID_RW_FAILED:
+                case BluetoothService.SERVICE_MESSAGE_ID_DISCONNECTED:
+                    connectedDeviceLabel.setTextColor(Color.RED);
+                    connectedDeviceLabel.setText(R.string.not_connected);
+                    sendBackground.setTextColor(Color.GREEN);
+                    sendBackground.setText(R.string.connect);
+                    loading.setVisibility(View.GONE);
+                    break;
+                case BluetoothService.SERVICE_MESSAGE_ID_BT_OFF:
+                    setBluetoothViews(BLUETOOTH_IS_OFF);
+                    loading.setVisibility(View.GONE);
+                    break;
+                case BluetoothService.SERVICE_MESSAGE_ID_CONNECTED:
+                    connectedDeviceLabel.setTextColor(Color.GREEN);
+                    connectedDeviceLabel.setText(String.format(getString(R.string.connected_to_placeholder_device), selected_device.getName()));
+                    sendBackground.setTextColor(Color.RED);
+                    sendBackground.setText(R.string.disconnect);
+                    loading.setVisibility(View.GONE);
+                    break;
+            }
+        }
+    };
 
     private void initComponents() {
         setToolbar();
@@ -99,7 +160,12 @@ public class MainActivity extends AppCompatActivity {
         noPairedDevices = findViewById(R.id.no_paired_devices);
         selectedBluetoothDevice = findViewById(R.id.selected_bluetooth_devices);
         goToBluetoothSettings = findViewById(R.id.btn_go_to_bluetooth_settings);
+        connectedDeviceLabel = findViewById(R.id.connected_device);
+        sendBackground = findViewById(R.id.btn_send_background);
         bluetoothDevicesListView = findViewById(R.id.ls_bluetooth_devices);
+        loading = findViewById(R.id.loading);
+        loading_message = findViewById(R.id.loading_message);
+
         goToBluetoothSettings.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 final Intent intent = new Intent(Intent.ACTION_MAIN, null);
@@ -110,6 +176,10 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+        connectedDeviceLabel.setTextColor(Color.RED);
+        connectedDeviceLabel.setText(R.string.not_connected);
+        sendBackground.setTextColor(Color.GREEN);
+        sendBackground.setText(R.string.connect);
     }
 
     private void setToolbar() {
@@ -123,6 +193,9 @@ public class MainActivity extends AppCompatActivity {
                 if (item.getItemId() == R.id.settings) {
                     startActivity(new Intent(MainActivity.this, SettingsActivity.class));
                 } else if (item.getItemId() == R.id.development) {
+                    if (!FireBaseService.SERVICE_ACTIVE || !LocationService.SERVICE_ACTIVE) {
+                        openBackgroundService();
+                    }
                     startActivityAndSend(TerminalActivity.class, true);
                 } else if (item.getItemId() == R.id.info) {
                     infoLinearLayout.setVisibility(View.VISIBLE);
@@ -272,28 +345,6 @@ public class MainActivity extends AppCompatActivity {
                         + selected_device.getName() + "</b></font>.");
     }
 
-    private void createNotificationChannel() {
-        // Create the NotificationChannel, but only on API 26+ because
-        // the NotificationChannel class is new and not in the support library
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            CharSequence name = getString(R.string.channel_name);
-            String description = getString(R.string.channel_description);
-            int importance = NotificationManager.IMPORTANCE_DEFAULT;
-            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
-            channel.setDescription(description);
-            // Register the channel with the system; you can't change the importance
-            // or other notification behaviors after this
-            NotificationManager notificationManager = getSystemService(NotificationManager.class);
-            assert notificationManager != null;
-            notificationManager.createNotificationChannel(channel);
-        }
-    }
-
-    private void showNotification(int notificationID){
-        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
-        notificationManager.notify(notificationID, builder.build());
-    }
-
     @Override
     public void onBackPressed() {
         if (infoLinearLayout.getVisibility() == View.VISIBLE) {
@@ -304,25 +355,76 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public void openBluetoothService() {
+        Intent bluetoothServiceIntent = new Intent(this, BluetoothService.class);
+
+        if (BluetoothService.SERVICE_ACTIVE) {
+            stopService(bluetoothServiceIntent);
+        } else {
+            if (selected_device == null) {
+                Toast.makeText(this, R.string.please_select_one_device, Toast.LENGTH_SHORT).show();
+                return;
+            }
+            bluetoothServiceIntent.putExtra(MainActivity.BT_DEVICE_SESSION_ID, selected_device);
+            ContextCompat.startForegroundService(this, bluetoothServiceIntent);
+        }
+    }
+
+    public void openBluetoothService(View view) {
+        openBluetoothService();
+    }
+
+    public void openBackgroundService(){
+        fireBaseServiceIntent = new Intent(this, FireBaseService.class);
+        locationServiceIntent = new Intent(this, LocationService.class);
+        this.startService(fireBaseServiceIntent);
+        this.startService(locationServiceIntent);
+    }
+
+    public void closeBackgroundService(){
+        if (FireBaseService.SERVICE_ACTIVE) {
+            stopService(fireBaseServiceIntent);
+        }
+        if (LocationService.SERVICE_ACTIVE) {
+            stopService(locationServiceIntent);
+        }
+    }
+
     public void goToGoogleMaps(View view) {
+        if (!BluetoothService.SERVICE_ACTIVE && !LocationService.SERVICE_ACTIVE) {
+            Toast.makeText(this, getString(R.string.gps_module_gps_phone_not_working), Toast.LENGTH_LONG).show();
+            return;
+        }
         startActivityAndSend(GoogleMapsActivity.class, false);
     }
 
     public void goToTerminal(View view) {
-        /*Intent intent1 = new Intent(this, TesteActivity.class);
-        intent1.putExtra("BT_DEVICE_SESSION_ID", selected_device);
-        startActivity(intent1);*/
         if (selected_device == null) {
             Toast.makeText(this, R.string.please_select_one_device, Toast.LENGTH_SHORT).show();
+            return;
+        } else if (!BluetoothService.SERVICE_ACTIVE) {
+            Toast.makeText(this, getString(R.string.need_to_connect), Toast.LENGTH_SHORT).show();
             return;
         }
         startActivityAndSend(TerminalActivity.class, false);
     }
 
+    private void end() {
+        try {
+            //Unregister the ACTION_FOUND receiver.
+            LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver);
+            // Unregister since the activity is not visible
+            LocalBroadcastManager.getInstance(this).unregisterReceiver(messageReceiver);
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+        }
+    }
+
     public void startActivityAndSend(Class<?> destination, boolean development) {
+        end();
         Intent intent = new Intent(this, destination);
-        intent.putExtra("BT_DEVICE_SESSION_ID", selected_device);
-        intent.putExtra("DEVELOPMENT_SESSION_ID", development);
+        intent.putExtra(BT_DEVICE_SESSION_ID, selected_device);
+        intent.putExtra(DEVELOPMENT_SESSION_ID, development);
         startActivity(intent);
     }
 }

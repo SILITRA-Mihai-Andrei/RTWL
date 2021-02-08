@@ -11,6 +11,7 @@ import android.widget.EditText;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Arrays;
 
 
 public class BluetoothSendReceive extends Thread {
@@ -64,20 +65,37 @@ public class BluetoothSendReceive extends Thread {
         byte[] buffer = new byte[UtilsBluetooth.BLUETOOTH_BUFFER_SIZE];
         int bytes;
 
+        if (socket.isConnected()) {
+            try {
+                //noinspection ResultOfMethodCallIgnored
+                inputStream.read(buffer);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        Arrays.fill(buffer, (byte) 0);
         while (true) try {
             if (!socket.isConnected()) {
                 sendHandlerMessage(UtilsBluetooth.STATE_READING_WRITING_FAILED);
                 return;
             }
-            if (inputStream.available() > 0) {
+
+            int stream_size = inputStream.available();
+            if (stream_size > 0) {
+                Arrays.fill(buffer, (byte) 0);
                 bytes = inputStream.read(buffer);
                 if (bytes == -1) {
                     sendHandlerMessage(UtilsBluetooth.STATE_READING_WRITING_FAILED);
                     return;
                 }
-                handler.obtainMessage(UtilsBluetooth.STATE_MESSAGE_RECEIVED, bytes, -1, buffer).sendToTarget();
+                if (Utils.containsByte(buffer, (byte) UtilsBluetooth.BLUETOOTH_RECEIVE_DELIMITER.charAt(0))) {
+                    if (stream_size <= UtilsBluetooth.BLUETOOTH_ONE_RECORD_SIZE) {
+                        handler.obtainMessage(UtilsBluetooth.STATE_MESSAGE_RECEIVED, bytes, -1, buffer).sendToTarget();
+                    }
+                }
             } else {
-                SystemClock.sleep(250);
+                SystemClock.sleep(1000);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -92,7 +110,6 @@ public class BluetoothSendReceive extends Thread {
             e.printStackTrace();
             sendHandlerMessage(UtilsBluetooth.STATE_READING_WRITING_FAILED);
         }
-
     }
 
     private void sendHandlerMessage(int msg) {

@@ -2,7 +2,9 @@ package com.example.realtimeweatherlocationtrafficsystem.models;
 
 import androidx.annotation.NonNull;
 
-public class Data {
+import java.io.Serializable;
+
+public class Data implements Serializable {
     private int code;
     private int temperature;
     private int humidity;
@@ -17,40 +19,40 @@ public class Data {
         this.air = air;
     }
 
-    public Data(Data data) { //need this for firebase assignation
-        this.code = data.getCode();
-        this.temperature = data.getTemperature();
-        this.humidity = data.getHumidity();
-        this.air = data.getAir();
-    }
-
     @NonNull
     public String toString(){
         return code + " " + temperature + " " + humidity + " " + air;
-    }
-
-    public String toStringFormatDataBase(){
-        String tabs = "\n\t\t\t\t\t\t";
-        return tabs + "air: " + air + tabs + "code: " + code
-                + tabs + "humidity: " + humidity + tabs + "temperature: " + temperature;
     }
 
     public int getCode() {
         return code;
     }
 
+    public void setCode(int code) {
+        this.code = code;
+    }
 
     public int getTemperature() {
         return temperature;
     }
 
+    public void setTemperature(int temperature) {
+        this.temperature = temperature;
+    }
 
     public int getHumidity() {
         return humidity;
+    }
+
+    public void setHumidity(int humidity) {
+        this.humidity = humidity;
     }
 
     public int getAir() {
         return air;
     }
 
+    public void setAir(int air) {
+        this.air = air;
+    }
 }

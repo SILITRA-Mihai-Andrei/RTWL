@@ -7,6 +7,42 @@
     android:background="@android:color/black"
     tools:context=".MainActivity">
 
+    <LinearLayout
+        android:id="@+id/loading"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/black"
+        android:elevation="@dimen/dim_16dp"
+        android:visibility="gone"
+        android:orientation="vertical">
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/loading"
+            android:textAlignment="center"
+            android:textSize="@dimen/size_24sp"
+            android:layout_marginTop="@dimen/dim_128dp"/>
+        <TextView
+            android:id="@+id/loading_message"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/loading_points"
+            android:textAlignment="center"
+            android:textSize="@dimen/size_16sp"
+            android:layout_marginTop="@dimen/dim_16dp"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/please_wait"
+            android:textAlignment="center"
+            android:textSize="@dimen/size_16sp"
+            android:layout_marginBottom="@dimen/dim_16dp"/>
+        <ProgressBar
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            style="?android:attr/progress"/>
+    </LinearLayout>
+
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
@@ -82,12 +118,37 @@
         app:layout_constraintTop_toBottomOf="@+id/selected_bluetooth_devices"
         app:layout_constraintWidth_percent="0.8" />
 
+    <TextView
+        android:id="@+id/connected_device"
+        android:layout_width="@dimen/dim_0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/dim_8dp"
+        android:textColor="@android:color/white"
+        android:textAlignment="center"
+        android:textStyle="bold"
+        android:textSize="@dimen/size_16sp"
+        app:layout_constraintBottom_toTopOf="@id/btn_send_background"
+        app:layout_constraintEnd_toEndOf="@+id/ls_bluetooth_devices"
+        app:layout_constraintStart_toStartOf="@+id/ls_bluetooth_devices" />
+
+    <Button
+        android:id="@+id/btn_send_background"
+        android:layout_width="@dimen/dim_0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/dim_16dp"
+        android:background="@drawable/btn_rounded_8dp_dark_gray"
+        android:onClick="openBluetoothService"
+        android:textColor="@android:color/white"
+        app:layout_constraintBottom_toTopOf="@id/btn_terminal"
+        app:layout_constraintEnd_toEndOf="@+id/ls_bluetooth_devices"
+        app:layout_constraintStart_toStartOf="@+id/ls_bluetooth_devices" />
+
     <Button
         android:id="@+id/btn_terminal"
         android:layout_width="@dimen/dim_0dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="@dimen/dim_16dp"
-        android:background="@drawable/btn_rounded_8dp_dark_gray"
+        android:background="@drawable/btn_rounded_8dp_yellow"
         android:onClick="goToTerminal"
         android:text="@string/terminal"
         android:textColor="@android:color/white"

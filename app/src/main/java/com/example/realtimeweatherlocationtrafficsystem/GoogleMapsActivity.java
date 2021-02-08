@@ -1,85 +1,61 @@
 package com.example.realtimeweatherlocationtrafficsystem;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentActivity;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
-import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothSocket;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
+
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
+
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
-import android.provider.Settings;
+
 import android.view.View;
-import android.widget.Button;
+
 import android.widget.ImageView;
-import android.widget.LinearLayout;
+
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.realtimeweatherlocationtrafficsystem.models.BluetoothClientClass;
-import com.example.realtimeweatherlocationtrafficsystem.models.Data;
-import com.example.realtimeweatherlocationtrafficsystem.models.FireBaseManager;
 import com.example.realtimeweatherlocationtrafficsystem.models.Region;
 import com.example.realtimeweatherlocationtrafficsystem.models.Utils;
 import com.example.realtimeweatherlocationtrafficsystem.models.UtilsBluetooth;
+
 import com.example.realtimeweatherlocationtrafficsystem.models.UtilsGoogleMaps;
 import com.example.realtimeweatherlocationtrafficsystem.models.Weather;
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationServices;
+import com.example.realtimeweatherlocationtrafficsystem.services.BluetoothService;
+import com.example.realtimeweatherlocationtrafficsystem.services.FireBaseService;
+
+import com.example.realtimeweatherlocationtrafficsystem.services.LocationService;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
-public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCallback, FireBaseManager.onFireBaseDataNew
-        , GoogleMap.OnMarkerClickListener, GoogleMap.OnCameraIdleListener, LocationListener {
-
-    private final int REQUEST_PERMISSION_CODE = 1;
-    private final int MAX_FAILURES_GPS = 2;
+public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener, GoogleMap.OnCameraIdleListener {
 
     private SharedPreferences googleMapsPreferences;
     private GoogleMap map;
     private Location currentLocation;
-    private FusedLocationProviderClient fusedLocationProviderClient;
-    private boolean sendDataInBackground;
     private boolean locationTracked = false;
+    private List<Region> regions = new ArrayList<>();
     private List<Integer> markerIcons;
-    private List<Region> regions;
-    private BluetoothDevice device;
-    private BluetoothSocket socket;
-    private String lastUnfinishedMessage = "";
-    private FireBaseManager fireBaseManager;
-    private LinearLayout loading;
-    private TextView loading_message;
     private TextView received;
     private ImageView regionWeatherIcon;
     private ImageView locationTrackIcon;
-    private Button send;
     private int counterFailureGPS = 0;
 
     @Override
@@ -88,31 +64,30 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
         setContentView(R.layout.activity_google_maps);
         initComponents();
         googleMapsPreferences = getSharedPreferences(getString(R.string.preference_google_maps_key), MODE_PRIVATE);
-        initDialog();
-        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
-        fetchLastLocation();
         initMap();
-        fireBaseManager = new FireBaseManager(getBaseContext(), getResources(), this);
     }
 
     @Override
     protected void onPause() {
+        // Unregister since the activity is not visible
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(messageReceiver);
         super.onPause();
-        goToMainActivity();
     }
 
     @Override
-    protected void onStop() {
-        super.onStop();
-        goToMainActivity();
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (sendDataInBackground) {
-            unregisterReceiver(receiverState);
-            unregisterReceiver(receiverConnection);
+    protected void onResume() {
+        super.onResume();
+        // This registers messageReceiver to receive messages.
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(BluetoothService.SERVICE_KEY);
+        intentFilter.addAction(MainActivity.SERVICE_KEY);
+        LocalBroadcastManager.getInstance(this).registerReceiver(messageReceiver, intentFilter);
+        if (FireBaseService.regions != null) {
+            onFirebaseDataNew(FireBaseService.regions);
+        }
+        currentLocation = LocationService.currentLocation;
+        if (BluetoothService.SERVICE_ACTIVE) {
+            received.setVisibility(View.VISIBLE);
         }
     }
 
@@ -126,11 +101,13 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
+        if (!FireBaseService.SERVICE_ACTIVE) {
+            goToMainActivity();
+        }
         map = googleMap;
         if (map == null) goToMainActivity();
         moveMapCamera(map.getCameraPosition().target.latitude, map.getCameraPosition().target.longitude, 15f);
         ImageView mapType = findViewById(R.id.mapType);
-        regions = new ArrayList<>();
         map.setOnCameraIdleListener(this);
         if (ActivityCompat.checkSelfPermission(this,
                 android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
@@ -162,7 +139,7 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
                 @SuppressLint("InflateParams") final View window = getLayoutInflater().inflate(R.layout.item_map_windows_info, null);
                 Region region;
                 try {
-                    region = fireBaseManager.getRegion(marker.getTitle());
+                    region = FireBaseService.getRegion(marker.getTitle());
                     if (region == null)
                         return null;
                 } catch (IndexOutOfBoundsException e) {
@@ -201,10 +178,67 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
                 marker.hideInfoWindow();
             }
         });
+        setLocationTrack(true);
     }
 
-    @Override
-    public void onDataNewFireBase(List<Region> regionsReceived) {
+    // Handling the received Intents from BluetoothService Service
+    private BroadcastReceiver messageReceiver = new BroadcastReceiver() {
+        @SuppressLint("SetTextI18n")
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            int messageID = intent.getIntExtra(MainActivity.SERVICE_MESSAGE_ID_KEY, -1);
+            if (messageID != -1) {
+                if (messageID == MainActivity.SERVICE_MESSAGE_ID_REGIONS) {
+                    onFirebaseDataNew(FireBaseService.regions);
+                } else if (messageID == MainActivity.SERVICE_MESSAGE_ID_LOCATION) {
+                    currentLocation = LocationService.currentLocation;
+                }
+            }
+
+            // Extract data included in the Intent
+            messageID = intent.getIntExtra(BluetoothService.SERVICE_MESSAGE_ID_KEY, -1);
+            String message = intent.getStringExtra(BluetoothService.SERVICE_MESSAGE_KEY);
+
+            if (messageID == -1) return;
+            switch (messageID) {
+                case BluetoothService.SERVICE_MESSAGE_ID_BT_OFF:
+                case BluetoothService.SERVICE_MESSAGE_ID_CONNECTION_FAILED:
+                case BluetoothService.SERVICE_MESSAGE_ID_DISCONNECTED:
+                case BluetoothService.SERVICE_MESSAGE_ID_RW_FAILED:
+                    Toast.makeText(context, getString(R.string.bluetooth_device_offline_no_send), Toast.LENGTH_SHORT).show();
+                    received.setVisibility(View.GONE);
+                    end();
+                    break;
+                case BluetoothService.SERVICE_MESSAGE_ID_RECEIVED:
+                    if (message == null) break;
+                    if (message.isEmpty()) break;
+                    if (message.split(UtilsBluetooth.MESSAGE_TIME_END)[1].length() <= 3)
+                        break;
+
+                    String[] splited = message.split("@");
+
+                    /* Check again if the coordinates are valid */
+                    if ((splited[1].contains(UtilsBluetooth.INVALID_GPS_COORDINATES) || splited[1].contains(UtilsBluetooth.INVALID_GPS_COORDINATES1))
+                            && currentLocation == null) {
+                        /* The coordinates are still invalid - the location of this phone is not working */
+                        received.setText(R.string.gps_module_gps_phone_not_working);
+                        if (counterFailureGPS++ >= 2 && !Utils.isLocationEnabled(getContentResolver())) {
+                            currentLocation = null;
+                            counterFailureGPS = 0;
+                        }
+                        break;
+                    }
+                    if (locationTracked) {
+                        if (currentLocation == null) break;
+                        moveMapCamera(currentLocation.getLatitude(), currentLocation.getLongitude(), map.getCameraPosition().zoom);
+                    }
+                    break;
+            }
+        }
+    };
+
+    public void onFirebaseDataNew(List<Region> regionsReceived) {
+        if (regionsReceived == null) return;
         if (map != null) {
             map.clear();
             regions.clear();
@@ -218,8 +252,10 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
                                 region.getWeather().getWeather(), getBaseContext()))));
                 int color = UtilsGoogleMaps.COLOR_REGION_GREEN;
                 int index = UtilsGoogleMaps.getWeatherStringIndex(region.getWeather().getWeather(), this);
-                if(index == 1 || index == 4 || index == 7) color = UtilsGoogleMaps.COLOR_REGION_ORANGE;
-                else if(index == 2 || index == 5 || index == 8) color = UtilsGoogleMaps.COLOR_REGION_RED;
+                if (index == 1 || index == 4 || index == 7)
+                    color = UtilsGoogleMaps.COLOR_REGION_ORANGE;
+                else if (index == 2 || index == 5 || index == 8)
+                    color = UtilsGoogleMaps.COLOR_REGION_RED;
                 map.addPolygon(UtilsGoogleMaps.getPolygonOptions(location, UtilsGoogleMaps.REGION_AREA, color));
             }
         }
@@ -228,150 +264,6 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
     @Override
     public boolean onMarkerClick(Marker marker) {
         return false;
-    }
-
-    DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
-        @Override
-        public void onClick(DialogInterface dialog, int which) {
-            switch (which) {
-                case DialogInterface.BUTTON_POSITIVE:
-                    sendDataInBackground = true;
-                    loading.setVisibility(View.VISIBLE);
-                    registerReceiver(receiverState, new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED));
-                    registerReceiver(receiverConnection, new IntentFilter(BluetoothDevice.ACTION_ACL_DISCONNECTED));
-                    initSendDataInBackgroundComponents();
-                    break;
-
-                case DialogInterface.BUTTON_NEGATIVE:
-                    sendDataInBackground = false;
-                    loading.setVisibility(View.GONE);
-                    break;
-            }
-        }
-    };
-
-    Handler handler = new android.os.Handler(new android.os.Handler.Callback() {
-        @SuppressLint("DefaultLocale")
-        @Override
-        public boolean handleMessage(@NonNull Message msg) {
-            switch (msg.what) {
-                case UtilsBluetooth.STATE_CONNECTING:
-                    loading_message.setText(R.string.connection_to_bluetooth_device);
-                    if (loading.getVisibility() == View.GONE) {
-                        loading.setVisibility(View.VISIBLE);
-                    }
-                    break;
-                case UtilsBluetooth.STATE_CONNECTED:
-                    //send command to Arduino to enable GPS get coordinates every second feature
-                    send.setText(UtilsBluetooth.COMMAND_GET_GPS_COORDINATES_INTEGER);
-                    send.performClick();
-                    send.setText("");
-                    Toast.makeText(getBaseContext(), String.format(getString(R.string.connected_to_placeholder_device), device.getName()), Toast.LENGTH_SHORT).show();
-                    loading.setVisibility(View.GONE);
-                    break;
-                case UtilsBluetooth.STATE_CONNECTION_FAILED:
-                    Toast.makeText(GoogleMapsActivity.this, getString(R.string.connection_failed), Toast.LENGTH_SHORT).show();
-                    finish();
-                    break;
-                case UtilsBluetooth.STATE_READING_WRITING_FAILED:
-                    Toast.makeText(GoogleMapsActivity.this,
-                            String.format(getString(R.string.disconected_from_placeholder_device), device.getName()), Toast.LENGTH_SHORT).show();
-                    if (socket.isConnected()) goToMainActivity();
-                    else {
-                        finish();
-                    }
-                    break;
-                case UtilsBluetooth.STATE_MESSAGE_RECEIVED:
-                    byte[] readBuffer = (byte[]) msg.obj;
-                    if (readBuffer == null) break;
-                    String message = new String(readBuffer, 0, msg.arg1);
-                    if (message.isEmpty()) break;
-                    if (isFinalMessage(message)) {
-                        String response = UtilsBluetooth.getReceivedMessage( lastUnfinishedMessage + message, getBaseContext());
-                        if (!(response == null || response.isEmpty() || response.length() <= 11)) {
-                            String[] splited = response.split("@");
-                            if (splited.length == 2) {
-                                /* Check if the coordinates received are valid */
-                                if(splited[1].contains(UtilsBluetooth.INVALID_GPS_COORDINATES)){
-                                    if(counterFailureGPS++ >= MAX_FAILURES_GPS && !Utils.isLocationEnabled(getContentResolver())){
-                                        currentLocation = null;
-                                        counterFailureGPS = 0;
-                                    }
-                                    /* Check if the location of this phone is updated */
-                                    if(currentLocation != null){
-                                        /* Use the coordinates of this phone */
-                                        splited[1] = splited[1].replace(UtilsBluetooth.INVALID_GPS_COORDINATES,
-                                                currentLocation.getLatitude() + " " + currentLocation.getLongitude());
-                                    }
-                                }
-                                else if(locationTracked){
-                                    String[] data = splited[1].split(" ");
-                                    double lat = currentLocation==null ? Float.parseFloat(data[0]) : currentLocation.getLatitude();
-                                    double lon = currentLocation==null ? Float.parseFloat(data[1]) : currentLocation.getLongitude();
-                                    moveMapCamera(lat, lon, map.getCameraPosition().zoom);
-                                }
-
-                                String[] d = splited[1].split(" ");
-
-                                /* Check again if the coordinates are valid */
-                                if(splited[1].contains(UtilsBluetooth.INVALID_GPS_COORDINATES) && currentLocation == null){
-                                    /* The coordinates are still invalid - the location of this phone is not working */
-                                    received.setText(R.string.gps_module_gps_phone_not_working);
-                                    break;
-                                }
-
-                                if(currentLocation != null) {
-                                    splited[0] = splited[0].replace(UtilsBluetooth.MUST_GET_LOCATION, "Region: " +
-                                            String.format("%.2f", currentLocation.getLatitude()) + " " + String.format("%.2f", currentLocation.getLongitude()));
-                                }
-                                else{
-                                    splited[0] = splited[0].replace(UtilsBluetooth.MUST_GET_LOCATION, "");
-                                }
-                                String displyData = splited[0].split(UtilsBluetooth.MESSAGE_TIME_END)[1];
-                                displyData = displyData.replace("Speed: unknown", "Speed: " + (int) currentLocation.getSpeed());
-                                displyData = displyData.replace("Direction: unknown", "Direction: " + UtilsGoogleMaps.getDirection((int) currentLocation.getBearing()));
-                                received.setText(displyData);
-
-                                int validity = Utils.isDataValid(d[0] + " " + d[1], d[2], d[3], d[4], d[5].replace(UtilsBluetooth.BLUETOOTH_RECEIVE_DELIMITER, ""));
-                                if (validity == Utils.VALID)
-                                    fireBaseManager.setValue(
-                                            Utils.getCoordinatesForDataBase(d[0] + " " + d[1], 2), Utils.getCurrentDateAndTime(),
-                                            new Data(Utils.getInt(d[2]),
-                                                    Utils.getInt(d[3]),
-                                                    Utils.getInt(d[4]),
-                                                    Utils.getInt(d[5].replace(UtilsBluetooth.BLUETOOTH_RECEIVE_DELIMITER, ""))));
-                                else
-                                    Toast.makeText(GoogleMapsActivity.this, Utils.getInvalidMessage(validity, getBaseContext()), Toast.LENGTH_SHORT).show();
-                            }
-                        }
-                        lastUnfinishedMessage = "";
-                    }
-                    break;
-            }
-            return true;
-        }
-    });
-
-    private void fetchLastLocation() {
-        if (ActivityCompat.checkSelfPermission(this,
-                android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission(this,
-                android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_PERMISSION_CODE);
-            return;
-        }
-        Task<Location> task = fusedLocationProviderClient.getLastLocation();
-        if (task == null) return;
-        setLocationTrack(true);
-        task.addOnSuccessListener(new OnSuccessListener<Location>() {
-            @Override
-            public void onSuccess(Location location) {
-                if (location != null && locationTracked) {
-                    currentLocation = location;
-                    moveMapCamera(currentLocation.getLatitude(), currentLocation.getLongitude(), map.getCameraPosition().zoom);
-                }
-            }
-        });
     }
 
     @Override
@@ -390,103 +282,6 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
             }
         }
         regionWeatherIcon.setImageDrawable(null);
-    }
-
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if (requestCode == REQUEST_PERMISSION_CODE) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                fetchLastLocation();
-            }
-        }
-    }
-
-    private boolean isFinalMessage(String string) {
-        if (string.contains(UtilsBluetooth.BLUETOOTH_RECEIVE_DELIMITER)) {
-            return true;
-        }
-        lastUnfinishedMessage = string;
-        return false;
-    }
-
-    private void initDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(GoogleMapsActivity.this);
-        builder.setMessage(R.string.need_to_connect_to_send)
-                .setPositiveButton("Yes", dialogClickListener)
-                .setNegativeButton("No", dialogClickListener);
-        builder.setTitle(R.string.send_data_background);
-        builder.setCancelable(false);
-        builder.show();
-    }
-
-    private void initSendDataInBackgroundComponents() {
-        device = Objects.requireNonNull(getIntent().getExtras()).getParcelable("BT_DEVICE_SESSION_ID");
-        if (device == null || device.getName().equals("")) {
-            Toast.makeText(GoogleMapsActivity.this, getString(R.string.please_select_one_device), Toast.LENGTH_SHORT).show();
-            startActivity(new Intent(GoogleMapsActivity.this, MainActivity.class));
-            return;
-        }
-        try {
-            socket = device.createRfcommSocketToServiceRecord(UtilsBluetooth.MY_UUID);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        BluetoothClientClass clientClass = new BluetoothClientClass(socket, bluetoothAdapter, handler, send, null);
-        clientClass.start();
-        received.setVisibility(View.VISIBLE);
-    }
-
-    private final BroadcastReceiver receiverState = new BroadcastReceiver() {
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if (action == null) return;
-            if (action.equals(BluetoothAdapter.ACTION_STATE_CHANGED)) {
-                final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR);
-                if (state == BluetoothAdapter.STATE_OFF || state == BluetoothAdapter.STATE_TURNING_OFF) {
-                    goToMainActivity();
-                }
-            }
-        }
-    };
-
-    private final BroadcastReceiver receiverConnection = new BroadcastReceiver() {
-        @SuppressLint("ShowToast")
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if (action == null) return;
-            if (action.equals(BluetoothDevice.ACTION_ACL_DISCONNECT_REQUESTED) || action.equals(BluetoothDevice.ACTION_ACL_DISCONNECTED)) {
-                Toast toast = new Toast(getBaseContext());
-                try {
-                    toast.getView().isShown();    // true if visible
-                } catch (Exception e) {         // invisible if exception
-                    toast = Toast.makeText(context,
-                            String.format(getString(R.string.disconected_from_placeholder_device),
-                                    device.getName()), Toast.LENGTH_SHORT);
-                }
-                toast.show();  //finally display it
-                goToMainActivity();
-            }
-        }
-    };
-
-    @Override
-    public void onLocationChanged(Location location) {
-        Toast.makeText(this, location.getLatitude() + " " + location.getLongitude(), Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    public void onStatusChanged(String provider, int status, Bundle extras) {
-        Toast.makeText(this, status + " = OnStatusChanged", Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    public void onProviderEnabled(String provider) {
-        setLocationTrack(true);
-    }
-
-    @Override
-    public void onProviderDisabled(String provider) {
-        setLocationTrack(false);
     }
 
     private void setLocationTrack(boolean tracked) {
@@ -513,20 +308,19 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
 
     @Override
     public void onBackPressed() {
-        if (sendDataInBackground) {
-            goToMainActivity();
-        } else {
-            super.onBackPressed();
-        }
+        goToMainActivity();
+        super.onBackPressed();
+    }
+
+    private void end() {
+        // Unregister
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(messageReceiver);
     }
 
     private void initComponents() {
-        loading = findViewById(R.id.loading);
         locationTrackIcon = findViewById(R.id.location);
-        loading_message = findViewById(R.id.loading_message);
         received = findViewById(R.id.received);
         regionWeatherIcon = findViewById(R.id.regionWeatherIcon);
-        send = findViewById(R.id.send);
     }
 
     private void initMarkerIcons() {
@@ -546,15 +340,7 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
     }
 
     public void goToMainActivity() {
-        try {
-            if (socket != null) {
-                loading_message.setText(R.string.disconnection_to_bluetooth_device);
-                loading.setVisibility(View.VISIBLE);
-                socket.close();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-            finish();
-        }
+        end();
+        finish();
     }
 }

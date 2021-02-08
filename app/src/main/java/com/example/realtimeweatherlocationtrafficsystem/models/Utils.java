@@ -6,12 +6,11 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.Handler;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.example.realtimeweatherlocationtrafficsystem.GoogleMapsActivity;
 import com.example.realtimeweatherlocationtrafficsystem.R;
 
 public class Utils {
@@ -105,7 +104,7 @@ public class Utils {
         return result;
     }
 
-    public static String getCoordinatesForDataBase(String coordinates, int decimals){
+    public static String getCoordinatesFormat(String coordinates, int decimals, String sep){
         if(isCoordinatesValid(coordinates)){
             String[] result = getCoordinatesSplited(coordinates);
             if(result==null) return null;
@@ -113,9 +112,13 @@ public class Utils {
             String result3 = result[3];
             if(result1.length()>=decimals) result1 = result1.substring(0, decimals);
             if(result3.length()>=decimals) result3 = result3.substring(0, decimals);
-            return result[0] + " " + result1 + " " + result[2] + " " + result3;
+            return result[0] + sep + result1 + " " + result[2] + sep + result3;
         }
         return null;
+    }
+
+    public static String getCoordinatesForDataBase(String coordinates, int decimals){
+        return getCoordinatesFormat(coordinates, decimals, " ");
     }
 
     public static String getCoordinatesWithPoint(String coordinates){
@@ -175,6 +178,16 @@ public class Utils {
         else if(color==Utils.COLOR_GREEN) return Color.argb(255, 0, 255, 0);
         else if(color==Utils.COLOR_BLUE) return Color.argb(255, 0, 0, 255);
         return -1;
+    }
+
+    public static boolean containsByte(byte[] buffer, byte toFind){
+        for (byte iterator : buffer){
+            if (iterator == toFind){
+                return true;
+            }
+            if(iterator == 0) break;
+        }
+        return false;
     }
 
     public static boolean isInRange(int number, int min, int max){

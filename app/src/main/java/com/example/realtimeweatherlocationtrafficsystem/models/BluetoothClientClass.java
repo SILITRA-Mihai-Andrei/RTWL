@@ -10,6 +10,7 @@ import java.io.IOException;
 
 public class BluetoothClientClass extends Thread{
 
+    BluetoothSendReceive sendReceive;
     private BluetoothSocket socket;
     private BluetoothAdapter adapter;
     private Handler handler;
@@ -38,7 +39,7 @@ public class BluetoothClientClass extends Thread{
                 sendHandlerMessage(UtilsBluetooth.STATE_CONNECTION_FAILED);
                 return;
             }
-            BluetoothSendReceive sendReceive = new BluetoothSendReceive(socket, handler, send, message);
+            sendReceive = new BluetoothSendReceive(socket, handler, send, message);
             sendReceive.start();
         } catch (IOException e) {
             e.printStackTrace();
@@ -51,4 +52,9 @@ public class BluetoothClientClass extends Thread{
         message.what = msg;
         handler.sendMessage(message);
     }
+
+    public BluetoothSendReceive getBluetoothSendReceive(){
+        return sendReceive;
+    }
+    public BluetoothSocket getSocket(){return socket;}
 }
