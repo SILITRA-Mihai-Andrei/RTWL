@@ -42,6 +42,7 @@ import com.example.realtimeweatherlocationtrafficsystem.models.UtilsBluetooth;
 import com.example.realtimeweatherlocationtrafficsystem.models.UtilsGoogleMaps;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 
 @SuppressLint("ParcelCreator")
@@ -72,6 +73,8 @@ public class BluetoothService extends Service implements Parcelable, FireBaseMan
     public static final String CHANNEL_REPLY_ID = "ForegroundServiceReplyChannel";
     public static final int NOTIFICATION_ID = 1;
     public static final int NOTIFICATION_REPLY_ID = 2;
+    public static final int NOTIFICATION_TIME_REPLY_UPDATE = 30000;
+    public static final int NOTIFICATION_TIME_REPLY_TIMEOUT = NOTIFICATION_TIME_REPLY_UPDATE / 2;
     public static final String NOTIFICATION_REPLY_KEY = "KEY_TEXT_REPLY";
     public static final String NOTIFICATION_TITLE = "RTWL Traffic System";
 
@@ -83,6 +86,8 @@ public class BluetoothService extends Service implements Parcelable, FireBaseMan
     private RemoteViews notificationLayout;
     private RemoteViews notificationLayoutExpanded;
     private NotificationManager notificationManager;
+    private String lastReply = "";
+    private Date lastReplyCount = null;
 
     @SuppressLint("StaticFieldLeak")
     static BluetoothClientClass clientClass;
@@ -345,10 +350,14 @@ public class BluetoothService extends Service implements Parcelable, FireBaseMan
             }
             notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build());
         } else {
-            notificationReplyBuilder.setContentTitle(getString(R.string.reply_from) + " " + device.getName());
-            notificationReplyBuilder.setStyle(new NotificationCompat.BigTextStyle().bigText(data));
-            notificationReplyBuilder.setTimeoutAfter(5000);
-            notificationManager.notify(NOTIFICATION_REPLY_ID, notificationReplyBuilder.build());
+            if (!lastReply.equals(data) || (lastReplyCount != null && Utils.getTimeDifference(lastReplyCount) > NOTIFICATION_TIME_REPLY_UPDATE)) {
+                lastReply = data;
+                lastReplyCount = new java.util.Date();
+                notificationReplyBuilder.setContentTitle(getString(R.string.reply_from) + " " + device.getName());
+                notificationReplyBuilder.setStyle(new NotificationCompat.BigTextStyle().bigText(data));
+                notificationReplyBuilder.setTimeoutAfter(NOTIFICATION_TIME_REPLY_TIMEOUT);
+                notificationManager.notify(NOTIFICATION_REPLY_ID, notificationReplyBuilder.build());
+            }
         }
     }
 

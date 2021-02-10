@@ -13,6 +13,8 @@ import android.widget.TextView;
 
 import com.example.realtimeweatherlocationtrafficsystem.R;
 
+import java.util.Date;
+
 public class Utils {
 
     public final static int VALID = 0;
@@ -200,5 +202,9 @@ public class Utils {
 
     public static String getTime() {
         return android.text.format.DateFormat.format("kk:mm:ss", new java.util.Date()).toString();
+    }
+
+    public static long getTimeDifference(Date date){
+        return new java.util.Date().getTime() - date.getTime();
     }
 }
