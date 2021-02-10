@@ -12,7 +12,8 @@
         android:layout_marginBottom="@dimen/dim_4dp"
         android:layout_alignParentStart="true"
         android:layout_alignParentEnd="true"
-        android:layout_alignParentTop="true" />
+        android:layout_alignParentTop="true"
+        android:textColor="@color/color_gray"/>
 
     <ImageView
         android:id="@+id/logo"

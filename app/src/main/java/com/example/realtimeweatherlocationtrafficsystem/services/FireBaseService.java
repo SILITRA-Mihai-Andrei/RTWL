@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.IBinder;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
@@ -16,6 +17,7 @@ import com.example.realtimeweatherlocationtrafficsystem.models.FireBaseManager;
 import com.example.realtimeweatherlocationtrafficsystem.models.Region;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 public class FireBaseService extends Service implements FireBaseManager.onFireBaseDataNew, Serializable {
@@ -29,7 +31,7 @@ public class FireBaseService extends Service implements FireBaseManager.onFireBa
     public static boolean SERVICE_ACTIVE;
 
     public static FireBaseManager fireBaseManager;
-    public static List<Region> regions = null;
+    public static List<Region> regions = new ArrayList<>();
 
 
     @Override

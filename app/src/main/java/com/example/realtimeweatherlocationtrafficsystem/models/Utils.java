@@ -2,14 +2,13 @@ package com.example.realtimeweatherlocationtrafficsystem.models;
 
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Color;
-import android.os.Handler;
 import android.provider.Settings;
-import android.util.Log;
-import android.view.View;
 import android.widget.EditText;
-import android.widget.TextView;
+
+import androidx.core.app.ActivityCompat;
 
 import com.example.realtimeweatherlocationtrafficsystem.R;
 
@@ -30,8 +29,6 @@ public class Utils {
 
     //bluetooth
     public final static int MAX_RECEIVE_BOX_LENGTH = 1024; //6400
-
-    private static int blinkTextViewRepeats = -1;
 
     public static int isDataValid(String coordinates, String code, String temperature, String humidity, String air) {
         if (!isCoordinatesValid(coordinates)) return INVALID_COORDINATES;
@@ -62,7 +59,7 @@ public class Utils {
                 && getInt(coordinatesSplited[2]) >= -180 && getInt(coordinatesSplited[2]) <= 180;
     }
 
-    public static boolean areFieldsCompleted(EditText coordinates, EditText code, EditText temperature, EditText humidity, EditText air){
+    public static boolean areFieldsCompleted(EditText coordinates, EditText code, EditText temperature, EditText humidity, EditText air) {
         return !(coordinates == null || code == null || temperature == null || humidity == null || air == null
                 || coordinates.getText().toString().equals("") || temperature.getText().toString().equals("")
                 || humidity.getText().toString().equals("") || air.getText().toString().equals(""));
@@ -81,7 +78,7 @@ public class Utils {
     }
 
     public static boolean isNumber(String number) {
-        if(number.length() >= String.valueOf(Integer.MAX_VALUE).length()){
+        if (number.length() >= String.valueOf(Integer.MAX_VALUE).length()) {
             number = number.substring(0, 9);
         }
         try {
@@ -100,100 +97,71 @@ public class Utils {
         }
     }
 
-    public static String[] getCoordinatesSplited(String coordinates){
+    public static String[] getCoordinatesSplited(String coordinates) {
         String[] result = coordinates.replace(".", " ").replace(",", " ").split(" ");
-        if(result.length!=4) return null;
+        if (result.length != 4) return null;
         return result;
     }
 
-    public static String getCoordinatesFormat(String coordinates, int decimals, String sep){
-        if(isCoordinatesValid(coordinates)){
+    public static String getCoordinatesFormat(String coordinates, int decimals, String sep) {
+        if (isCoordinatesValid(coordinates)) {
             String[] result = getCoordinatesSplited(coordinates);
-            if(result==null) return null;
+            if (result == null) return null;
             String result1 = result[1];
             String result3 = result[3];
-            if(result1.length()>=decimals) result1 = result1.substring(0, decimals);
-            if(result3.length()>=decimals) result3 = result3.substring(0, decimals);
+            if (result1.length() >= decimals) result1 = result1.substring(0, decimals);
+            if (result3.length() >= decimals) result3 = result3.substring(0, decimals);
             return result[0] + sep + result1 + " " + result[2] + sep + result3;
         }
         return null;
     }
 
-    public static String getCoordinatesForDataBase(String coordinates, int decimals){
+    public static String getCoordinatesForDataBase(String coordinates, int decimals) {
         return getCoordinatesFormat(coordinates, decimals, " ");
     }
 
-    public static String getCoordinatesWithPoint(String coordinates){
+    public static String getCoordinatesWithPoint(String coordinates) {
         String[] splitedCoordinates = getCoordinatesSplited(coordinates);
-        if(splitedCoordinates==null) return null;
-        return splitedCoordinates[0]+"."+splitedCoordinates[1]+" "+splitedCoordinates[2]+"."+splitedCoordinates[3];
+        if (splitedCoordinates == null) return null;
+        return splitedCoordinates[0] + "." + splitedCoordinates[1] + " " + splitedCoordinates[2] + "." + splitedCoordinates[3];
     }
 
-    public static boolean isLocationEnabled(ContentResolver contentResolver){
+    public static boolean isLocationEnabled(ContentResolver contentResolver, Context context) {
         int locationMode = 0;
+        boolean permissionCheck = true;
         try {
             locationMode = Settings.Secure.getInt(contentResolver, Settings.Secure.LOCATION_MODE);
         } catch (Settings.SettingNotFoundException e) {
             e.printStackTrace();
         }
-        return locationMode != Settings.Secure.LOCATION_MODE_OFF;
+        if (ActivityCompat.checkSelfPermission(context,
+                android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(context,
+                android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            permissionCheck = false;
+        }
+        return locationMode != Settings.Secure.LOCATION_MODE_OFF && permissionCheck;
     }
 
-    public static void blinkTextView(final TextView textView, final int currentColor, final int color, final int duration, final int repeats) {
-        final Handler handler = new Handler();
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                if (blinkTextViewRepeats == 0) {
-                    blinkTextViewRepeats = -1;
-                    return;
-                } else if (blinkTextViewRepeats == -1) {
-                    blinkTextViewRepeats = repeats;
-                    if (repeats % 2 == 1) blinkTextViewRepeats++;
-                }
-                try {
-                    Thread.sleep(duration);
-                } catch (Exception e) {
-                    return;
-                }
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (textView.getVisibility() == View.VISIBLE) {
-                            textView.setVisibility(View.INVISIBLE);
-                        } else {
-                            textView.setVisibility(View.VISIBLE);
-                            if (blinkTextViewRepeats == 1)
-                                textView.setTextColor(currentColor);
-                            else
-                                textView.setTextColor(color);
-                        }
-                        blinkTextView(textView, currentColor, color, duration, blinkTextViewRepeats--);
-                    }
-                });
-            }
-        }).start();
-    }
-
-    public static int getColorARGB(int color){
-        if(color==Utils.COLOR_RED) return Color.argb(255, 255, 0, 0);
-        else if(color==Utils.COLOR_GREEN) return Color.argb(255, 0, 255, 0);
-        else if(color==Utils.COLOR_BLUE) return Color.argb(255, 0, 0, 255);
+    public static int getColorARGB(int color) {
+        if (color == Utils.COLOR_RED) return Color.argb(255, 255, 0, 0);
+        else if (color == Utils.COLOR_GREEN) return Color.argb(255, 0, 255, 0);
+        else if (color == Utils.COLOR_BLUE) return Color.argb(255, 0, 0, 255);
         return -1;
     }
 
-    public static boolean containsByte(byte[] buffer, byte toFind){
-        for (byte iterator : buffer){
-            if (iterator == toFind){
+    public static boolean containsByte(byte[] buffer, byte toFind) {
+        for (byte iterator : buffer) {
+            if (iterator == toFind) {
                 return true;
             }
-            if(iterator == 0) break;
+            if (iterator == 0) break;
         }
         return false;
     }
 
-    public static boolean isInRange(int number, int min, int max){
-        return number>=min && number<=max;
+    public static boolean isInRange(int number, int min, int max) {
+        return number >= min && number <= max;
     }
 
     public static String getCurrentDateAndTime() {
@@ -204,7 +172,11 @@ public class Utils {
         return android.text.format.DateFormat.format("kk:mm:ss", new java.util.Date()).toString();
     }
 
-    public static long getTimeDifference(Date date){
-        return new java.util.Date().getTime() - date.getTime();
+    public static Date getDate() {
+        return new java.util.Date();
+    }
+
+    public static long getTimeDifference(Date date) {
+        return getDate().getTime() - date.getTime();
     }
 }

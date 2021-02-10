@@ -95,7 +95,6 @@
     <string name="commands">Commands</string>
     <string name="bluetooth_commands_title">Bluetooth commands to send:</string>
     <string name="expand">EXPAND</string>
-    <string name="gps_module_gps_phone_not_working">GPS module is not working. The location on this phone is not working.</string>
     <string name="no_location_valid">GPS module is not working. \nLocation on this module is not working. \nCan\'t send data to database!\n</string>
     <string name="statusTimeFormat">[HH:mm:ss] </string>
     <string name="not_connected">"Not connected!"</string>
@@ -133,11 +132,11 @@
     <string name="write_command">write here the command</string>
     <string name="reply_from">Reply from</string>
     <string name="close">Close</string>
-    <string name="temperature_dots">Temperature:\u0020</string>
-    <string name="humidity_dots">Humidity:\u0020</string>
-    <string name="speed_dots">Speed:\u0020</string>
-    <string name="direction_dots">Direction:\u0020</string>
-    <string name="pollution_dots">Pollution:\u0020</string>
+    <string name="temperature_dots">Temperature:</string>
+    <string name="humidity_dots">Humidity:</string>
+    <string name="speed_dots">Speed:</string>
+    <string name="direction_dots">Direction:</string>
+    <string name="pollution_dots">Pollution:</string>
     <string name="temperature_label">Temperature</string>
     <string name="humidity_label">Humidity</string>
     <string name="speed_label">Speed</string>
@@ -148,5 +147,8 @@
     <string name="change_the_map_type">Change the map type.</string>
     <string name="active_track_location">Active track location.</string>
     <string name="the_current_region_weather">The current region weather.</string>
+    <string name="no_gps_data">No GPS data.</string>
+    <string name="no_gps_data_no_send">No GPS data available. Can\'t send data to database.</string>
+    <string name="active_location">Turn on location.</string>
 
 </resources>

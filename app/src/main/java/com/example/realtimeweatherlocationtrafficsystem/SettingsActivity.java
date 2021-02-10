@@ -1,6 +1,5 @@
 package com.example.realtimeweatherlocationtrafficsystem;
 
-import android.annotation.SuppressLint;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.InputType;
@@ -15,6 +14,10 @@ import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 
 public class SettingsActivity extends AppCompatActivity {
+
+    public static final String DEFAULT_BLUETOOTH_DEVICE = "HC-05";
+    public static final String DEFAULT_ZOOM_KEY = "15f";
+    public static final String DEFAULT_MAX_ZOOM_REGION = "16f";
 
     public static final int TYPE_EDIT_TEXT_PREF = 1;
     public static final int TYPE_LIST_PREF = 2;
@@ -47,7 +50,6 @@ public class SettingsActivity extends AppCompatActivity {
         SharedPreferences.Editor bluetooth_settings_editor;
         SharedPreferences.Editor google_maps_settings_editor;
 
-        @SuppressLint("CommitPrefEdits")
         @Override
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
             setPreferencesFromResource(R.xml.root_preferences, rootKey);
@@ -56,6 +58,7 @@ public class SettingsActivity extends AppCompatActivity {
             final EditTextPreference bluetoothMainDevice = findPreference(getString(R.string.bluetooth_main_device_key));
             final ListPreference bluetoothReceiveDelimiter = findPreference(getString(R.string.bluetooth_receive_delimiter_key));
             final ListPreference bluetoothReceiveStateDelimiter = findPreference(getString(R.string.bluetooth_receive_state_delimiter_key));
+            // Preferences for Google Maps
             final EditTextPreference mapsDefaultZoom = findPreference(getString(R.string.maps_default_zoom_key));
             final EditTextPreference mapsMaxRegionZoom = findPreference(getString(R.string.maps_max_zoom_region_key));
 
@@ -64,7 +67,7 @@ public class SettingsActivity extends AppCompatActivity {
                 bluetoothMainDevice.setOnBindEditTextListener(getOnBindEditText(InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS));
                 String value = bluetooth_settings.getString(key, null);
                 if (value == null) {
-                    value = "HC-05";
+                    value = DEFAULT_BLUETOOTH_DEVICE;
                     bluetooth_settings_editor.putString(key, value);
                 }
                 bluetoothMainDevice.setSummaryProvider(getSummary(key, value, TYPE_EDIT_TEXT_PREF, PREF_DEFAULT_DEVICE));
@@ -124,34 +127,31 @@ public class SettingsActivity extends AppCompatActivity {
         private Preference.SummaryProvider<?> getSummary(final String key, final Object value, int type, final int order) {
             if (key == null || value == null) return null;
             final String string = getPreferenceStringByOrder(order);
-            if(string == null) return null;
-            if(type == TYPE_EDIT_TEXT_PREF) {
+            if (string == null) return null;
+            if (type == TYPE_EDIT_TEXT_PREF) {
                 return new Preference.SummaryProvider<EditTextPreference>() {
                     @Override
                     public CharSequence provideSummary(EditTextPreference preference) {
-                        if(value.getClass() == Integer.class){
-                            if((int) value == -1) return null;
+                        if (value.getClass() == Integer.class) {
+                            if ((int) value == -1) return null;
                             else return String.format(string, (int) value);
-                        }
-                        else if(value.getClass() == Float.class){
-                            if((float) value == -1f) return null;
+                        } else if (value.getClass() == Float.class) {
+                            if ((float) value == -1f) return null;
                             else return String.format(string, (float) value);
-                        }
-                        else if (value.getClass() == String.class) {
+                        } else if (value.getClass() == String.class) {
                             return String.format(string, (String) value);
                         }
                         return null;
                     }
                 };
-            }
-            else if(type == TYPE_LIST_PREF){
+            } else if (type == TYPE_LIST_PREF) {
                 return new Preference.SummaryProvider<ListPreference>() {
                     @Override
                     public CharSequence provideSummary(ListPreference preference) {
                         if (value.getClass() == String.class) {
                             String valueStr = (String) value;
-                            if(valueStr.equals("\n")) valueStr = "n";
-                            else if(valueStr.equals("\t")) valueStr = "t";
+                            if (valueStr.equals("\n")) valueStr = "n";
+                            else if (valueStr.equals("\t")) valueStr = "t";
                             return String.format(string, valueStr);
                         }
                         return null;
@@ -175,8 +175,7 @@ public class SettingsActivity extends AppCompatActivity {
                             editor.putString(key, (String) newValue);
                             editTextPreference.setSummaryProvider(getSummary(key, (String) newValue, TYPE_EDIT_TEXT_PREF, order));
                         }
-                    }
-                    else if (field.getClass() == ListPreference.class) {
+                    } else if (field.getClass() == ListPreference.class) {
                         ListPreference listPreference = (ListPreference) field;
                         if (newValue.getClass() == String.class) {
                             editor.putString(key, (String) newValue);
@@ -198,10 +197,13 @@ public class SettingsActivity extends AppCompatActivity {
             };
         }
 
-        private String getPreferenceStringByOrder(int order){
-            if(order == PREF_DEFAULT_DEVICE) return getString(R.string.preference_default_device_placeholder);
-            else if(order == PREF_VALUE_STRING) return getString(R.string.preference_value_string_placeholder);
-            else if(order == PREF_VALUE_STRING_SLASH) return getString(R.string.preference_value_string_slash_placeholder);
+        private String getPreferenceStringByOrder(int order) {
+            if (order == PREF_DEFAULT_DEVICE)
+                return getString(R.string.preference_default_device_placeholder);
+            else if (order == PREF_VALUE_STRING)
+                return getString(R.string.preference_value_string_placeholder);
+            else if (order == PREF_VALUE_STRING_SLASH)
+                return getString(R.string.preference_value_string_slash_placeholder);
             return null;
         }
     }

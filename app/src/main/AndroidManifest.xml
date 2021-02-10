@@ -2,17 +2,20 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.realtimeweatherlocationtrafficsystem">
 
+    <!-- PERMISSIONS FOR LOCATION -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <!-- PERMISSIONS FOR BLUETOOTH -->
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
 
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-
     <permission android:name="android.permission.BLUETOOTH" />
     <permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <!-- PERMISSIONS FOR SERVICES -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <!-- PERMISSIONS FOR GOOGLE MAPS -->
     <permission
         android:name="com.pkg.map.permission.MAPS_RECEIVE"
         android:protectionLevel="signature" />
@@ -26,15 +29,14 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.NoActionBar">
 
+        <!-- SERVICES -->
         <service android:name=".services.BluetoothService" />
         <service android:name=".services.FireBaseService" />
         <service android:name=".services.LocationService" />
 
-        <receiver android:name=".models.BluetoothReceiveReply"/>
+        <!-- RECEIVERS OF BROADCASTS -->
+        <receiver android:name=".models.BluetoothReceiveReply" />
 
-        <activity
-            android:name=".SettingsActivity"
-            android:label="Settings" />
         <!-- for Google Maps -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
@@ -42,6 +44,10 @@
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
+
+        <activity
+            android:name=".SettingsActivity"
+            android:label="Settings" />
 
         <activity
             android:name=".TerminalActivity"
@@ -58,6 +64,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
     </application>
 
 </manifest>

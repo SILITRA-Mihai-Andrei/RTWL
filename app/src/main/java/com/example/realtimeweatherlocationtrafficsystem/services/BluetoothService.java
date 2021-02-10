@@ -202,10 +202,6 @@ public class BluetoothService extends Service implements Parcelable, FireBaseMan
                                 splited[1] = checkLocation(splited[1]);
                                 sendMessage(SERVICE_MESSAGE_ID_RECEIVED, splited[0] + "@" + splited[1]);
                                 String[] d = splited[1].split(" ");
-                                if (currentLocation == null && d[0].equals("0.0") && d[1].equals("0.0")) {
-                                    updateNotification(splited[0]);
-                                    break;
-                                }
                                 updateNotification(splited[0]);
                                 sendToDataBase(d);
                             } else {
@@ -296,8 +292,7 @@ public class BluetoothService extends Service implements Parcelable, FireBaseMan
         if (location.contains(UtilsBluetooth.MUST_GET_LOCATION)) {
             if (currentLocation == null) {
                 location = location.replace(
-                        UtilsBluetooth.MUST_GET_LOCATION,
-                        UtilsBluetooth.MUST_GET_LOCATION_STRING);
+                        UtilsBluetooth.MUST_GET_LOCATION, getString(R.string.no_gps_data));
             } else {
                 location = location.replace(
                         UtilsBluetooth.MUST_GET_LOCATION,
@@ -318,13 +313,12 @@ public class BluetoothService extends Service implements Parcelable, FireBaseMan
         String[] d = data.split("\n-");
         if (d.length >= 7) {
             String region;
-            try {
+            if (!d[0].contains(UtilsBluetooth.MSG_REGION_START)) {
+                region = getString(R.string.no_gps_data);
+            } else {
                 region = UtilsBluetooth.MSG_REGION_START + " " + Utils.getCoordinatesFormat(
                         d[0].split("]")[1].replace("\n", "")
                                 .split(UtilsBluetooth.MSG_REGION_START + " ")[1], 2, ".");
-            } catch (ArrayIndexOutOfBoundsException e) {
-                e.printStackTrace();
-                return;
             }
             notificationLayoutExpanded.setImageViewResource(R.id.logo,
                     UtilsGoogleMaps.getWeatherIcon(UtilsGoogleMaps.getWeatherStringIndex(d[1], this)));
@@ -348,7 +342,6 @@ public class BluetoothService extends Service implements Parcelable, FireBaseMan
                 notificationLayoutExpanded.setViewVisibility(R.id.directionLabel, View.VISIBLE);
                 notificationLayoutExpanded.setViewVisibility(R.id.direction, View.VISIBLE);
             }
-            notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build());
         } else {
             if (!lastReply.equals(data) || (lastReplyCount != null && Utils.getTimeDifference(lastReplyCount) > NOTIFICATION_TIME_REPLY_UPDATE)) {
                 lastReply = data;
@@ -359,6 +352,8 @@ public class BluetoothService extends Service implements Parcelable, FireBaseMan
                 notificationManager.notify(NOTIFICATION_REPLY_ID, notificationReplyBuilder.build());
             }
         }
+        // The main notification (this foreground service) is always updated (to delete the reply)
+        notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build());
     }
 
     private void sendToDataBase(String[] d) {
@@ -405,7 +400,6 @@ public class BluetoothService extends Service implements Parcelable, FireBaseMan
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
             if (action == null) return;
-            Toast.makeText(context, action, Toast.LENGTH_SHORT).show();
             if (action.equals(BluetoothAdapter.ACTION_STATE_CHANGED)) {
                 final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR);
                 if (state == BluetoothAdapter.STATE_OFF || state == BluetoothAdapter.STATE_TURNING_OFF) {

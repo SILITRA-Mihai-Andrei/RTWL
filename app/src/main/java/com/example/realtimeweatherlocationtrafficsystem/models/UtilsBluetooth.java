@@ -16,7 +16,6 @@ public class UtilsBluetooth {
     public final static String MESSAGE_TIME_END = "] \n";
 
     public final static String MUST_GET_LOCATION = "#";
-    public final static String MUST_GET_LOCATION_STRING = "GPS module not working! \nMobile location will be used.";
     public final static int BLUETOOTH_BUFFER_SIZE = 1024;
     public final static int BLUETOOTH_ONE_RECORD_SIZE = 40;
     public final static UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb");
@@ -89,13 +88,21 @@ public class UtilsBluetooth {
                 } else {
                     result = MSG_REGION_START + " " + string[0] + " " + string[1];
                 }
+                String direction = DIRECTION_UNKNOWN;
+                if (!string[7].contains("U")) {
+                    try {
+                        direction = UtilsGoogleMaps.getDirection(Integer.parseInt(string[7]));
+                    } catch (NumberFormatException e) {
+                        direction = string[7];
+                    }
+                }
                 result +=
                         "\n\t-\t" + UtilsGoogleMaps.getWeatherString(UtilsGoogleMaps.getWeatherStringIndex(Integer.parseInt(string[2])), context)
                                 + "\n\t-\tTemperature: " + string[3]
                                 + "\n\t-\tHumidity: " + string[4]
                                 + "\n\t-\tAir: " + string[5]
                                 + "\n\t-\tSpeed: " + (string[6].equals("-1") ? "0" : string[6])
-                                + "\n\t-\tDirection: " + (string[7].contains("U") ? DIRECTION_UNKNOWN : UtilsGoogleMaps.getDirection(Integer.parseInt(string[7]))) + "\n";
+                                + "\n\t-\tDirection: " + direction + "\n";
                 result = result + "@" + message;
             }
         } else if (message.contains(STATES_STRING.substring(STATE_ERROR, STATE_ERROR + 2))) {
