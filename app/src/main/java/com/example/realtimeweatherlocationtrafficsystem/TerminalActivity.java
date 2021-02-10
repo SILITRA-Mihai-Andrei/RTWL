@@ -5,7 +5,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import android.annotation.SuppressLint;
-import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -68,12 +67,14 @@ public class TerminalActivity extends AppCompatActivity implements Serializable 
         intentFilter.addAction(BluetoothService.SERVICE_KEY);
         intentFilter.addAction(MainActivity.SERVICE_KEY);
         LocalBroadcastManager.getInstance(this).registerReceiver(messageReceiver, intentFilter);
-        if (!development && BluetoothService.SERVICE_ACTIVE) {
-            String string = String.format(getString(R.string.connected_to_placeholder_device), device.getName());
-            connectedDeviceTextView.setText(string);
-            statusTextView.setText(string);
-        } else if (!development) {
-            goToMainActivity();
+        if (!development) {
+            if (BluetoothService.SERVICE_ACTIVE) {
+                String string = String.format(getString(R.string.connected_to_placeholder_device), device.getName());
+                connectedDeviceTextView.setText(string);
+                statusTextView.setText(string);
+            } else {
+                goToMainActivity();
+            }
         }
     }
 
@@ -154,8 +155,6 @@ public class TerminalActivity extends AppCompatActivity implements Serializable 
         findViews(); //find views
 
         if (!development) {
-            registerReceiver(receiverState, new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED));
-            registerReceiver(receiverConnection, new IntentFilter(BluetoothDevice.ACTION_ACL_DISCONNECTED));
             device = Objects.requireNonNull(getIntent().getExtras()).getParcelable(MainActivity.BT_DEVICE_SESSION_ID);
             //BluetoothServiceIntent = Objects.requireNonNull(getIntent().getExtras()).getParcelable(MainActivity.BT_SERVICE_SESSION_ID);
         }
@@ -287,39 +286,6 @@ public class TerminalActivity extends AppCompatActivity implements Serializable 
         send = findViewById(R.id.send);
         showDataBase = findViewById(R.id.show_data_base);
     }
-
-    private final BroadcastReceiver receiverState = new BroadcastReceiver() {
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if (action == null) return;
-            if (action.equals(BluetoothAdapter.ACTION_STATE_CHANGED)) {
-                final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR);
-                if (state == BluetoothAdapter.STATE_OFF || state == BluetoothAdapter.STATE_TURNING_OFF) {
-                    goToMainActivity(new View(getBaseContext()));
-                }
-            }
-        }
-    };
-
-    private final BroadcastReceiver receiverConnection = new BroadcastReceiver() {
-        @SuppressLint("ShowToast")
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if (action == null) return;
-            if (action.equals(BluetoothDevice.ACTION_ACL_DISCONNECT_REQUESTED) || action.equals(BluetoothDevice.ACTION_ACL_DISCONNECTED)) {
-                Toast toast = new Toast(getBaseContext());
-                try {
-                    toast.getView().isShown();    // true if visible
-                } catch (Exception e) {         // invisible if exception
-                    toast = Toast.makeText(context,
-                            String.format(getString(R.string.disconnected_from_placeholder_device),
-                                    device.getName()), Toast.LENGTH_SHORT);
-                }
-                toast.show();  //finally display it
-                goToMainActivity(new View(getBaseContext()));
-            }
-        }
-    };
 
     private void setStatus(String message) {
         statusTextView.setText(String.format(getString(R.string.message_with_time_placeholder), Utils.getTime(), message));

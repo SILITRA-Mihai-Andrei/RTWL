@@ -15,6 +15,7 @@
 
     <style name="NotificationStyle" parent="Widget.AppCompat.TextView">
         <item name="android:textSize">13sp</item>
+        <item name="android:textColor">@color/color_gray</item>
         <item name="android:layout_marginStart">@dimen/dim_4dp</item>
     </style>
 

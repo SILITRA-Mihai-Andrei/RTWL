@@ -9,6 +9,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.IBinder;
+
 import androidx.annotation.Nullable;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
@@ -16,6 +17,8 @@ import com.example.realtimeweatherlocationtrafficsystem.MainActivity;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
+
+import java.util.Locale;
 
 public class LocationService extends Service implements LocationListener {
 
@@ -60,7 +63,7 @@ public class LocationService extends Service implements LocationListener {
         fusedLocationProviderClient.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
             @Override
             public void onSuccess(Location location) {
-                if(location == null) return;
+                if (location == null) return;
                 currentLocation = location;
                 sendNewLocation();
             }
@@ -68,6 +71,10 @@ public class LocationService extends Service implements LocationListener {
     }
 
     private void sendNewLocation() {
+        if (currentLocation != null) {
+            currentLocation.setLatitude(Double.parseDouble(String.format(Locale.ENGLISH, "%.3f", currentLocation.getLatitude())));
+            currentLocation.setLongitude(Double.parseDouble(String.format(Locale.ENGLISH, "%.3f", currentLocation.getLongitude())));
+        }
         // The string SERVICE_FIREBASE_KEY will be used to filer the intent
         Intent intent = new Intent(MainActivity.SERVICE_KEY);
         // Adding some data
@@ -77,17 +84,20 @@ public class LocationService extends Service implements LocationListener {
 
     @Override
     public void onLocationChanged(Location location) {
-        if(location == null) return;
+        if (location == null) return;
         currentLocation = location;
         sendNewLocation();
     }
 
     @Override
-    public void onStatusChanged(String provider, int status, Bundle extras) {}
+    public void onStatusChanged(String provider, int status, Bundle extras) {
+    }
 
     @Override
-    public void onProviderEnabled(String provider) {}
+    public void onProviderEnabled(String provider) {
+    }
 
     @Override
-    public void onProviderDisabled(String provider) {}
+    public void onProviderDisabled(String provider) {
+    }
 }

@@ -14,7 +14,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.text.Html;
@@ -29,6 +28,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.realtimeweatherlocationtrafficsystem.models.Utils;
 import com.example.realtimeweatherlocationtrafficsystem.models.UtilsBluetooth;
 import com.example.realtimeweatherlocationtrafficsystem.services.BluetoothService;
 import com.example.realtimeweatherlocationtrafficsystem.services.FireBaseService;
@@ -89,10 +89,7 @@ public class MainActivity extends AppCompatActivity {
         initBluetoothDevicesListView();
         // This registers messageReceiver to receive messages.
         LocalBroadcastManager.getInstance(this).registerReceiver(messageReceiver, new IntentFilter(BluetoothService.SERVICE_KEY));
-        if (ActivityCompat.checkSelfPermission(this,
-                android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission(this,
-                android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if(Utils.isLocationEnabled(getContentResolver(), this)){
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 0);
         }
     }
@@ -105,15 +102,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onRestart() {
-        super.onRestart();
-        openBackgroundService();
-    }
-
-    @Override
     protected void onStop() {
         super.onStop();
         LocalBroadcastManager.getInstance(this).unregisterReceiver(messageReceiver);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
         closeBackgroundService();
     }
 
@@ -176,10 +172,18 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
-        connectedDeviceLabel.setTextColor(Color.RED);
-        connectedDeviceLabel.setText(R.string.not_connected);
-        sendBackground.setTextColor(Color.GREEN);
-        sendBackground.setText(R.string.connect);
+        if (BluetoothService.SERVICE_ACTIVE){
+            connectedDeviceLabel.setTextColor(Color.GREEN);
+            connectedDeviceLabel.setText(getString(R.string.connected_to_placeholder_device, BluetoothService.device.getName()));
+            sendBackground.setTextColor(Color.RED);
+            sendBackground.setText(R.string.disconnect);
+        }
+        else{
+            connectedDeviceLabel.setTextColor(Color.RED);
+            connectedDeviceLabel.setText(R.string.not_connected);
+            sendBackground.setTextColor(Color.GREEN);
+            sendBackground.setText(R.string.connect);
+        }
     }
 
     private void setToolbar() {
@@ -240,12 +244,6 @@ public class MainActivity extends AppCompatActivity {
         arrayAdapter.notifyDataSetChanged();
         getBluetoothDevice(UtilsBluetooth.MAIN_BLUETOOTH_DEVICE, true);
     }
-
-    private final BroadcastReceiver receiver = new BroadcastReceiver() {
-        public void onReceive(Context context, Intent intent) {
-            checkBluetoothStatus();
-        }
-    };
 
     private void checkBluetoothStatus() {
         if (mBluetoothAdapter == null) {
@@ -374,14 +372,18 @@ public class MainActivity extends AppCompatActivity {
         openBluetoothService();
     }
 
-    public void openBackgroundService(){
-        fireBaseServiceIntent = new Intent(this, FireBaseService.class);
-        locationServiceIntent = new Intent(this, LocationService.class);
-        this.startService(fireBaseServiceIntent);
-        this.startService(locationServiceIntent);
+    public void openBackgroundService() {
+        if (!FireBaseService.SERVICE_ACTIVE){
+            fireBaseServiceIntent = new Intent(this, FireBaseService.class);
+            this.startService(fireBaseServiceIntent);
+        }
+        if (!LocationService.SERVICE_ACTIVE){
+            locationServiceIntent = new Intent(this, LocationService.class);
+            this.startService(locationServiceIntent);
+        }
     }
 
-    public void closeBackgroundService(){
+    public void closeBackgroundService() {
         if (FireBaseService.SERVICE_ACTIVE) {
             stopService(fireBaseServiceIntent);
         }
@@ -392,7 +394,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void goToGoogleMaps(View view) {
         if (!BluetoothService.SERVICE_ACTIVE && !LocationService.SERVICE_ACTIVE) {
-            Toast.makeText(this, getString(R.string.gps_module_gps_phone_not_working), Toast.LENGTH_LONG).show();
+            Toast.makeText(this, getString(R.string.no_gps_data_no_send), Toast.LENGTH_LONG).show();
             return;
         }
         startActivityAndSend(GoogleMapsActivity.class, false);
@@ -411,8 +413,6 @@ public class MainActivity extends AppCompatActivity {
 
     private void end() {
         try {
-            //Unregister the ACTION_FOUND receiver.
-            LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver);
             // Unregister since the activity is not visible
             LocalBroadcastManager.getInstance(this).unregisterReceiver(messageReceiver);
         } catch (IllegalArgumentException e) {

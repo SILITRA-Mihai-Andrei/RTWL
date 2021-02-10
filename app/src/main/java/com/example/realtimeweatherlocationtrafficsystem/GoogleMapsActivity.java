@@ -5,22 +5,18 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import android.annotation.SuppressLint;
-
 import android.content.BroadcastReceiver;
 import android.content.Context;
-
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.location.Location;
-
 import android.os.Bundle;
-
 import android.view.View;
-
 import android.widget.ImageView;
-
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -28,12 +24,10 @@ import android.widget.Toast;
 import com.example.realtimeweatherlocationtrafficsystem.models.Region;
 import com.example.realtimeweatherlocationtrafficsystem.models.Utils;
 import com.example.realtimeweatherlocationtrafficsystem.models.UtilsBluetooth;
-
 import com.example.realtimeweatherlocationtrafficsystem.models.UtilsGoogleMaps;
 import com.example.realtimeweatherlocationtrafficsystem.models.Weather;
 import com.example.realtimeweatherlocationtrafficsystem.services.BluetoothService;
 import com.example.realtimeweatherlocationtrafficsystem.services.FireBaseService;
-
 import com.example.realtimeweatherlocationtrafficsystem.services.LocationService;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -56,11 +50,16 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
     private TextView received;
     private ImageView regionWeatherIcon;
     private ImageView locationTrackIcon;
-    private int counterFailureGPS = 0;
+
+    private final int receivedBoxOFF = Color.argb(32, 0, 0, 0);
+    private final int receivedBoxON = Color.argb(196, 0, 0, 0);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (!FireBaseService.SERVICE_ACTIVE || (!BluetoothService.SERVICE_ACTIVE && !LocationService.SERVICE_ACTIVE)) {
+            goToMainActivity();
+        }
         setContentView(R.layout.activity_google_maps);
         initComponents();
         googleMapsPreferences = getSharedPreferences(getString(R.string.preference_google_maps_key), MODE_PRIVATE);
@@ -85,9 +84,8 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
         if (FireBaseService.regions != null) {
             onFirebaseDataNew(FireBaseService.regions);
         }
-        currentLocation = LocationService.currentLocation;
-        if (BluetoothService.SERVICE_ACTIVE) {
-            received.setVisibility(View.VISIBLE);
+        if (!BluetoothService.SERVICE_ACTIVE && LocationService.currentLocation == null) {
+            received.setText(getString(R.string.no_gps_data));
         }
     }
 
@@ -99,6 +97,127 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
         mapFragment.getMapAsync(this);
     }
 
+    // Handling the received Intents from BluetoothService Service
+    private BroadcastReceiver messageReceiver = new BroadcastReceiver() {
+        @SuppressLint("SetTextI18n")
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            int messageID = intent.getIntExtra(MainActivity.SERVICE_MESSAGE_ID_KEY, -1);
+            if (messageID != -1) {
+                if (messageID == MainActivity.SERVICE_MESSAGE_ID_REGIONS) {
+                    onFirebaseDataNew(FireBaseService.regions);
+                } else if (messageID == MainActivity.SERVICE_MESSAGE_ID_LOCATION) {
+                    currentLocation = LocationService.currentLocation;
+                }
+            }
+
+            // Extract data included in the Intent
+            messageID = intent.getIntExtra(BluetoothService.SERVICE_MESSAGE_ID_KEY, -1);
+            String message = intent.getStringExtra(BluetoothService.SERVICE_MESSAGE_KEY);
+
+            if (messageID == -1) return;
+            switch (messageID) {
+                case BluetoothService.SERVICE_MESSAGE_ID_BT_OFF:
+                case BluetoothService.SERVICE_MESSAGE_ID_CONNECTION_FAILED:
+                case BluetoothService.SERVICE_MESSAGE_ID_DISCONNECTED:
+                case BluetoothService.SERVICE_MESSAGE_ID_RW_FAILED:
+                    Toast.makeText(context, getString(R.string.bluetooth_device_offline_no_send), Toast.LENGTH_SHORT).show();
+                    received.setText(getString(R.string.bluetooth_device_offline_no_send));
+                    end();
+                    break;
+                case BluetoothService.SERVICE_MESSAGE_ID_RECEIVED:
+                    if (message == null) break;
+                    if (message.isEmpty()) break;
+                    if (message.split(UtilsBluetooth.MESSAGE_TIME_END)[1].length() <= 3)
+                        break;
+
+                    String[] splited = message.split("@");
+                    received.setText(splited[0]);
+
+                    /* Check again if the coordinates are valid */
+                    if (splited[1].contains(UtilsBluetooth.INVALID_GPS_COORDINATES) || splited[1].contains(UtilsBluetooth.INVALID_GPS_COORDINATES1)) {
+                        String locationService = Utils.isLocationEnabled(getContentResolver(), getBaseContext()) ? "" : getString(R.string.active_location);
+                        received.setText(getString(R.string.no_gps_data_no_send) + "\n" + locationService);
+                        if (locationTracked && currentLocation != null) {
+                            moveMapCamera(currentLocation.getLatitude(), currentLocation.getLongitude(), map.getCameraPosition().zoom);
+                            break;
+                        }
+                    }
+                    else if (locationTracked){
+                        String[] data = splited[1].split(" ");
+                        try{
+                            moveMapCamera(Float.parseFloat(data[0]), Float.parseFloat(data[1]), map.getCameraPosition().zoom);
+                        } catch (NumberFormatException e){
+                            e.printStackTrace();
+                        }
+                    }
+                    break;
+            }
+        }
+    };
+
+    public void onFirebaseDataNew(List<Region> regionsReceived) {
+        if (regionsReceived == null) return;
+        if (map != null) {
+            map.clear();
+            regions.clear();
+            for (int i = 0; i < regionsReceived.size(); i++) {
+                Region region = regionsReceived.get(i);
+                regions.add(region);
+                LatLng location = UtilsGoogleMaps.getCoordinates(region.getName(), 2);
+                if (location == null) return;
+                map.addMarker(UtilsGoogleMaps.getMarkerOptions(location, region.getName(), "",
+                        markerIcons.get(UtilsGoogleMaps.getWeatherStringIndex(
+                                region.getWeather().getWeather(), getBaseContext()))));
+                int color = UtilsGoogleMaps.COLOR_REGION_GREEN;
+                int index = UtilsGoogleMaps.getWeatherStringIndex(region.getWeather().getWeather(), this);
+                if (index == 1 || index == 4 || index == 7)
+                    color = UtilsGoogleMaps.COLOR_REGION_ORANGE;
+                else if (index == 2 || index == 5 || index == 8)
+                    color = UtilsGoogleMaps.COLOR_REGION_RED;
+                map.addPolygon(UtilsGoogleMaps.getPolygonOptions(location, UtilsGoogleMaps.REGION_AREA, color));
+            }
+        }
+    }
+
+    @Override
+    public boolean onMarkerClick(Marker marker) {
+        return false;
+    }
+
+    @Override
+    public void onCameraIdle() {
+        if (map == null || regions == null || markerIcons == null || regionWeatherIcon == null)
+            return;
+        if (map.getCameraPosition().zoom >= Float.parseFloat(
+                googleMapsPreferences.getString(getString(R.string.maps_max_zoom_region_key), SettingsActivity.DEFAULT_MAX_ZOOM_REGION))) {
+            LatLng point = map.getCameraPosition().target;
+            String pointCoordinates = Utils.getCoordinatesForDataBase(point.latitude + " " + point.longitude, 9);
+            for (int i = 0; i < regions.size(); i++) {
+                if (UtilsGoogleMaps.isPointInRegion(regions.get(i).getName(), pointCoordinates, UtilsGoogleMaps.REGION_AREA)) {
+                    regionWeatherIcon.setImageResource(markerIcons.get(
+                            UtilsGoogleMaps.getWeatherStringIndex(regions.get(i).getWeather().getWeather(), getBaseContext())));
+                    return;
+                }
+            }
+        }
+        regionWeatherIcon.setImageDrawable(null);
+    }
+
+    private void setLocationTrack(boolean tracked) {
+        locationTracked = tracked;
+        if (tracked) {
+            locationTrackIcon.setImageResource(R.drawable.location_track);
+            if (currentLocation != null) {
+                moveMapCamera(currentLocation.getLatitude(), currentLocation.getLongitude(), map.getCameraPosition().zoom);
+                map.setTrafficEnabled(true);
+            }
+        } else {
+            locationTrackIcon.setImageResource(R.drawable.location_untracked);
+            map.setTrafficEnabled(false);
+        }
+    }
+
     @Override
     public void onMapReady(GoogleMap googleMap) {
         if (!FireBaseService.SERVICE_ACTIVE) {
@@ -106,7 +225,10 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
         }
         map = googleMap;
         if (map == null) goToMainActivity();
-        moveMapCamera(map.getCameraPosition().target.latitude, map.getCameraPosition().target.longitude, 15f);
+        moveMapCamera(map.getCameraPosition().target.latitude,
+                map.getCameraPosition().target.longitude,
+                Float.parseFloat(googleMapsPreferences.getString(getString(
+                        R.string.maps_default_zoom_key), SettingsActivity.DEFAULT_ZOOM_KEY)));
         ImageView mapType = findViewById(R.id.mapType);
         map.setOnCameraIdleListener(this);
         if (ActivityCompat.checkSelfPermission(this,
@@ -181,127 +303,10 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
         setLocationTrack(true);
     }
 
-    // Handling the received Intents from BluetoothService Service
-    private BroadcastReceiver messageReceiver = new BroadcastReceiver() {
-        @SuppressLint("SetTextI18n")
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            int messageID = intent.getIntExtra(MainActivity.SERVICE_MESSAGE_ID_KEY, -1);
-            if (messageID != -1) {
-                if (messageID == MainActivity.SERVICE_MESSAGE_ID_REGIONS) {
-                    onFirebaseDataNew(FireBaseService.regions);
-                } else if (messageID == MainActivity.SERVICE_MESSAGE_ID_LOCATION) {
-                    currentLocation = LocationService.currentLocation;
-                }
-            }
-
-            // Extract data included in the Intent
-            messageID = intent.getIntExtra(BluetoothService.SERVICE_MESSAGE_ID_KEY, -1);
-            String message = intent.getStringExtra(BluetoothService.SERVICE_MESSAGE_KEY);
-
-            if (messageID == -1) return;
-            switch (messageID) {
-                case BluetoothService.SERVICE_MESSAGE_ID_BT_OFF:
-                case BluetoothService.SERVICE_MESSAGE_ID_CONNECTION_FAILED:
-                case BluetoothService.SERVICE_MESSAGE_ID_DISCONNECTED:
-                case BluetoothService.SERVICE_MESSAGE_ID_RW_FAILED:
-                    Toast.makeText(context, getString(R.string.bluetooth_device_offline_no_send), Toast.LENGTH_SHORT).show();
-                    received.setVisibility(View.GONE);
-                    end();
-                    break;
-                case BluetoothService.SERVICE_MESSAGE_ID_RECEIVED:
-                    if (message == null) break;
-                    if (message.isEmpty()) break;
-                    if (message.split(UtilsBluetooth.MESSAGE_TIME_END)[1].length() <= 3)
-                        break;
-
-                    String[] splited = message.split("@");
-
-                    /* Check again if the coordinates are valid */
-                    if ((splited[1].contains(UtilsBluetooth.INVALID_GPS_COORDINATES) || splited[1].contains(UtilsBluetooth.INVALID_GPS_COORDINATES1))
-                            && currentLocation == null) {
-                        /* The coordinates are still invalid - the location of this phone is not working */
-                        received.setText(R.string.gps_module_gps_phone_not_working);
-                        if (counterFailureGPS++ >= 2 && !Utils.isLocationEnabled(getContentResolver())) {
-                            currentLocation = null;
-                            counterFailureGPS = 0;
-                        }
-                        break;
-                    }
-                    if (locationTracked) {
-                        if (currentLocation == null) break;
-                        moveMapCamera(currentLocation.getLatitude(), currentLocation.getLongitude(), map.getCameraPosition().zoom);
-                    }
-                    break;
-            }
-        }
-    };
-
-    public void onFirebaseDataNew(List<Region> regionsReceived) {
-        if (regionsReceived == null) return;
-        if (map != null) {
-            map.clear();
-            regions.clear();
-            for (int i = 0; i < regionsReceived.size(); i++) {
-                Region region = regionsReceived.get(i);
-                regions.add(region);
-                LatLng location = UtilsGoogleMaps.getCoordinates(region.getName(), 2);
-                if (location == null) return;
-                map.addMarker(UtilsGoogleMaps.getMarkerOptions(location, region.getName(), "",
-                        markerIcons.get(UtilsGoogleMaps.getWeatherStringIndex(
-                                region.getWeather().getWeather(), getBaseContext()))));
-                int color = UtilsGoogleMaps.COLOR_REGION_GREEN;
-                int index = UtilsGoogleMaps.getWeatherStringIndex(region.getWeather().getWeather(), this);
-                if (index == 1 || index == 4 || index == 7)
-                    color = UtilsGoogleMaps.COLOR_REGION_ORANGE;
-                else if (index == 2 || index == 5 || index == 8)
-                    color = UtilsGoogleMaps.COLOR_REGION_RED;
-                map.addPolygon(UtilsGoogleMaps.getPolygonOptions(location, UtilsGoogleMaps.REGION_AREA, color));
-            }
-        }
-    }
-
-    @Override
-    public boolean onMarkerClick(Marker marker) {
-        return false;
-    }
-
-    @Override
-    public void onCameraIdle() {
-        if (map == null || regions == null || markerIcons == null || regionWeatherIcon == null)
-            return;
-        if (map.getCameraPosition().zoom >= Float.parseFloat(googleMapsPreferences.getString(getString(R.string.maps_max_zoom_region_key), "16"))) {
-            LatLng point = map.getCameraPosition().target;
-            String pointCoordinates = Utils.getCoordinatesForDataBase(point.latitude + " " + point.longitude, 9);
-            for (int i = 0; i < regions.size(); i++) {
-                if (UtilsGoogleMaps.isPointInRegion(regions.get(i).getName(), pointCoordinates, UtilsGoogleMaps.REGION_AREA)) {
-                    regionWeatherIcon.setImageResource(markerIcons.get(
-                            UtilsGoogleMaps.getWeatherStringIndex(regions.get(i).getWeather().getWeather(), getBaseContext())));
-                    return;
-                }
-            }
-        }
-        regionWeatherIcon.setImageDrawable(null);
-    }
-
-    private void setLocationTrack(boolean tracked) {
-        locationTracked = tracked;
-        if (tracked) {
-            locationTrackIcon.setImageResource(R.drawable.location_track);
-            if (currentLocation != null) {
-                moveMapCamera(currentLocation.getLatitude(), currentLocation.getLongitude(), map.getCameraPosition().zoom);
-                map.setTrafficEnabled(true);
-            }
-        } else {
-            locationTrackIcon.setImageResource(R.drawable.location_untracked);
-            map.setTrafficEnabled(false);
-        }
-    }
-
     private void moveMapCamera(double lat, double lon, float zoom) {
         if (zoom == -1f)
             zoom = Float.parseFloat(googleMapsPreferences.getString(getString(
-                    R.string.maps_default_zoom_key), "15f"));
+                    R.string.maps_default_zoom_key), SettingsActivity.DEFAULT_ZOOM_KEY));
         map.moveCamera(CameraUpdateFactory.newLatLngZoom(
                 new LatLng(lat, lon), zoom));
     }
@@ -313,7 +318,7 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
     }
 
     private void end() {
-        // Unregister
+        // Unregister broadcast receiver
         LocalBroadcastManager.getInstance(this).unregisterReceiver(messageReceiver);
     }
 
@@ -321,6 +326,18 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
         locationTrackIcon = findViewById(R.id.location);
         received = findViewById(R.id.received);
         regionWeatherIcon = findViewById(R.id.regionWeatherIcon);
+
+        received.setBackgroundColor(receivedBoxON);
+        received.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (((ColorDrawable) received.getBackground()).getColor() == receivedBoxOFF) {
+                    received.setBackgroundColor(receivedBoxON);
+                } else {
+                    received.setBackgroundColor(receivedBoxOFF);
+                }
+            }
+        });
     }
 
     private void initMarkerIcons() {
