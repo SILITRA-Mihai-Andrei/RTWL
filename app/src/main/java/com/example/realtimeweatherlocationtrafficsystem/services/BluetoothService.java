@@ -50,6 +50,8 @@ public class BluetoothService extends Service implements Parcelable, FireBaseMan
 
     public static boolean SERVICE_ACTIVE;
 
+    public static boolean GPS_MODULE_WORKING = false;
+
     public static final String SERVICE_CHANNEL_NAME = "Foreground Service Channel";
     public static final String SERVICE_STOP_KEY = "BluetoothService-Stop-KEY";
     public static final String SERVICE_KEY = "BluetoothService-KEY";
@@ -368,7 +370,7 @@ public class BluetoothService extends Service implements Parcelable, FireBaseMan
                     Utils.getInt(d[3]),
                     Utils.getInt(d[4]),
                     Utils.getInt(d[5].replace(UtilsBluetooth.BLUETOOTH_RECEIVE_DELIMITER, "")));
-            sendDatabase(Utils.getCoordinatesForDataBase(lat + " " + lon, 2), Utils.getCurrentDateAndTime(), data);
+            sendDatabase(Utils.getCoordinatesWithDecimals(lat + " " + lon, 2), Utils.getCurrentDateAndTime(), data);
         }
     }
 

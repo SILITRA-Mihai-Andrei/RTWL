@@ -40,7 +40,7 @@
         <!-- for Google Maps -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyCqrctnfF6Bsidj-Td50Zjnxqeg-AX61p0" />
+            android:value="MY_API_KEY" />
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
