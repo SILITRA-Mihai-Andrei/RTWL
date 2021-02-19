@@ -150,5 +150,8 @@
     <string name="no_gps_data">No GPS data.</string>
     <string name="no_gps_data_no_send">No GPS data available. Can\'t send data to database.</string>
     <string name="active_location">Turn on location.</string>
+    <string name="grant_location_permission">Please grant permission to location.</string>
+    <string name="stop_bluetooth_service_first">Bluetooth service is active. If you want to close the database service, please stop the Bluetooth service.</string>
+    <string name="no_gps_data_without_service">You can\'t close the location service because the GPS module didn\'t send any location yet.</string>
 
 </resources>

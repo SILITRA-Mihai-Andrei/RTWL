@@ -30,8 +30,8 @@
         android:id="@+id/container"
         android:layout_width="@dimen/dim_0dp"
         android:layout_height="@dimen/dim_0dp"
-        android:orientation="vertical"
         android:layout_marginBottom="@dimen/dim_4dp"
+        android:orientation="vertical"
         app:layout_constraintBottom_toTopOf="@id/show_data_base"
         app:layout_constraintEnd_toEndOf="@id/view"
         app:layout_constraintStart_toStartOf="@id/view"
@@ -68,10 +68,10 @@
                     android:layout_marginEnd="@dimen/dim_8dp"
                     android:layout_weight="1"
                     android:hint="@string/code_hint"
+                    android:importantForAutofill="no"
                     android:inputType="numberSigned"
                     android:maxLines="1"
-                    android:textAlignment="center"
-                    android:importantForAutofill="no" />
+                    android:textAlignment="center" />
 
                 <EditText
                     android:id="@+id/temperature"
@@ -81,10 +81,10 @@
                     android:layout_marginEnd="@dimen/dim_8dp"
                     android:layout_weight="1"
                     android:hint="@string/temperature_hint"
+                    android:importantForAutofill="no"
                     android:inputType="numberSigned"
                     android:maxLines="1"
-                    android:textAlignment="center"
-                    android:importantForAutofill="no" />
+                    android:textAlignment="center" />
 
                 <EditText
                     android:id="@+id/humidity"
@@ -94,10 +94,10 @@
                     android:layout_marginEnd="@dimen/dim_8dp"
                     android:layout_weight="1"
                     android:hint="@string/humidity_hint"
+                    android:importantForAutofill="no"
                     android:inputType="numberSigned"
                     android:maxLines="1"
-                    android:textAlignment="center"
-                    android:importantForAutofill="no" />
+                    android:textAlignment="center" />
 
                 <EditText
                     android:id="@+id/air"
@@ -106,10 +106,10 @@
                     android:layout_marginTop="@dimen/dim_8dp"
                     android:layout_weight="1"
                     android:hint="@string/air_hint"
+                    android:importantForAutofill="no"
                     android:inputType="numberSigned"
                     android:maxLines="1"
-                    android:textAlignment="center"
-                    android:importantForAutofill="no" />
+                    android:textAlignment="center" />
 
             </LinearLayout>
 
@@ -146,13 +146,13 @@
                     android:id="@+id/expand_terminal"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/expand"/>
+                    android:text="@string/expand" />
 
                 <Button
                     android:id="@+id/clear_terminal"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/clear"/>
+                    android:text="@string/clear" />
 
             </LinearLayout>
 
@@ -178,29 +178,31 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/dim_16dp">
+
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center"
                     android:layout_weight="1"
-                    android:text="@string/message_to_send"
-                    android:layout_gravity="center"/>
+                    android:text="@string/message_to_send" />
+
                 <TextView
                     android:id="@+id/commands"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/commands"
-                    android:paddingHorizontal="@dimen/dim_8dp"
                     android:layout_gravity="center"
+                    android:background="@color/color_gray"
+                    android:paddingHorizontal="@dimen/dim_8dp"
                     android:paddingVertical="@dimen/dim_4dp"
-                    android:background="@color/color_gray"/>
+                    android:text="@string/commands" />
             </LinearLayout>
 
             <EditText
                 android:id="@+id/message_to_send"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/message_to_send_hint"
                 android:autofillHints="@string/message_to_send_hint"
+                android:hint="@string/message_to_send_hint"
                 android:inputType="textNoSuggestions" />
 
             <Button
@@ -219,36 +221,37 @@
         android:id="@+id/data_base_linear_layout"
         android:layout_width="match_parent"
         android:layout_height="@dimen/dim_0dp"
-        android:orientation="vertical"
-        android:visibility="gone"
         android:background="@android:color/black"
+        android:orientation="vertical"
         android:paddingVertical="@dimen/dim_8dp"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/show_data_base">
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@id/show_data_base"
+        app:layout_constraintTop_toTopOf="parent">
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/dim_16dp"
             android:text="@string/data_base"
             android:textAlignment="center"
             android:textColor="@color/color_green_light"
-            android:textStyle="bold"
-            android:layout_marginTop="@dimen/dim_16dp"/>
+            android:textStyle="bold" />
 
         <ScrollView
             android:layout_width="match_parent"
             android:layout_height="0dp"
+            android:layout_marginHorizontal="@dimen/dim_64dp"
+            android:layout_marginVertical="@dimen/dim_16dp"
             android:layout_weight="1"
             android:orientation="vertical"
-            android:scrollbars="none"
             android:overScrollMode="never"
-            android:layout_marginHorizontal="@dimen/dim_64dp"
-            android:layout_marginVertical="@dimen/dim_16dp">
+            android:scrollbars="none">
+
             <TextView
                 android:id="@+id/dataBase"
-                android:text="@string/waiting_for_data"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+                android:text="@string/waiting_for_data" />
         </ScrollView>
 
     </LinearLayout>
