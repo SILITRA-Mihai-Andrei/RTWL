@@ -1,42 +1,43 @@
+/** YOU MUST REPLACE ALL FIELDS THAT BEGINS WITH "EXAMPLE: " */
 {
   "project_info": {
-    "project_number": "529180953763",
-    "firebase_url": "https://real-time-weather-location.firebaseio.com",
-    "project_id": "real-time-weather-location",
-    "storage_bucket": "real-time-weather-location.appspot.com"
+    "project_number": "EXAMPLE: 529180900000",
+    "firebase_url": "EXAMPLE: https://rtwlts.firebaseio.com",
+    "project_id": "EXAMPLE: rtwl traffic system",
+    "storage_bucket": "EXAMPLE: rtwlts.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:529180953763:android:d7538f24a2edc76dd08316",
+        "mobilesdk_app_id": "EXAMPLE: 1:529180900000:android:d7538f24a2edc76dd00000",
         "android_client_info": {
           "package_name": "com.example.realtimeweatherlocationtrafficsystem"
         }
       },
       "oauth_client": [
         {
-          "client_id": "529180953763-81vapol375gt83kr06tpo34loak5davc.apps.googleusercontent.com",
+          "client_id": "EXAMPLE: 529180900000-81testl375gt83kr06tpo34loak5test.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.example.realtimeweatherlocationtrafficsystem",
-            "certificate_hash": "e17c8a69aa17437a37df6afba24790940a392c16"
+            "certificate_hash": "EXAMPLE: e17c8a69aa00000a37df6afba24700000a392c16"
           }
         },
         {
-          "client_id": "529180953763-t5me2anmuritfi7gunjg86djbrnv1lbj.apps.googleusercontent.com",
+          "client_id": "EXAMPLE: 529180900000-t5me2testritfi7testg86djtest1lbj.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyBaEXgipqQIaBj8GkqDoiYaLcWlaZlreFQ"
+          "current_key": "EXAMPLE: ATeSTyBaEXtestQIaBj8TeStoiYatEsTaZlreFQ"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "529180953763-t5me2anmuritfi7gunjg86djbrnv1lbj.apps.googleusercontent.com",
+              "client_id": "EXAMPLE: 529180900000-81testl375gt83kr06tpo34loak5test.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
