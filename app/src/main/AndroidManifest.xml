@@ -37,7 +37,10 @@
         <!-- RECEIVERS OF BROADCASTS -->
         <receiver android:name=".models.BluetoothReceiveReply" />
 
-        <!-- for Google Maps -->
+        <!-- Google Maps -->
+        <!-- The Google Maps API key will be inserted automatically.
+            You have to change the API key in local.properties file
+         -->
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
