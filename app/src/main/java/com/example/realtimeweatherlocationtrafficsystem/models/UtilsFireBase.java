@@ -13,8 +13,8 @@ public class UtilsFireBase {
      * @param regions is the list of regions that will converted to a String and formatted.
      */
     public static String regionListToString(List<Region> regions) {
-        // Check if the list exists
-        if (regions == null) {
+        // Check if the list exists and have at least one element
+        if (regions == null || regions.size() == 0) {
             // There is no region in database
             return "No data.";
         }

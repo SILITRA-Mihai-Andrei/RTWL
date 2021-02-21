@@ -111,7 +111,7 @@ public class MainActivity extends AppCompatActivity {
         // This registers messageReceiver to receive messages from broadcasts
         LocalBroadcastManager.getInstance(this).registerReceiver(messageReceiver, new IntentFilter(BluetoothService.SERVICE_KEY));
         // Check if the location is enabled
-        if (Utils.isLocationEnabled(getContentResolver(), this)) {
+        if (!Utils.isLocationEnabled(getContentResolver(), this)) {
             // Ask for permission is if not granted
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 0);
         }
@@ -610,7 +610,7 @@ public class MainActivity extends AppCompatActivity {
     public void goToGoogleMaps(View view) {
         // Check if mandatory services and features are active
         if (!BluetoothService.SERVICE_ACTIVE && (!LocationService.SERVICE_ACTIVE || !BluetoothService.GPS_MODULE_WORKING)) {
-            Toast.makeText(this, getString(R.string.no_gps_data_no_send), Toast.LENGTH_LONG).show();
+            Toast.makeText(this, getString(R.string.no_gps_data), Toast.LENGTH_LONG).show();
             return;
         }
         // Start the new activity
