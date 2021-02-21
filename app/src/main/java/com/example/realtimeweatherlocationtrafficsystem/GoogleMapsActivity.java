@@ -68,6 +68,7 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
         if (!FireBaseService.SERVICE_ACTIVE || (!BluetoothService.SERVICE_ACTIVE && !LocationService.SERVICE_ACTIVE)) {
             // Go back to MainActivity to activate the mandatory services
             goToMainActivity();
+            return;
         }
         setContentView(R.layout.activity_google_maps);
         initComponents();  // init the UI components
@@ -87,6 +88,8 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
     @Override
     protected void onResume() {
         super.onResume();
+        // Update the variable that indicates the app is running (not stopped)
+        Utils.APP_ACTIVE = true;
         // This registers messageReceiver to receive messages from broadcast
         // Create the filters of receiver - which type of messages to take
         IntentFilter intentFilter = new IntentFilter();
@@ -106,6 +109,13 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
             // Location service is active, so this activity will continue to wait for a location
             received.setText(getString(R.string.no_gps_data));
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        // Update the variable that indicates the app is running (not stopped)
+        Utils.APP_ACTIVE = false;
+        super.onDestroy();
     }
 
     /**
@@ -143,6 +153,10 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
                 } else if (messageID == MainActivity.SERVICE_MESSAGE_ID_LOCATION) {
                     // Update the current location object
                     currentLocation = LocationService.currentLocation;
+                    // Check if location tracking is enabled and the new location exists
+                    if (locationTracked && currentLocation != null) {
+                        moveMapCamera(currentLocation.getLatitude(), currentLocation.getLongitude(), map.getCameraPosition().zoom);
+                    }
                 }
                 return;
             }

@@ -13,6 +13,8 @@ import androidx.preference.ListPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 
+import com.example.realtimeweatherlocationtrafficsystem.models.Utils;
+
 /**
  * This activity will define and store some of the important variables.
  * It also allow the user to modify them.
@@ -57,6 +59,20 @@ public class SettingsActivity extends AppCompatActivity {
         // Initialize the SharedPreferences object using the keys
         bluetooth_settings = getSharedPreferences(getString(R.string.preference_bluetooth_key), MODE_PRIVATE);
         google_maps_settings = getSharedPreferences(getString(R.string.preference_google_maps_key), MODE_PRIVATE);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Update the variable that indicates the app is running (not stopped)
+        Utils.APP_ACTIVE = true;
+    }
+
+    @Override
+    protected void onDestroy() {
+        // Update the variable that indicates the app is running (not stopped)
+        Utils.APP_ACTIVE = false;
+        super.onDestroy();
     }
 
     /**

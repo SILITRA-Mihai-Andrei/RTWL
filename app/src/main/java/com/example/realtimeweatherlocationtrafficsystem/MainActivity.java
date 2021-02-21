@@ -106,6 +106,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        // Update the variable that indicates the app is running (not stopped)
+        Utils.APP_ACTIVE = true;
         // Update the Bluetooth UI components
         initBluetoothDevicesListView();
         // This registers messageReceiver to receive messages from broadcasts
@@ -133,9 +135,11 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
         // Close the background services if not necessary
         closeBackgroundService();
+        // Update the variable that indicates the app is running (not stopped)
+        Utils.APP_ACTIVE = false;
+        super.onDestroy();
     }
 
     // Handling the received messages from Bluetooth Service
@@ -609,7 +613,7 @@ public class MainActivity extends AppCompatActivity {
      */
     public void goToGoogleMaps(View view) {
         // Check if mandatory services and features are active
-        if (!BluetoothService.SERVICE_ACTIVE && (!LocationService.SERVICE_ACTIVE || !BluetoothService.GPS_MODULE_WORKING)) {
+        if (!BluetoothService.SERVICE_ACTIVE && (!LocationService.SERVICE_ACTIVE && !BluetoothService.GPS_MODULE_WORKING)) {
             Toast.makeText(this, getString(R.string.no_gps_data), Toast.LENGTH_LONG).show();
             return;
         }
