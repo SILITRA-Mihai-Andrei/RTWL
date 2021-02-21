@@ -8,12 +8,12 @@ import android.provider.Settings;
 import android.widget.EditText;
 
 import androidx.core.app.ActivityCompat;
-
 import com.example.realtimeweatherlocationtrafficsystem.R;
-
 import java.util.Date;
 
 public class Utils {
+
+    public static boolean APP_ACTIVE = false;
 
     // Defines the invalid values codes
     // These are used by some functions to check which fields have invalid values
@@ -35,7 +35,7 @@ public class Utils {
      * @param coordinates specifies the coordinates (ex: 46.23 26.20).
      * @param code        specifies the weather code (from 100 to 499).
      * @param temperature specifies the weather temperature (between -50 and 50 Celsius).
-     * @param humidity    specifies the weather humidiyu (between 0 and 100).
+     * @param humidity    specifies the weather humidity (between 0 and 100).
      * @param air         specifies the region air quality or pollution (between 0 and 100).
      * @return the validation code that indicates which field is not valid or if all are valid.
      */

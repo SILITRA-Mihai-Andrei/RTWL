@@ -77,6 +77,8 @@ public class TerminalActivity extends AppCompatActivity implements Serializable 
     @Override
     protected void onResume() {
         super.onResume();
+        // Update the variable that indicates the app is running (not stopped)
+        Utils.APP_ACTIVE = true;
         // This registers messageReceiver to receive messages from broadcasts
         // Create a filter that will filtrate the messages from broadcasts
         IntentFilter intentFilter = new IntentFilter();
@@ -118,6 +120,13 @@ public class TerminalActivity extends AppCompatActivity implements Serializable 
         // Go to main activity
         // When the user comes back to app, the MainActivity will check all changes made
         goToMainActivity();
+    }
+
+    @Override
+    protected void onDestroy() {
+        // Update the variable that indicates the app is running (not stopped)
+        Utils.APP_ACTIVE = false;
+        super.onDestroy();
     }
 
     // Handling the received Intents from BluetoothService Service
@@ -344,7 +353,7 @@ public class TerminalActivity extends AppCompatActivity implements Serializable 
                 AlertDialog.Builder builder = new AlertDialog.Builder(TerminalActivity.this);
                 // Write the available commands
                 builder.setMessage(UtilsBluetooth.BLUETOOTH_COMMANDS_LIST).setCancelable(true);
-                // Set the alert diaglo title
+                // Set the alert dialog title
                 builder.setTitle(R.string.bluetooth_commands_title);
                 // Show the alert dialog
                 builder.show();
@@ -419,7 +428,7 @@ public class TerminalActivity extends AppCompatActivity implements Serializable 
     }
 
     /**
-     * Go to main activity. Call the extented method.
+     * Go to main activity. Call the extended method.
      */
     public void goToMainActivity() {
         goToMainActivity(new View(this));
