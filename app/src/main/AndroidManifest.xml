@@ -39,7 +39,8 @@
 
         <!-- Google Maps -->
         <!-- The Google Maps API key will be inserted automatically.
-            You have to change the API key in local.properties file
+            You have to change the API key in local.properties file.
+            Another API key must be changed in google-services.json.
          -->
         <meta-data
             android:name="com.google.android.gms.version"
