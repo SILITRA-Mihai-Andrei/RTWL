@@ -1,5 +1,7 @@
 package com.example.realtimeweatherlocationtrafficsystem;
 
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
@@ -13,12 +15,16 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.location.Location;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.realtimeweatherlocationtrafficsystem.models.Prediction;
 import com.example.realtimeweatherlocationtrafficsystem.models.Region;
 import com.example.realtimeweatherlocationtrafficsystem.models.Utils;
 import com.example.realtimeweatherlocationtrafficsystem.models.UtilsBluetooth;
@@ -35,6 +41,8 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -111,13 +119,6 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
         }
     }
 
-    @Override
-    protected void onDestroy() {
-        // Update the variable that indicates the app is running (not stopped)
-        Utils.APP_ACTIVE = false;
-        super.onDestroy();
-    }
-
     /**
      * Initialize the Google map and the listener (onMapReadyCallback). When the map will be ready
      * there will be a notification from listener.
@@ -149,8 +150,9 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
                 if (messageID == MainActivity.SERVICE_MESSAGE_ID_REGIONS) {
                     // Update the regions in activity
                     onFirebaseDataNew(FireBaseService.regions);
-                    // Check if the message contains the location from Location service
-                } else if (messageID == MainActivity.SERVICE_MESSAGE_ID_LOCATION) {
+                }
+                // Check if the message contains the location from Location service
+                else if (messageID == MainActivity.SERVICE_MESSAGE_ID_LOCATION) {
                     // Update the current location object
                     currentLocation = LocationService.currentLocation;
                     // Check if location tracking is enabled and the new location exists
@@ -366,6 +368,8 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
         initMapComponents();
         // Set the InfoWindow adapter for markers
         setInfoWindowAdapter();
+        // Update the regions in activity
+        onFirebaseDataNew(FireBaseService.regions);
         // Set the location tracking by default
         setLocationTrack(true);
     }
@@ -550,15 +554,19 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
                     weather.setTextColor(getResources().getColor(R.color.color_red_dark));
                 }
                 // Set the temperature
-                temperature.setText(String.format(getString(R.string.temperature_celsius_placeholder), weatherObj.getTemperature()));
+                temperature.setText(String.format(getString(R.string.float_temperature_celsius_placeholder), weatherObj.getTemperature()));
                 // Set the humidity
-                humidity.setText(String.format(getString(R.string.value_percent_placeholder), weatherObj.getHumidity()));
+                humidity.setText(String.format(getString(R.string.float_percent_placeholder), weatherObj.getHumidity()));
                 // Set the air quality / pollution
-                air.setText(String.format(getString(R.string.value_percent_placeholder), weatherObj.getAir()));
+                air.setText(String.format(getString(R.string.float_percent_placeholder), weatherObj.getAir()));
                 // Set the air quality / pollution bar
                 if (weatherObj.getAir() >= 0 && weatherObj.getAir() <= 100)
                     // Set air quality / pollution
                     airBar.setProgress((int) weatherObj.getAir());
+
+                // Set the predictions for the current region
+                setPredictions(window, region);
+
                 return window;
             }
 
@@ -575,6 +583,112 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
                 marker.hideInfoWindow();
             }
         });
+    }
+
+    /**
+     * Set predictions for the region's marker.
+     * Inflate in the InfoWindow 3 new views containing prediction data.
+     * <p>
+     * Prediction data contains:
+     * -- weather code predicted with its probability;
+     * -- temperature predicted with its probability;
+     * -- humidity predicted with its probability.
+     *
+     * @param window is the InfoWindow of the region marker where the predictions will be inserted.
+     * @param region specifies the region.
+     */
+    private void setPredictions(View window, Region region) {
+        // Get the predictions from the region
+        HashMap<String, Prediction> prediction = UtilsGoogleMaps.getPredictions(region.getName());
+        // Check if there are predictions
+        if (prediction != null) {
+            // Get the system inflater necessary to inflate view in the InfoWindow
+            LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            if (inflater == null) return;
+            // Get the LinearLayout where the views will be inserted
+            LinearLayout weather_data_ll = window.findViewById(R.id.weather_data_ll);
+            // Create new LinearLayout for a single prediction
+            // In this will be inserted the views with custom prediction data
+            LinearLayout predictions_ll = new LinearLayout(window.getContext());
+            // In this list will be inserted all the prediction views created with custom data
+            // From this list, the views will be inserted in the main layout (containing all predictions)
+            ArrayList<View> views = new ArrayList<>();
+
+            // Configure the prediction layout
+            predictions_ll.setLayoutParams(
+                    new LinearLayout.LayoutParams(
+                            ViewGroup.LayoutParams.MATCH_PARENT,
+                            ViewGroup.LayoutParams.WRAP_CONTENT));
+            predictions_ll.setOrientation(LinearLayout.HORIZONTAL);
+            predictions_ll.setHorizontalGravity(View.TEXT_ALIGNMENT_CENTER);
+
+            // Count the prediction views
+            int counter = 0;
+            for (String key : prediction.keySet()) {
+                // Get the prediction layout and inflate it in a view
+                @SuppressLint("InflateParams")
+                View v = inflater.inflate(R.layout.item_prediction, null);
+                // Get the prediction data from the HashMap
+                Prediction predict = prediction.get(key);
+                // Check if the prediction exists
+                if (predict == null) continue;
+
+                // Find all view from prediction layout
+                ConstraintLayout prediction_body = v.findViewById(R.id.prediction_body);
+                TextView prediction_datetime = v.findViewById(R.id.prediction_datetime);
+                TextView prediction_weather_probability = v.findViewById(R.id.prediction_weather_probability);
+                ImageView prediction_weather_image = v.findViewById(R.id.prediction_image);
+                TextView prediction_weather = v.findViewById(R.id.prediction_weather);
+                TextView prediction_temperature = v.findViewById(R.id.prediction_temperature);
+                TextView prediction_temperature_accuracy = v.findViewById(R.id.prediction_temperature_accuracy);
+                TextView prediction_humidity = v.findViewById(R.id.prediction_humidity);
+                TextView prediction_humidity_accuracy = v.findViewById(R.id.prediction_humidity_accuracy);
+
+                // Set the views from prediction layout with custom prediction data
+                prediction_weather.setText(
+                        UtilsGoogleMaps.getWeatherString(
+                                UtilsGoogleMaps.getWeatherStringIndex(
+                                        predict.getCode()), getBaseContext()));
+                String[] datetime = key.split(":");
+                prediction_datetime.setText(String.format("%s:%s", datetime[3], datetime[4]));
+                prediction_weather_probability.setText(String.format(getString(R.string.int_percent_placeholder), predict.getCode_p()));
+                prediction_weather_image.setImageDrawable(ContextCompat.getDrawable(window.getContext(), R.drawable.sun));
+                prediction_temperature.setText(String.format(getString(R.string.int_temperature_celsius_placeholder), predict.getTemperature()));
+                prediction_temperature_accuracy.setText(String.format(getString(R.string.int_percent_placeholder), predict.getTemperature_p()));
+                prediction_humidity.setText(String.format(getString(R.string.int_percent_placeholder), predict.getHumidity()));
+                prediction_humidity_accuracy.setText(String.format(getString(R.string.int_percent_placeholder), predict.getHumidity_p()));
+                // The prediction has data, so show the view
+                prediction_body.setVisibility(View.VISIBLE);
+                // Add the configured view to the list - it will be inserted in the main layout after
+                views.add(v);
+                // Count another valid prediction
+                counter++;
+            }
+            // Check if there are 3 predictions
+            if (counter != 3) {
+                // Add 'No available' view to complete the invalid predictions
+                for (int i = counter; i < 3; i++) {
+                    // Create a new view
+                    @SuppressLint("InflateParams")
+                    View v = inflater.inflate(R.layout.item_prediction, null);
+                    // Show only the views for invalid predictions
+                    TextView no_available_prediction = v.findViewById(R.id.no_available);
+                    no_available_prediction.setVisibility(View.VISIBLE);
+                    // Add the view to the list
+                    views.add(v);
+                }
+            }
+            // Reverse the list
+            // The HashMap data is reversed, so now reverse again XD
+            Collections.reverse(views);
+            // Loop through all the views in the list
+            for (View view : views) {
+                // Add the views to the predictions layout (horizontal linear layout)
+                predictions_ll.addView(view);
+            }
+            // Add the predictions layout to the InfoWindow view (under air quality)
+            weather_data_ll.addView(predictions_ll);
+        }
     }
 
 
@@ -601,6 +715,8 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
      * Go to MainActivity safe. Unregister all broadcast receivers.
      */
     public void goToMainActivity() {
+        // Update the variable that indicates the app is running (not stopped)
+        Utils.APP_ACTIVE = false;
         end();
         finish();
     }

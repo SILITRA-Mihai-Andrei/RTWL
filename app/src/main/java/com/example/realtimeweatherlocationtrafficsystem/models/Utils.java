@@ -1,5 +1,6 @@
 package com.example.realtimeweatherlocationtrafficsystem.models;
 
+import android.app.ActivityManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -10,6 +11,7 @@ import android.widget.EditText;
 import androidx.core.app.ActivityCompat;
 import com.example.realtimeweatherlocationtrafficsystem.R;
 import java.util.Date;
+import java.util.List;
 
 public class Utils {
 
@@ -28,6 +30,26 @@ public class Utils {
     // This value is used by the receiveBox view from TerminalActivity
     // If the number of characters is exceeded, all content is erased and new message is written
     public final static int MAX_RECEIVE_BOX_LENGTH = 1024;
+
+    /**
+     * Return if the application is still running.
+     * */
+    public static boolean isBackgroundRunning(Context context) {
+        ActivityManager am = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        assert am != null;
+        List<ActivityManager.RunningAppProcessInfo> runningProcesses = am.getRunningAppProcesses();
+        for (ActivityManager.RunningAppProcessInfo processInfo : runningProcesses) {
+            if (processInfo.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND) {
+                for (String activeProcess : processInfo.pkgList) {
+                    if (activeProcess.equals(context.getPackageName())) {
+                        // If your app is the process in foreground, then it's not in running in background
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
 
     /**
      * Check if all fields have valid values.

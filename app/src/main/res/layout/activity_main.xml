@@ -13,34 +13,38 @@
         android:layout_height="match_parent"
         android:background="@android:color/black"
         android:elevation="@dimen/dim_16dp"
-        android:visibility="gone"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:visibility="gone">
+
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/dim_128dp"
             android:text="@string/loading"
             android:textAlignment="center"
-            android:textSize="@dimen/size_24sp"
-            android:layout_marginTop="@dimen/dim_128dp"/>
+            android:textSize="@dimen/size_24sp" />
+
         <TextView
             android:id="@+id/loading_message"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/dim_16dp"
             android:text="@string/loading_points"
             android:textAlignment="center"
-            android:textSize="@dimen/size_16sp"
-            android:layout_marginTop="@dimen/dim_16dp"/>
+            android:textSize="@dimen/size_16sp" />
+
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/dim_16dp"
             android:text="@string/please_wait"
             android:textAlignment="center"
-            android:textSize="@dimen/size_16sp"
-            android:layout_marginBottom="@dimen/dim_16dp"/>
+            android:textSize="@dimen/size_16sp" />
+
         <ProgressBar
+            style="?android:attr/progress"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            style="?android:attr/progress"/>
+            android:layout_height="wrap_content" />
     </LinearLayout>
 
     <androidx.appcompat.widget.Toolbar
@@ -48,8 +52,8 @@
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:background="?attr/colorPrimary"
-        android:elevation="4dp"
         android:backgroundTint="@android:color/black"
+        android:elevation="4dp"
         android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
         app:layout_constraintTop_toTopOf="parent"
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
@@ -123,10 +127,10 @@
         android:layout_width="@dimen/dim_0dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="@dimen/dim_8dp"
-        android:textColor="@android:color/white"
         android:textAlignment="center"
-        android:textStyle="bold"
+        android:textColor="@android:color/white"
         android:textSize="@dimen/size_16sp"
+        android:textStyle="bold"
         app:layout_constraintBottom_toTopOf="@id/btn_send_background"
         app:layout_constraintEnd_toEndOf="@+id/ls_bluetooth_devices"
         app:layout_constraintStart_toStartOf="@+id/ls_bluetooth_devices" />
@@ -171,12 +175,12 @@
 
     <LinearLayout
         android:id="@+id/infoLinearLayout"
-        android:visibility="gone"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
         android:background="@android:color/black"
-        android:elevation="@dimen/dim_16dp">
+        android:elevation="@dimen/dim_16dp"
+        android:orientation="vertical"
+        android:visibility="gone">
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -234,29 +238,29 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/dim_16dp"
             android:text="@string/application_details"
-            android:textColor="@android:color/white"
-            android:textStyle="bold"
-            android:textSize="@dimen/size_18sp"
             android:textAlignment="center"
-            android:layout_marginTop="@dimen/dim_16dp"/>
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/size_18sp"
+            android:textStyle="bold" />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1"
-            android:text="@string/application_details_description"
-            android:textColor="@android:color/white"
             android:layout_marginTop="@dimen/dim_16dp"
-            android:paddingHorizontal="@dimen/dim_64dp"/>
+            android:layout_weight="1"
+            android:paddingHorizontal="@dimen/dim_64dp"
+            android:text="@string/application_details_description"
+            android:textColor="@android:color/white" />
 
         <Button
             android:id="@+id/ok"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/ok"
             android:layout_gravity="center"
-            android:layout_marginBottom="@dimen/dim_64dp"/>
+            android:layout_marginBottom="@dimen/dim_64dp"
+            android:text="@string/ok" />
 
     </LinearLayout>
 

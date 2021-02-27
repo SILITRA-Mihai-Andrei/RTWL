@@ -2,12 +2,18 @@ package com.example.realtimeweatherlocationtrafficsystem.models;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.util.Log;
 
 import com.example.realtimeweatherlocationtrafficsystem.R;
+import com.example.realtimeweatherlocationtrafficsystem.services.FireBaseService;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolygonOptions;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * Implement public static functions used for GoogleMaps activity.
@@ -244,6 +250,30 @@ public class UtilsGoogleMaps {
             return DIRECTIONS[(degrees - 15) / 30];
         }
         return DIRECTIONS[0];
+    }
+
+    /**
+     * Get the prediction data (date-time and values) of the region.
+     * Check in the predictions list if the region exists.
+     *
+     * @param region specifies the finding region.
+     * @return null if there is no region for region, otherwise return the prediction data
+     */
+    public static HashMap<String, Prediction> getPredictions(String region) {
+        // Check if the predictions list exists and is not empty
+        if (FireBaseService.predictions == null || FireBaseService.predictions.isEmpty())
+            return null;
+        // Loop through all predictions
+        for (HashMap<String, HashMap<String, Prediction>> prediction : FireBaseService.predictions) {
+            // Get the key of the HashMap - the key is the region name
+            String key = (String) prediction.keySet().toArray()[0];
+            // Check if the current region in loop is equal to the finding one
+            if (key.equals(region)) {
+                // Found the region, return its prediction data
+                return prediction.get(key);
+            }
+        }
+        return null;
     }
 
     /**

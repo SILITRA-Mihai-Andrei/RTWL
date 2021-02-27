@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@drawable/rounded_8dp_dark_gray_border_green_transparent"
+    android:padding="@dimen/dim_4dp">
+
+    <TextView
+        android:id="@+id/no_available"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:gravity="center"
+        android:text="@string/no_available"
+        android:textAlignment="center"
+        android:textSize="@dimen/size_10sp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/prediction_body"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/prediction_datetime"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/dim_4dp"
+            android:textSize="@dimen/size_8sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/prediction_image" />
+
+        <ImageView
+            android:id="@+id/prediction_image"
+            android:layout_width="@dimen/dim_16dp"
+            android:layout_height="@dimen/dim_16dp"
+            android:contentDescription="@string/image_description_predictions"
+            android:src="@drawable/alert"
+            app:layout_constraintEnd_toStartOf="@id/prediction_weather_probability"
+            app:layout_constraintStart_toEndOf="@id/prediction_datetime"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/prediction_weather_probability"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/dim_4dp"
+            android:textSize="@dimen/size_8sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/prediction_image" />
+
+        <TextView
+            android:id="@+id/prediction_weather"
+            android:layout_width="60dip"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/dim_4dp"
+            android:textAlignment="center"
+            android:textSize="@dimen/size_10sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/prediction_datetime" />
+
+        <ImageView
+            android:id="@+id/temp_image"
+            android:layout_width="@dimen/dim_12dp"
+            android:layout_height="@dimen/dim_12dp"
+            android:contentDescription="@string/image_description_predictions"
+            android:src="@drawable/temperature"
+            app:layout_constraintBottom_toBottomOf="@id/prediction_temperature"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/prediction_temperature" />
+
+        <TextView
+            android:id="@+id/prediction_temperature"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/dim_4dp"
+            android:textSize="@dimen/size_10sp"
+            app:layout_constraintStart_toEndOf="@id/temp_image"
+            app:layout_constraintTop_toBottomOf="@id/prediction_weather" />
+
+        <TextView
+            android:id="@+id/prediction_temperature_accuracy"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/size_8sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/prediction_temperature" />
+
+        <ImageView
+            android:id="@+id/hum_image"
+            android:layout_width="@dimen/dim_12dp"
+            android:layout_height="@dimen/dim_12dp"
+            android:contentDescription="@string/image_description_predictions"
+            android:src="@drawable/humidity"
+            app:layout_constraintBottom_toBottomOf="@id/prediction_humidity"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/prediction_humidity" />
+
+        <TextView
+            android:id="@+id/prediction_humidity"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/size_10sp"
+            app:layout_constraintStart_toEndOf="@id/hum_image"
+            app:layout_constraintTop_toBottomOf="@id/prediction_temperature" />
+
+        <TextView
+            android:id="@+id/prediction_humidity_accuracy"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/size_8sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/prediction_humidity" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

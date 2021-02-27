@@ -17,4 +17,8 @@
     <dimen name="size_22sp">22sp</dimen>
     <dimen name="dim_52dp">52dp</dimen>
     <dimen name="dim_90dp">90dp</dimen>
+    <dimen name="size_10sp">10sp</dimen>
+    <dimen name="dim_12dp">12dp</dimen>
+    <dimen name="dim_16sp">16sp</dimen>
+    <dimen name="size_8sp">8sp</dimen>
 </resources>

@@ -135,10 +135,10 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        // Close the background services if not necessary
-        closeBackgroundService();
         // Update the variable that indicates the app is running (not stopped)
         Utils.APP_ACTIVE = false;
+        // Close the background services if not necessary
+        closeBackgroundService();
         super.onDestroy();
     }
 
@@ -596,7 +596,7 @@ public class MainActivity extends AppCompatActivity {
         // Check if the location service is active
         if (LocationService.SERVICE_ACTIVE) {
             // Check if Bluetooth service received at least one valid GPS coordinates from GPS module
-            if (BluetoothService.GPS_MODULE_WORKING) {
+            if (BluetoothService.GPS_MODULE_WORKING || !Utils.APP_ACTIVE && !Utils.isBackgroundRunning(this)) {
                 // GPS module can supply GPS coordinates instead of this service
                 stopService(locationServiceIntent);
             } else {
