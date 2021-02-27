@@ -58,7 +58,6 @@ public class LocationService extends Service implements LocationListener {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Toast.makeText(this, "DESTROY", Toast.LENGTH_SHORT).show();
         SERVICE_ACTIVE = false;
         // Stop the service
         stopSelf();
@@ -119,7 +118,7 @@ public class LocationService extends Service implements LocationListener {
      */
     private void checkAppStatus() {
         // Check if the app is still running and the Bluetooth service is active
-        if (!Utils.APP_ACTIVE && !BluetoothService.SERVICE_ACTIVE) {
+        if (!Utils.APP_ACTIVE && Utils.isBackgroundRunning(this) && !BluetoothService.SERVICE_ACTIVE) {
             // This service is not necessary anymore
             onDestroy();
         }

@@ -62,10 +62,12 @@
     <string name="unknown">Unknown</string>
     <string name="region">Region</string>
     <string name="temperature">Temperature:</string>
-    <string name="temperature_celsius_placeholder">%1$.1f\u2103:</string>
+    <string name="float_temperature_celsius_placeholder">%1$.1f\u2103</string>
+    <string name="int_temperature_celsius_placeholder">%1$d\u2103</string>
     <string name="humidity">Humidity:</string>
     <string name="air_quality">Air quality:</string>
-    <string name="value_percent_placeholder">%1$.1f%%</string>
+    <string name="float_percent_placeholder">%1$.1f%%</string>
+    <string name="int_percent_placeholder">%1$d%%</string>
     <string name="show_data_base">Show DataBase content</string>
     <string name="hide_data_base">Hide DataBase content</string>
     <string name="clear">CLEAR</string>
@@ -154,5 +156,7 @@
     <string name="grant_location_permission">Please grant permission to location.</string>
     <string name="stop_bluetooth_service_first">Bluetooth service is active. If you want to close the database service, please stop the Bluetooth service.</string>
     <string name="no_gps_data_without_service">You can\'t close the location service because the GPS module didn\'t send any location yet.</string>
+    <string name="image_description_predictions">Predictions</string>
+    <string name="no_available">No available!</string>
 
 </resources>

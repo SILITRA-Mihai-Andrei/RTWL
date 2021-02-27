@@ -13,11 +13,13 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import com.example.realtimeweatherlocationtrafficsystem.MainActivity;
 import com.example.realtimeweatherlocationtrafficsystem.models.Data;
 import com.example.realtimeweatherlocationtrafficsystem.models.FireBaseManager;
+import com.example.realtimeweatherlocationtrafficsystem.models.Prediction;
 import com.example.realtimeweatherlocationtrafficsystem.models.Region;
 import com.example.realtimeweatherlocationtrafficsystem.models.Utils;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -42,6 +44,7 @@ public class FireBaseService extends Service implements FireBaseManager.onFireBa
     public static FireBaseManager fireBaseManager;
     // Define the region list received from database
     public static List<Region> regions = new ArrayList<>();
+    public static List<HashMap<String, HashMap<String, Prediction>>> predictions = new ArrayList<>();
 
 
     @Override
@@ -135,7 +138,7 @@ public class FireBaseService extends Service implements FireBaseManager.onFireBa
      */
     private void checkAppStatus() {
         // Check if the app is running and the Bluetooth service is active
-        if (!Utils.APP_ACTIVE && !BluetoothService.SERVICE_ACTIVE) {
+        if (!Utils.APP_ACTIVE && Utils.isBackgroundRunning(this) && !BluetoothService.SERVICE_ACTIVE) {
             // The service is not necessary anymore
             onDestroy();
         }
@@ -153,6 +156,12 @@ public class FireBaseService extends Service implements FireBaseManager.onFireBa
         FireBaseService.regions = regions;
         // Send a broadcast message to all active activities indicating that there is new GPS location available
         sendNewData();
+    }
+
+    @Override
+    public void onDataNewFireBasePredictions(List<HashMap<String, HashMap<String, Prediction>>> predictions) {
+        // Update the received predictions list
+        FireBaseService.predictions = predictions;
     }
 
     @Override

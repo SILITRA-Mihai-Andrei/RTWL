@@ -1,14 +1,18 @@
 package com.example.realtimeweatherlocationtrafficsystem.models;
 
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -18,11 +22,13 @@ import java.util.List;
 public class FireBaseManager {
 
     // Define the main nodes in database
-    public static final String dataPath = "data/";          // contains all the records sent by users
-    public static final String weatherPath = "weather/";    // contains all calculated data from /data/ node
+    public static final String dataPath = "data/";                  // contains all the records sent by users
+    public static final String weatherPath = "weather/";            // contains all calculated data from /data/ node
+    public static final String predictionPath = "predictions/";     // contains all predictions for regions
 
     // Define the list of regions that will received from database
     private List<Region> regions = new ArrayList<>();
+    private ArrayList<HashMap<String, HashMap<String, Prediction>>> predictions = new ArrayList<>();
     // Interface that will notify when new data from database is received
     private onFireBaseDataNew onFireBaseDataNew;
 
@@ -32,6 +38,8 @@ public class FireBaseManager {
      */
     public interface onFireBaseDataNew {
         void onDataNewFireBase(List<Region> regions);
+
+        void onDataNewFireBasePredictions(List<HashMap<String, HashMap<String, Prediction>>> predictions);
     }
 
     /**
@@ -41,19 +49,25 @@ public class FireBaseManager {
     public FireBaseManager(onFireBaseDataNew onFireBaseDataNew) {
         // Create the database reference for /weather/ node
         // This node contains all data calculated by the server using the data from /data/ node
-        DatabaseReference databaseReference =
+        DatabaseReference databaseWeatherReference =
                 FirebaseDatabase.getInstance().getReference().child(weatherPath);
+        // Add listener on value added to database event
+        databaseWeatherReference.addValueEventListener(getWeatherValueEventListener());
+        // Create the database reference for /predictions/ node
+        // This node contains all the predictions for all regions
+        DatabaseReference databasePredictionReference =
+                FirebaseDatabase.getInstance().getReference().child(predictionPath);
+        // Add listener on value added to database event
+        databasePredictionReference.addValueEventListener(getPredictionValueEventListener());
         // Initialize the interface
         this.onFireBaseDataNew = onFireBaseDataNew;
-        // Add listener on value added to database event
-        databaseReference.addValueEventListener(getValueEventListener());
     }
 
     /**
-     * Listener that will be notified when new values appear in database.
+     * Listener that will be notified when new values appear in database /weather/ node.
      * It will receive all new data from database.
      */
-    public ValueEventListener getValueEventListener() {
+    public ValueEventListener getWeatherValueEventListener() {
         return new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -88,6 +102,46 @@ public class FireBaseManager {
                 }
                 // Notify the interface that the regions list is updated
                 onFireBaseDataNew.onDataNewFireBase(regions);
+            }
+
+            /** No implementation. */
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+            }
+        };
+    }
+
+    /**
+     * Listener that will be notified when new values appear in database /predictions/ node.
+     * It will receive all new data from database.
+     */
+    public ValueEventListener getPredictionValueEventListener() {
+        return new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                predictions = new ArrayList<>();
+                // Loop through all new data received from database
+                for (final DataSnapshot ds : snapshot.getChildren()) {
+                    // Convert the dictionary to a generic object class
+                    // This allow the DataSnapshot object to convert the dictionary to a HashMap
+                    GenericTypeIndicator<HashMap<String, Prediction>> to =
+                            new GenericTypeIndicator<HashMap<String, Prediction>>() {
+                            };
+                    // Create the HashMap from dictionary
+                    // The String will be the date and time of the prediction
+                    // The Prediction object contains the prediction data
+                    final HashMap<String, Prediction> map = ds.getValue(to);
+                    if (map != null)
+                        // Add the prediction to predictions list
+                        predictions.add(new HashMap<String, HashMap<String, Prediction>>() {
+                            {
+                                // Insert the prediction region name and the prediction data for it
+                                put(ds.getKey(), map);
+                            }
+                        });
+                }
+                // Notify the interface that the predictions list is updated
+                onFireBaseDataNew.onDataNewFireBasePredictions(predictions);
             }
 
             /** No implementation. */

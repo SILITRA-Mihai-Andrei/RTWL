@@ -35,27 +35,24 @@ import com.example.realtimeweatherlocationtrafficsystem.R;
 import com.example.realtimeweatherlocationtrafficsystem.models.BluetoothClientClass;
 import com.example.realtimeweatherlocationtrafficsystem.models.BluetoothReceiveReply;
 import com.example.realtimeweatherlocationtrafficsystem.models.Data;
-import com.example.realtimeweatherlocationtrafficsystem.models.FireBaseManager;
-import com.example.realtimeweatherlocationtrafficsystem.models.Region;
 import com.example.realtimeweatherlocationtrafficsystem.models.Utils;
 import com.example.realtimeweatherlocationtrafficsystem.models.UtilsBluetooth;
 import com.example.realtimeweatherlocationtrafficsystem.models.UtilsGoogleMaps;
 
 import java.io.IOException;
 import java.util.Date;
-import java.util.List;
 
 /**
  * This foreground service will connect to a Bluetooth device and handle the connection and communication with it.
  * The service states will be sent through broadcasts messages.
  */
 @SuppressLint("ParcelCreator")
-public class BluetoothService extends Service implements Parcelable, FireBaseManager.onFireBaseDataNew {
+public class BluetoothService extends Service implements Parcelable {
 
     // True if the service is active, false otherwise
     public static boolean SERVICE_ACTIVE;
 
-    // True if the GPS module sends valid GPS coordiantes
+    // True if the GPS module sends valid GPS coordinates
     public static boolean GPS_MODULE_WORKING = false;
 
     // Service keys
@@ -647,7 +644,4 @@ public class BluetoothService extends Service implements Parcelable, FireBaseMan
         dest.writeParcelable(device, flags);
     }
 
-    @Override
-    public void onDataNewFireBase(List<Region> regions) {
-    }
 }

@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -8,9 +7,9 @@
 
     <fragment
         android:id="@+id/map"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:name="com.google.android.gms.maps.SupportMapFragment"
         tools:ignore="FragmentTagUsage" />
 
     <TextView
@@ -31,29 +30,28 @@
         android:layout_alignTop="@id/map"
         android:layout_marginStart="@dimen/dim_8dp"
         android:layout_marginTop="@dimen/dim_8dp"
-        android:src="@drawable/google_maps"
-        android:contentDescription="@string/change_the_map_type" />
+        android:contentDescription="@string/change_the_map_type"
+        android:src="@drawable/google_maps" />
 
     <ImageView
         android:id="@+id/location"
         android:layout_width="@dimen/dim_32dp"
         android:layout_height="@dimen/dim_32dp"
-        android:layout_alignStart="@id/map"
         android:layout_below="@id/mapType"
+        android:layout_alignStart="@id/map"
         android:layout_marginStart="@dimen/dim_8dp"
         android:layout_marginTop="@dimen/dim_8dp"
-        android:src="@drawable/location_untracked"
-        android:contentDescription="@string/active_track_location" />
+        android:contentDescription="@string/active_track_location"
+        android:src="@drawable/location_untracked" />
 
     <ImageView
         android:id="@+id/regionWeatherIcon"
         android:layout_width="@dimen/dim_32dp"
         android:layout_height="@dimen/dim_32dp"
+        android:layout_below="@id/location"
+        android:layout_alignStart="@id/map"
         android:layout_marginStart="@dimen/dim_8dp"
         android:layout_marginTop="@dimen/dim_8dp"
-        android:src="@drawable/sun"
-        android:layout_alignStart="@id/map"
-        android:layout_below="@id/location"
         android:contentDescription="@string/the_current_region_weather" />
 
     <!-- Button hidden for sending command to microcontroller -->
@@ -61,6 +59,6 @@
         android:id="@+id/send"
         android:layout_width="@dimen/dim_0dp"
         android:layout_height="@dimen/dim_0dp"
-        android:visibility="gone"/>
+        android:visibility="gone" />
 
 </RelativeLayout>

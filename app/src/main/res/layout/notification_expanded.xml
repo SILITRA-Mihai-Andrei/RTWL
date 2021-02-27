@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     style="@style/NotificationStyle"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -9,20 +8,20 @@
         android:id="@+id/title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/dim_4dp"
         android:layout_alignParentStart="true"
-        android:layout_alignParentEnd="true"
         android:layout_alignParentTop="true"
-        android:textColor="@color/color_gray"/>
+        android:layout_alignParentEnd="true"
+        android:layout_marginBottom="@dimen/dim_4dp"
+        android:textColor="@color/color_gray" />
 
     <ImageView
         android:id="@+id/logo"
         android:layout_width="56dp"
         android:layout_height="56dp"
-        android:layout_alignParentStart="true"
         android:layout_below="@id/title"
-        android:src="@mipmap/ic_launcher"
-        android:contentDescription="@string/app_name" />
+        android:layout_alignParentStart="true"
+        android:contentDescription="@string/app_name"
+        android:src="@mipmap/ic_launcher" />
 
     <TextView
         android:id="@+id/region"
@@ -49,32 +48,32 @@
         android:id="@+id/temperatureImage"
         android:layout_width="15dp"
         android:layout_height="15dp"
-        android:layout_alignBottom="@id/temperatureLabel"
         android:layout_below="@id/logo"
+        android:layout_alignBottom="@id/temperatureLabel"
         android:layout_alignParentStart="true"
         android:layout_marginTop="8dp"
-        android:src="@drawable/temperature"
-        android:contentDescription="@string/temperature_label" />
+        android:contentDescription="@string/temperature_label"
+        android:src="@drawable/temperature" />
 
     <TextView
         android:id="@+id/temperatureLabel"
+        style="@style/NotificationStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/logo"
-        android:layout_toEndOf="@id/temperatureImage"
         android:layout_marginStart="0dp"
         android:layout_marginTop="8dp"
-        android:text="@string/temperature_dots"
-        style="@style/NotificationStyle"/>
+        android:layout_toEndOf="@id/temperatureImage"
+        android:text="@string/temperature_dots" />
 
     <TextView
         android:id="@+id/temperature"
+        style="@style/NotificationStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/logo"
         android:layout_marginTop="@dimen/dim_8dp"
-        android:layout_toEndOf="@id/temperatureLabel"
-        style="@style/NotificationStyle"/>
+        android:layout_toEndOf="@id/temperatureLabel" />
 
     <ImageView
         android:id="@+id/humidityImage"
@@ -82,118 +81,118 @@
         android:layout_height="15dp"
         android:layout_below="@id/logo"
         android:layout_alignBottom="@id/humidityLabel"
-        android:layout_toStartOf="@id/humidityLabel"
         android:layout_marginTop="8dp"
-        android:src="@drawable/humidity"
-        android:contentDescription="@string/humidity_label" />
+        android:layout_toStartOf="@id/humidityLabel"
+        android:contentDescription="@string/humidity_label"
+        android:src="@drawable/humidity" />
 
     <TextView
         android:id="@+id/humidityLabel"
+        style="@style/NotificationStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/logo"
         android:layout_marginTop="@dimen/dim_8dp"
         android:layout_toStartOf="@id/humidity"
-        android:text="@string/humidity_dots"
-        style="@style/NotificationStyle"/>
+        android:text="@string/humidity_dots" />
 
     <TextView
         android:id="@+id/humidity"
+        style="@style/NotificationStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/logo"
         android:layout_alignParentEnd="true"
-        android:layout_marginTop="@dimen/dim_8dp"
-        style="@style/NotificationStyle"/>
+        android:layout_marginTop="@dimen/dim_8dp" />
 
     <ImageView
         android:id="@+id/speedImage"
         android:layout_width="15dp"
         android:layout_height="15dp"
-        android:layout_alignBottom="@id/speedLabel"
         android:layout_below="@id/temperatureImage"
+        android:layout_alignBottom="@id/speedLabel"
         android:layout_alignParentStart="true"
         android:layout_marginTop="8dp"
-        android:src="@drawable/speed"
-        android:contentDescription="@string/speed_label" />
+        android:contentDescription="@string/speed_label"
+        android:src="@drawable/speed" />
 
     <TextView
         android:id="@+id/speedLabel"
+        style="@style/NotificationStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/temperatureLabel"
-        android:layout_toEndOf="@id/speedImage"
         android:layout_marginTop="@dimen/dim_8dp"
-        android:text="@string/speed_dots"
-        style="@style/NotificationStyle"/>
+        android:layout_toEndOf="@id/speedImage"
+        android:text="@string/speed_dots" />
 
     <TextView
         android:id="@+id/speed"
+        style="@style/NotificationStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/temperatureLabel"
         android:layout_marginTop="@dimen/dim_8dp"
-        android:layout_toEndOf="@id/speedLabel"
-        style="@style/NotificationStyle"/>
+        android:layout_toEndOf="@id/speedLabel" />
 
     <ImageView
         android:id="@+id/directionImage"
         android:layout_width="15dp"
         android:layout_height="15dp"
-        android:layout_alignBottom="@id/directionLabel"
         android:layout_below="@id/temperatureImage"
-        android:layout_toStartOf="@id/directionLabel"
+        android:layout_alignBottom="@id/directionLabel"
         android:layout_marginTop="8dp"
-        android:src="@drawable/direction"
-        android:contentDescription="@string/direction_label" />
+        android:layout_toStartOf="@id/directionLabel"
+        android:contentDescription="@string/direction_label"
+        android:src="@drawable/direction" />
 
     <TextView
         android:id="@+id/directionLabel"
+        style="@style/NotificationStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/temperatureLabel"
         android:layout_marginTop="@dimen/dim_8dp"
         android:layout_toStartOf="@id/direction"
-        android:text="@string/direction_dots"
-        style="@style/NotificationStyle"/>
+        android:text="@string/direction_dots" />
 
     <TextView
         android:id="@+id/direction"
+        style="@style/NotificationStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/temperatureLabel"
         android:layout_alignParentEnd="true"
-        android:layout_marginTop="@dimen/dim_8dp"
-        style="@style/NotificationStyle"/>
+        android:layout_marginTop="@dimen/dim_8dp" />
 
     <ImageView
         android:id="@+id/pollutionImage"
         android:layout_width="15dp"
         android:layout_height="15dp"
-        android:layout_alignBottom="@id/airLabel"
         android:layout_below="@id/speedImage"
+        android:layout_alignBottom="@id/airLabel"
         android:layout_alignParentStart="true"
         android:layout_marginTop="8dp"
-        android:src="@drawable/pollution"
-        android:contentDescription="@string/pollution_label" />
+        android:contentDescription="@string/pollution_label"
+        android:src="@drawable/pollution" />
 
     <TextView
         android:id="@+id/airLabel"
+        style="@style/NotificationStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/speedLabel"
-        android:layout_toEndOf="@id/pollutionImage"
         android:layout_marginTop="@dimen/dim_8dp"
-        android:text="@string/pollution_dots"
-        style="@style/NotificationStyle"/>
+        android:layout_toEndOf="@id/pollutionImage"
+        android:text="@string/pollution_dots" />
 
     <TextView
         android:id="@+id/air"
+        style="@style/NotificationStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/speedLabel"
-        android:layout_toEndOf="@id/airLabel"
         android:layout_marginTop="@dimen/dim_8dp"
-        style="@style/NotificationStyle"/>
+        android:layout_toEndOf="@id/airLabel" />
 
 </RelativeLayout>
