@@ -185,7 +185,8 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
                     if (message.isEmpty()) break;     // the message should not be empty
                     // All Bluetooth messages must have a time [hh:mm:ss]
                     // If this time is not valid - the message is not valid
-                    if (message.split(UtilsBluetooth.MESSAGE_TIME_END)[1].length() <= 3)
+                    String[] s_message = message.split(UtilsBluetooth.MESSAGE_TIME_END);
+                    if (s_message.length == 2 && s_message[1].length() <= 3)
                         break;
 
                     // Bluetooth messages that contains GPS coordinates and weather data are duplicated
@@ -193,37 +194,42 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
                     // The second part will contain the message received from Bluetooth device
                     // There two parts are splited by a symbol ("@" in this case)
                     String[] splited = message.split("@");
-                    // Display the translated sensors values into the receive box
-                    received.setText(splited[0]);
 
-                    /* Check again if the coordinates are valid */
-                    if (splited[1].contains(UtilsBluetooth.INVALID_GPS_COORDINATES) || splited[1].contains(UtilsBluetooth.INVALID_GPS_COORDINATES1)) {
-                        // The coordinates are invalid
-                        // Check if location is enabled
-                        String locationService = Utils.isLocationEnabled(getContentResolver(), getBaseContext()) ? "" : "\n" + getString(R.string.active_location);
-                        // No GPS data available (neither from Bluetooth device, nor from location service)
-                        // This means that the data received can't be sent to database
-                        received.setText(getString(R.string.no_gps_data_no_send) + locationService);
-                        // Anyway, if the location tracking is activated and the last location exists
-                        // Move the map to the last valid location
-                        // If the location service is activated, there should be an update when the device is moving
-                        if (locationTracked && currentLocation != null) {
-                            moveMapCamera(currentLocation.getLatitude(), currentLocation.getLongitude(), map.getCameraPosition().zoom);
-                            break;
+                    // Check if was received a message with only GPS coordinates
+                    if (splited.length == 1 && splited[0].contains(UtilsBluetooth.MESSAGE_GPS_COORDINATES) && currentLocation != null && locationTracked) {
+                        moveMapCamera(currentLocation.getLatitude(), currentLocation.getLongitude(), map.getCameraPosition().zoom);
+                    } else if (splited.length == 2) {
+                        // Display the translated sensors values into the receive box
+                        received.setText(splited[0]);
+                        /* Check again if the coordinates are valid */
+                        if ((splited[1].contains(UtilsBluetooth.INVALID_GPS_COORDINATES) || splited[1].contains(UtilsBluetooth.INVALID_GPS_COORDINATES1))) {
+                            // The coordinates are invalid
+                            // Check if location is enabled
+                            String locationService = Utils.isLocationEnabled(getContentResolver(), getBaseContext()) ? "" : "\n" + getString(R.string.active_location);
+                            // No GPS data available (neither from Bluetooth device, nor from location service)
+                            // This means that the data received can't be sent to database
+                            received.setText(getString(R.string.no_gps_data_no_send) + locationService);
+                            // Anyway, if the location tracking is activated and the last location exists
+                            // Move the map to the last valid location
+                            // If the location service is activated, there should be an update when the device is moving
+                            if (locationTracked && currentLocation != null) {
+                                moveMapCamera(currentLocation.getLatitude(), currentLocation.getLongitude(), map.getCameraPosition().zoom);
+                                break;
+                            }
                         }
-                    }
-                    // If the location tracking is activated and the GPS coordinated received from Bluetooth device are valid
-                    // Use there GPS coordinates to move the map (GPS module has priority versus GPS phone)
-                    else if (locationTracked) {
-                        // Take the second part of the message (unmodified message received from Bluetooth device)
-                        //  and split it to get the latitude and longitude
-                        String[] data = splited[1].split(" ");
-                        // Using try/catch in the case of invalid coordinates (not numbers)
-                        try {
-                            // Convert the coordinates to float values and move the map
-                            moveMapCamera(Float.parseFloat(data[0]), Float.parseFloat(data[1]), map.getCameraPosition().zoom);
-                        } catch (NumberFormatException e) {
-                            e.printStackTrace();
+                        // If the location tracking is activated and the GPS coordinated received from Bluetooth device are valid
+                        // Use there GPS coordinates to move the map (GPS module has priority versus GPS phone)
+                        else if (locationTracked) {
+                            // Take the second part of the message (unmodified message received from Bluetooth device)
+                            //  and split it to get the latitude and longitude
+                            String[] data = splited[1].split(" ");
+                            // Using try/catch in the case of invalid coordinates (not numbers)
+                            try {
+                                // Convert the coordinates to float values and move the map
+                                moveMapCamera(Float.parseFloat(data[0]), Float.parseFloat(data[1]), map.getCameraPosition().zoom);
+                            } catch (NumberFormatException e) {
+                                e.printStackTrace();
+                            }
                         }
                     }
                     break;
@@ -434,6 +440,7 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
                 }
             }
         });
+        received.setText(getString(R.string.no_message));
     }
 
     /**

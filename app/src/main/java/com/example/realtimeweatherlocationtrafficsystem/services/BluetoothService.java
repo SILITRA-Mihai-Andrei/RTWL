@@ -242,42 +242,54 @@ public class BluetoothService extends Service implements Parcelable {
                     // The result is two strings separated by "@"
                     // The first part is the translated string
                     // The second part is the received string (unmodified)
-                    String response = UtilsBluetooth.getReceivedMessage(message, getBaseContext());
+                    String[] messages = message.split(UtilsBluetooth.BLUETOOTH_RECEIVE_DELIMITER);
+                    for (String m : messages){
+                        String response = UtilsBluetooth.getReceivedMessage(m, getBaseContext());
 
-                    // Check if the translated message exists
-                    if (response != null) {
-                        // Check if the message is not empty
-                        if (response.isEmpty()) break;
-                        // Check if the location service and the last location exists
-                        if (LocationService.SERVICE_ACTIVE && LocationService.currentLocation != null) {
-                            // Update the current location object from the LocationService
-                            currentLocation = LocationService.currentLocation;
-                        }
-                        // Check if the message contains the current time
-                        if (response.split(UtilsBluetooth.MESSAGE_TIME_END)[1].length() > 3) {
-                            // Split the message to receive the two parts
-                            String[] splited = response.split("@");
-                            // Check if the translated message contains valid GPS coordinates
-                            splited[0] = checkLocation(splited[0]);
-                            // Check if the message contains both messages
-                            if (splited.length == 2) {
-                                // Check the received message if contains valid GPS coordinates
-                                splited[1] = checkLocation(splited[1]);
-                                // Send broadcast message to all active activities with th translated and received messages
-                                sendMessage(SERVICE_MESSAGE_ID_RECEIVED, splited[0] + "@" + splited[1]);
-                                // Update the notification with the received message
-                                updateNotification(splited[0]);
-                                // Split the message received to get all components
-                                String[] d = splited[1].split(" ");
-                                // Send the data to database
-                                sendToDataBase(d);
-                            } else {
-                                // The received message is a reply message
-                                // Send the reply message as broadcast message to all active activities
-                                sendMessage(SERVICE_MESSAGE_ID_RECEIVED, splited[0]);
-                                // Update the reply notification
-                                updateNotification(response.split(
-                                        UtilsBluetooth.MESSAGE_TIME_END)[1].replace("\n", ""));
+                        // Check if the translated message exists
+                        if (response != null) {
+                            // Check if the message is not empty
+                            if (response.isEmpty()) break;
+                            // Check if the location service and the last location exists
+                            if (LocationService.SERVICE_ACTIVE && LocationService.currentLocation != null) {
+                                // Update the current location object from the LocationService
+                                currentLocation = LocationService.currentLocation;
+                            }
+                            String[] s_response = response.split(UtilsBluetooth.MESSAGE_TIME_END);
+                            // Check if the message contains the current time
+                            if (s_response[1].length() > 3) {
+                                // Split the message to receive the two parts
+                                String[] splited = response.split("@");
+                                // Check if the translated message contains valid GPS coordinates
+                                splited[0] = checkLocation(splited[0]);
+                                // Check if the message contains both messages
+                                if (splited.length == 2) {
+                                    // Check the received message if contains valid GPS coordinates
+                                    splited[1] = checkLocation(splited[1]);
+                                    // Send broadcast message to all active activities with th translated and received messages
+                                    sendMessage(SERVICE_MESSAGE_ID_RECEIVED, splited[0] + "@" + splited[1]);
+                                    // Update the notification with the received message
+                                    updateNotification(splited[0]);
+                                    // Split the message received to get all components
+                                    String[] d = splited[1].split(" ");
+                                    // Send the data to database
+                                    sendToDataBase(d);
+                                } else {
+                                    if (s_response[1].contains(UtilsBluetooth.MESSAGE_GPS_COORDINATES)){
+                                        if (GPS_MODULE_WORKING && LocationService.currentLocation != null){
+                                            currentLocation = LocationService.currentLocation;
+                                        }
+                                        // Send broadcast message to all active activities with th translated and received messages
+                                        sendMessage(SERVICE_MESSAGE_ID_RECEIVED, s_response[1]);
+                                    }
+                                    else {
+                                        // The received message is a reply message
+                                        // Send the reply message as broadcast message to all active activities
+                                        sendMessage(SERVICE_MESSAGE_ID_RECEIVED, splited[0]);
+                                        // Update the reply notification
+                                        updateNotification(s_response[1].replace("\n", ""));
+                                    }
+                                }
                             }
                         }
                     }

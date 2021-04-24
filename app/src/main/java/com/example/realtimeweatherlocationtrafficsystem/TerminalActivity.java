@@ -180,24 +180,28 @@ public class TerminalActivity extends AppCompatActivity implements Serializable 
                     if (message == null) break;
                     if (message.isEmpty()) break;
 
+                    String[] s_message = message.split(UtilsBluetooth.MESSAGE_TIME_END);
                     // Check if the message contains the time
                     // All Bluetooth service messages received must contain the current time when the message was received
-                    if (message.split(UtilsBluetooth.MESSAGE_TIME_END)[1].length() <= 3)
+                    if (s_message.length == 2 && s_message[1].length() <= 3)
                         break;
                     // Split the received message by message content separator
                     // Message that contains weather data are separated in two
                     // The first part contains the translated sensors values (ex: sun, rain, wind)
                     // The second part contains the message received from Bluetooth device (unmodified)
-                    String[] splited = message.split("@");
-                    // Check if the receive box text length plus the new message received length are higher than the limit
-                    if (receiveBox.getText().length() + splited[0].length() > Utils.MAX_RECEIVE_BOX_LENGTH) {
-                        // Clear all receive box text
-                        receiveBox.setText("");
+                    // Check the message to ignore the messages with only GPS data
+                    if (!s_message[0].contains(UtilsBluetooth.MESSAGE_GPS_COORDINATES)){
+                        String[] splited = message.split("@");
+                        // Check if the receive box text length plus the new message received length are higher than the limit
+                        if (receiveBox.getText().length() + splited[0].length() > Utils.MAX_RECEIVE_BOX_LENGTH) {
+                            // Clear all receive box text
+                            receiveBox.setText("");
+                        }
+                        // Set the first part of received message to the end of current receive box text
+                        receiveBox.append(splited[0] + "\n");
+                        // Update the status
+                        setStatus(getString(R.string.received_message));
                     }
-                    // Set the first part of received message to the end of current receive box text
-                    receiveBox.append(splited[0] + "\n");
-                    // Update the status
-                    setStatus(getString(R.string.received_message));
                     break;
             }
         }
