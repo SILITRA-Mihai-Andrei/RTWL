@@ -158,5 +158,6 @@
     <string name="no_gps_data_without_service">You can\'t close the location service because the GPS module didn\'t send any location yet.</string>
     <string name="image_description_predictions">Predictions</string>
     <string name="no_available">No available!</string>
+    <string name="no_message">No messages.</string>
 
 </resources>

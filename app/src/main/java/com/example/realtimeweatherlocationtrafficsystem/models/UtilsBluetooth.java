@@ -1,8 +1,10 @@
 package com.example.realtimeweatherlocationtrafficsystem.models;
 
 import android.content.Context;
+import android.widget.Toast;
 
 import com.example.realtimeweatherlocationtrafficsystem.services.BluetoothService;
+import com.example.realtimeweatherlocationtrafficsystem.services.LocationService;
 
 import java.util.UUID;
 
@@ -23,6 +25,7 @@ public class UtilsBluetooth {
 
     public final static String MESSAGE_TIME_START = "[";                // the start String before current time of the message
     public final static String MESSAGE_TIME_END = "] \n";               // the String after current time of the message
+    public final static String MESSAGE_GPS_COORDINATES = "###";         // notity that the message contains only GPS data
 
     public final static String MUST_GET_LOCATION = "#";                 // indicates that the message contains invalid GPS coordinates and must be replaced
     public final static int BLUETOOTH_BUFFER_SIZE = 1024;               // the maximum buffer size that is used to receive messages from Bluetooth device
@@ -81,14 +84,14 @@ public class UtilsBluetooth {
                     "D" + BLUETOOTH_RECEIVE_STATE_DELIMITER +
                     "t" + BLUETOOTH_RECEIVE_STATE_DELIMITER +
                     "h" + BLUETOOTH_RECEIVE_STATE_DELIMITER +
-                    "P" + BLUETOOTH_RECEIVE_DELIMITER +
-                    "W" + BLUETOOTH_RECEIVE_DELIMITER +
+                    "P" + BLUETOOTH_RECEIVE_STATE_DELIMITER +
+                    "W" + BLUETOOTH_RECEIVE_STATE_DELIMITER +
                     "w" + BLUETOOTH_RECEIVE_STATE_DELIMITER +
                     "c" + BLUETOOTH_RECEIVE_STATE_DELIMITER +
                     "A" + BLUETOOTH_RECEIVE_STATE_DELIMITER +
                     "a" + BLUETOOTH_RECEIVE_STATE_DELIMITER +
-                    "L" + BLUETOOTH_RECEIVE_DELIMITER +
-                    "l" + BLUETOOTH_RECEIVE_DELIMITER +
+                    "L" + BLUETOOTH_RECEIVE_STATE_DELIMITER +
+                    "l" + BLUETOOTH_RECEIVE_STATE_DELIMITER +
                     "u" + BLUETOOTH_RECEIVE_STATE_DELIMITER;
 
     /**
@@ -158,6 +161,19 @@ public class UtilsBluetooth {
                                 + "\n\t-\tDirection: " + direction + "\n";      // insert the direction
                 // Insert in result string the translated message and the received message separated by '@' character
                 result = result + "@" + message;
+            }
+            // Get GPS coordinates every 1 second is enable. Receiving GPS coordinates without any data.
+            else if (string.length == 2){
+                // Check if the GPS coordinates are valid
+                if (message.contains(INVALID_GPS_COORDINATES) || message.contains(INVALID_GPS_COORDINATES1)){
+                    BluetoothService.GPS_MODULE_WORKING = false;
+                }
+                else {
+                    BluetoothService.GPS_MODULE_WORKING = true;
+                    LocationService.updateLocation(message);    // update the current location with the received GPS data
+                    // Send a message with the GPS coordinates
+                    result = MESSAGE_GPS_COORDINATES + message;
+                }
             }
             // Check if the message contains a state
         } else if (message.contains(STATES_STRING.substring(STATE_ERROR, STATE_ERROR + 2))) {

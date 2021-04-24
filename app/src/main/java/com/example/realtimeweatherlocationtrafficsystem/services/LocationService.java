@@ -9,13 +9,13 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.example.realtimeweatherlocationtrafficsystem.MainActivity;
 import com.example.realtimeweatherlocationtrafficsystem.models.Utils;
+import com.example.realtimeweatherlocationtrafficsystem.models.UtilsBluetooth;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -110,6 +110,32 @@ public class LocationService extends Service implements LocationListener {
         intent.putExtra(MainActivity.SERVICE_MESSAGE_ID_KEY, MainActivity.SERVICE_MESSAGE_ID_LOCATION);
         // Send the message as broadcast message to all active activities
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+    }
+
+    /**
+     * Update the current location with the received GPS coordinates.
+     *
+     * @param coordinates: the GPS coordinates.
+     * */
+    public static void updateLocation(String coordinates){
+        if (coordinates == null) return;    // the received GPS coordinates are not valid
+        Location lastLocation = currentLocation;
+        if (currentLocation == null){       // check if the current location is valid
+            currentLocation = new Location(LocationManager.GPS_PROVIDER);   // create new one
+        }
+        // Split the latitude and longitude
+        String[] c = coordinates.split(" ");
+        // Check if there are 2 components after split
+        if (c.length == 2){
+            try {
+                // Try to convert the received GPS coordinates to double
+                currentLocation.setLatitude(Double.parseDouble(c[0]));
+                currentLocation.setLongitude(Double.parseDouble(c[1]));
+            } catch (NumberFormatException e){
+                // Restore the last location
+                currentLocation = lastLocation;
+            }
+        }
     }
 
     /**

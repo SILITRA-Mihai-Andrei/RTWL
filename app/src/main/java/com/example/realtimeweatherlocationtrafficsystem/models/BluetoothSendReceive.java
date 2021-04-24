@@ -119,7 +119,7 @@ public class BluetoothSendReceive extends Thread {
                 // Check if the received message contains the Bluetooth message delimiter
                 if (Utils.containsByte(buffer, (byte) UtilsBluetooth.BLUETOOTH_RECEIVE_DELIMITER.charAt(0))) {
                     // Check if the message received length is valid
-                    if (stream_size <= UtilsBluetooth.BLUETOOTH_ONE_RECORD_SIZE) {
+                    if (stream_size <= UtilsBluetooth.BLUETOOTH_ONE_RECORD_SIZE * 2) {
                         // Send the received message trough the handler
                         handler.obtainMessage(UtilsBluetooth.STATE_MESSAGE_RECEIVED, bytes, -1, buffer).sendToTarget();
                         failed_received_message = 0;
@@ -135,7 +135,7 @@ public class BluetoothSendReceive extends Thread {
             } else {
                 // Wait some time before the next reading
                 // Weather data doesn't change too fast
-                SystemClock.sleep(1000);
+                SystemClock.sleep(666);
             }
         } catch (IOException e) {
             e.printStackTrace();

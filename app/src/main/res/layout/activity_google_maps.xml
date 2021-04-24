@@ -14,7 +14,7 @@
 
     <TextView
         android:id="@+id/received"
-        android:layout_width="@dimen/dim_128dp"
+        android:layout_width="115sp"
         android:layout_height="wrap_content"
         android:layout_alignBottom="@id/map"
         android:layout_alignParentStart="@id/map"
