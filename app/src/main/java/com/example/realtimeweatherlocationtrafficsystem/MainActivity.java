@@ -28,6 +28,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.realtimeweatherlocationtrafficsystem.models.Resources;
 import com.example.realtimeweatherlocationtrafficsystem.models.Utils;
 import com.example.realtimeweatherlocationtrafficsystem.models.UtilsBluetooth;
 import com.example.realtimeweatherlocationtrafficsystem.services.BluetoothService;
@@ -96,6 +97,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Resources.resources = getResources();
         setContentView(R.layout.activity_main);
         // Initialize UI components
         initComponents();
@@ -105,6 +107,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onResume() {
+        Resources.resources = getResources();
         super.onResume();
         // Update the variable that indicates the app is running (not stopped)
         Utils.APP_ACTIVE = true;

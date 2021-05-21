@@ -194,7 +194,6 @@
                 android:background="@color/blue" />
 
             <TextView
-                android:id="@+id/victoria"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignTop="@id/blue_line"
@@ -216,7 +215,6 @@
                 android:src="@drawable/usv" />
 
             <TextView
-                android:id="@+id/mihai"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignTop="@id/blue_line"

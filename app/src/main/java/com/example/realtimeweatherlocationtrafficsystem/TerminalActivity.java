@@ -281,7 +281,7 @@ public class TerminalActivity extends AppCompatActivity implements Serializable 
                     // Check validity of the result
                     if (result == Utils.VALID) {
                         // Get the message corresponding to the result
-                        statusTextView.setText(Utils.getValidityMessage(result, getBaseContext()));
+                        statusTextView.setText(Utils.getValidityMessage(result));
                         // Create a new Data object with the values written by user
                         Data data = new Data(
                                 Utils.getInt(code.getText().toString()),
@@ -299,7 +299,7 @@ public class TerminalActivity extends AppCompatActivity implements Serializable 
                         LocalBroadcastManager.getInstance(getBaseContext()).sendBroadcast(intent);
                     } else {
                         // Some fields are not valid
-                        statusTextView.setText(Utils.getValidityMessage(result, getBaseContext()));
+                        statusTextView.setText(Utils.getValidityMessage(result));
                     }
                 }
             });

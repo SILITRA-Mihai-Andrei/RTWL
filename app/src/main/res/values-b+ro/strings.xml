@@ -1,0 +1,224 @@
+<resources>
+    <!-- App Info -->
+    <string name="app_name">Real Time Weather Location APP</string>
+    <string name="application_details_description">Această aplicație este creată de către TOMA Victoria și SILITRĂ Mihai-Andrei, în cadrul proiectului de licență la Facultatea de Inginerie Electrică și Știința Calculatoarelor din cadrul Universității ”Ștefan cel Mare” din Suceava.</string>
+
+    <!-- Main activity -->
+    <string name="chosen_device">Ai ales </string>
+    <string name="auto_selected">Autoselectat</string>
+
+    <!-- Google maps activity -->
+    <string name="google_maps">Google Maps</string>
+    <string name="region_dots">Regiune:</string>
+    <string name="MSG_REGION_START">Regiune:</string>
+    <string name="change_the_map_type">Schimbă tipul hărții.</string>
+    <string name="active_track_location">Urmărirea locației este activă.</string>
+    <string name="the_current_region_weather">Vremea din regiunea curentă.</string>
+    <string name="no_gps_data">Fără date GPS.</string>
+    <string name="no_gps_data_no_send">Fără date GPS disponibile. Nu se pot trimite date in baza de date.</string>
+    <string name="active_location">Pornește localizarea.</string>
+    <string name="grant_location_permission">Vă rugăm acordați permisiune aplicației pentru localizare GPS.</string>
+    <string name="image_description_predictions">Predicții</string>
+    <string name="the_center_of_the_map">Centrul hărții geografice</string>
+
+    <!-- Terminal activity -->
+    <string name="terminal">Terminal</string>
+    <string name="development">Dezvoltator</string>
+    <string name="development_mode">Modul dezvoltator.</string>
+    <string name="first_status_in_development_mode">Trimite date valide scrise manual in baza de date.</string>
+    <string name="complete_all_fields">Toate câmpurile trebuie completate!</string>
+    <string name="coordinates_hint">47.640323 26.244470</string>
+    <string name="code_hint">cod</string>
+    <string name="temperature_hint">temp</string>
+    <string name="humidity_hint">hum</string>
+    <string name="air_hint">airQ</string>
+    <string name="send_to_database">Trimite in baza de date</string>
+    <string name="connect">Conectare</string>
+    <string name="disconnect">Deconectare</string>
+    <string name="status">Stare:</string>
+    <string name="received">Primit:</string>
+    <string name="message_to_send">Mesaj de trimis:</string>
+    <string name="message_to_send_hint">reset</string>
+    <string name="send_command">Trimite comanda</string>
+    <string name="received_message">Mesaj primit.</string>
+    <string name="message_with_time_placeholder">[%1$s] %2$s</string>
+    <string name="commands">Comenzi</string>
+    <string name="expand">EXPANDARE</string>
+
+    <!-- Settings activity -->
+    <string name="settings">Setări</string>
+
+    <!-- Info activity -->
+    <string name="info">Informații</string>
+    <string name="stefan_cel_mare_university_suceava">Universitatea ”Ștefan cel Mare” Suceava</string>
+    <string name="application_details">Detalii aplicație</string>
+    <string name="fiesc">FIESC</string>
+    <string name="Y2020">2020</string>
+
+    <!-- Bluetooth -->
+    <string name="default_bluetooth_device">HC-05</string>
+    <string name="bluetooth_not_available">Bluetooth nu este disponibil!</string>
+    <string name="bluetooth_is_off">Bluetooth este OFF</string>
+    <string name="bluetooth_is_on">Bluetooth este ON</string>
+    <string name="choose_the_bluetooth_device">Alege dispozitivul Bluetooth</string>
+    <string name="go_to_bluetooth_settings">Mergi la setările Bluetooth</string>
+    <string name="no_paired_devices">Nici un dispozitiv Bluetooth împerecheat</string>
+    <string name="please_select_one_device">Ale un dispozitiv Bluetooth</string>
+    <string name="connected_to_placeholder_device">Conectat la %1$s.</string>
+    <string name="connecting_to_placeholder_device">Se conectează la %1$s…</string>
+    <string name="disconnected_from_placeholder_device">Deconectat de la %1$s.</string>
+    <string name="connection_to_bluetooth_device">Se conectează la dispozitivul Bluetooth.</string>
+    <string name="connection_failed">Conexiune eșuată!</string>
+    <string name="need_to_connect">Trebuie să fii conectat la un dispozitiv Bluetooth!</string>
+    <string name="something_wrong_with_bluetooth_name">Ceva nu a mers bine la accesarea numelui dispozitivului Bluetooth.</string>
+    <string name="bluetooth_commands_title">Comenzile Bluetooth disponibile:</string>
+    <string name="not_connected">"Neconectat!"</string>
+    <string name="rw_failed">Citire/Scriere cu %1$s a eșuat!</string>
+    <string name="closing_bt_communication">Se închide conexiunea Bluetooth.</string>
+    <string name="bluetooth_device_offline_no_send">Dispozitivul Bluetooth este OFFLINE.\nMergi în ecranul principal pentru reconectare.</string>
+    <string name="stop_bluetooth_service_first">Serviciul Bluetooth este activ. Trebuie închis pentru a opri celelalte servicii.</string>
+
+    <!-- Location Service -->
+    <string name="no_gps_data_without_service">Nu se poate opri serviciul de localizare deoarece încă nu au fost primite informații GPS.</string>
+
+    <!-- Database -->
+    <string name="data_base">Baza de date</string>
+    <string name="show_data_base">Arată baza de date</string>
+    <string name="hide_data_base">Ascunde baza de date</string>
+
+    <!-- Notification -->
+    <string name="write_command">scrie comanda aici</string>
+    <string name="reply_from">Răspuns de la</string>
+    <string name="notification_dangers_title">Ești aproape de regiuni periculoase!</string>
+    <string name="danger_notification_region">Ești într-o regiune periculoasă!</string>
+    <string name="danger_near_regions">Regiunile din apropiere prezintă pericolele:</string>
+
+    <!-- Limits -->
+    <string name="invalid_coordinates">Coordonate invalide! Trebuie ca latitudinea să fie în intervalul -90:90, iar longitudinea -180:180</string>
+    <string name="invalid_code">Cod invalid. Trebuie să fie de la 100 la 499.</string>
+    <string name="invalid_temperature">Temperatură invalidă. Trebuie să fie de la -50 la 50 grade Celsius.</string>
+    <string name="invalid_humidity">Umiditate invalidă. Trebuie să fie de la 0 la 100%.</string>
+    <string name="invalid_air">Valoarea poluării este invalidă. Trebuie să fie de la 0 la 100%.</string>
+    <string name="invalid_data">Date invalide!</string>
+    <string name="valid_data">Trimite datele.</string>
+
+    <!-- Weather -->
+    <string name="region">Regiune</string>
+    <string name="weather_dots">vreme:&#160;</string>
+    <string name="danger_dots">pericol:&#160;</string>
+    <string name="temperature_label">Temperatură</string>
+    <string name="temperature">Temperatură:</string>
+    <string name="temperature_space_dots">"Temperatură:&#160;"</string>
+    <string name="temperature_dots">Temperatură:</string>
+    <string name="temp_dots">temperatură:&#160;</string>
+    <string name="float_temperature_celsius_placeholder">%1$.1f\u2103</string>
+    <string name="int_temperature_celsius_placeholder">%1$d\u2103</string>
+    <string name="humidity_label">Umiditate</string>
+    <string name="humidity">Umiditate:</string>
+    <string name="humidity_dots">Umiditate:</string>
+    <string name="humidity_space_dots">"Umiditate:&#160;"</string>
+    <string name="_humidity_dots">umiditate:&#160;</string>
+    <string name="air_space_dots">"Poluare:&#160;"</string>
+    <string name="air_quality">Poluare:</string>
+    <string name="air_dots">poluare:&#160;</string>
+    <string name="speed_dots">Viteză:</string>
+    <string name="speed_space_dots">"Viteză:&#160;"</string>
+    <string name="speed_label">Viteză</string>
+    <string name="direction_dots">Direcție:</string>
+    <string name="direction_space_dots">"Direcție:&#160;"</string>
+    <string name="direction_label">Direcție</string>
+    <string name="pollution_dots">Poluare:</string>
+    <string name="pollution_label">Poluare</string>
+
+    <!-- Weather strings -->
+    <string name="weather_sunny">Însorit</string>
+    <string name="weather_sun">Soare</string>
+    <string name="weather_heat">Caniculă</string>
+    <string name="weather_soft_rain">Ploaie ușoară</string>
+    <string name="weather_moderate_rain">Ploaie moderată</string>
+    <string name="weather_torrential_rain">Ploaie torențială</string>
+    <string name="weather_soft_wind">Vânt ușor</string>
+    <string name="weather_moderate_wind">Vânt moderat</string>
+    <string name="weather_torrential_wind">Vânt torențial</string>
+    <string name="weather_soft_snow_fall">Ninsoare ușoară</string>
+    <string name="weather_moderate_snow_fall">Ninsoare moderată</string>
+    <string name="weather_massive_snow_fall">Ninsoare masivă</string>
+
+    <!-- Weather strings for translation -->
+    <string name="weather_sunny_ro">Însorit</string>
+    <string name="weather_sun_ro">Soare</string>
+    <string name="weather_heat_ro">Caniculă</string>
+    <string name="weather_soft_rain_ro">Ploaie ușoară</string>
+    <string name="weather_moderate_rain_ro">Ploaie moderată</string>
+    <string name="weather_torrential_rain_ro">Ploaie torențială</string>
+    <string name="weather_soft_wind_ro">Vânt ușor</string>
+    <string name="weather_moderate_wind_ro">Vânt moderat</string>
+    <string name="weather_torrential_wind_ro">Vânt torențial</string>
+    <string name="weather_soft_snow_fall_ro">Ninsoare ușoară</string>
+    <string name="weather_moderate_snow_fall_ro">Ninsoare moderată</string>
+    <string name="weather_massive_snow_fall_ro">Ninsoare masivă</string>
+
+    <!-- General -->
+    <string name="float_percent_placeholder">%1$.1f%%</string>
+    <string name="int_percent_placeholder">%1$d%%</string>
+    <string name="clear">ȘTERGE</string>
+    <string name="waiting_for_data">Se așteaptă date…</string>
+    <string name="message_sent">Mesaj trimis.</string>
+    <string name="loading">Încărcare…</string>
+    <string name="loading_points">…</string>
+    <string name="ok">BINE</string>
+    <string name="please_wait">Te rog așteaptă!</string>
+    <string name="close">Închide</string>
+    <string name="no_available">Indisponibil!</string>
+    <string name="no_message">Nici un mesaj.</string>
+    <string name="no_data">Fără date.</string>
+    <string name="none">nimic</string>
+
+    <!-- Preference strings -->
+    <string name="preference_default_device_placeholder">Dispozitivul implicit este %1$s</string>
+    <string name="preference_value_string_placeholder">Valoarea este %1$s</string>
+    <string name="preference_value_string_slash_placeholder">Valoarea este &#47;%1$s</string>
+
+    <!-- Preference Titles -->
+    <string name="bluetooth_device">Dispozitivul Bluetooth</string>
+    <string name="bluetooth_main_device">Dispozitivul Bluetooth principal</string>
+    <string name="bluetooth_receive_delimiter">Delimitatorul mesajelor Bluetooth</string>
+    <string name="bluetooth_receive_state_delimiter">Delimitatorul mesajelor Bluetooth de stare</string>
+    <string name="maps_default_zoom">Valoarea de mărire a hărții</string>
+    <string name="maps_max_zoom_region">Valoarea de prag a măririi unei regiuni</string>
+
+    <!-- Preference keys -->
+    <string name="preference_bluetooth_key">RTWL@BLUETOOTH_SETTINGS_KEY</string>x
+    <string name="preference_google_maps_key">RTWL@GOOGLE_MAPS_SETTINGS_KEY</string>
+    <string name="bluetooth_main_device_key">RTWL@MAIN_DEVICE_KEY</string>
+    <string name="bluetooth_receive_delimiter_key">RTWL@BLUETOOTH_RECEIVE_DELIMITER_KEY</string>
+    <string name="bluetooth_receive_state_delimiter_key">RTWL@BLUETOOTH_RECEIVE_STATE_DELIMITER_KEY</string>
+    <string name="maps_default_zoom_key">RTWL@MAP_DEFAULT_ZOOM_KEY</string>
+    <string name="maps_max_zoom_region_key">RTWL@MAX_ZOOM_REGION_KEY</string>
+
+    <!-- Bluetooth commands -->
+    <string name="BLUETOOTH_COMMANDS_LIST">-1\t\t|\t\trs\t\t\t|\t\treset\nResetează software Arduino\n------------------------------------\n
+                     0\t\t|\t\tgr\t\t|\t\tping\nPrimește răspuns de la Arduino\n------------------------------------\n
+                     1\t\t|\t\tgd\t\t|\t\tget data\nForțează obținerea dateor meteorologice\n------------------------------------\n
+                     2\t\t|\t\tpd\t\t|\t\tproxy fail\nAvertizează defectarea/repararea senzorului de proximitate\n------------------------------------\n
+                     3\t\t|\t\tgc\t\t|\t\tget coordinates\nPrimește date GPS la fiecare o secundă\n------------------------------------\n
+                     4\t\t|\t\tdgc\t\t|\t\tdisable get coordinates\nOprește primirea datelor GPS la o secundă\n------------------------------------\n</string>
+    <string name="RTWL_system_started">Sistemul a pornit\n</string>
+    <string name="Arduino_is_active">Arduino este activ.\n</string>
+    <string name="BT_MSG_ERROR">A apărut o eroare la microcontroller\n</string>
+    <string name="BT_MSG_GPS_NOT_WORKING">Modulul GPS nu funcționează!\n</string>
+    <string name="BT_MSG_INVALID_GPS">Date invalide de la modulul GPS\n</string>
+    <string name="BT_MSG_TEMP_HUM_SENSOR_NOT_WORKING">Modulul de temperatură și umiditate nu funcționează!\n</string>
+    <string name="BT_MSG_INVALID_TEMPERATURE">"Valoarea temperaturii invalidă! Valoarea primită: "</string>
+    <string name="BT_MSG_INVALID_HUMIDITY">"Valoarea umidității invalidă! Valoarea primită: "</string>
+    <string name="BT_MSG_PROXY_SENSOR_NOT_WORKING">Senzorul de proximitate nu funcționează!\n</string>
+    <string name="BT_MSG_WIND_SENSOR_NOT_WORKING">Senzorul de vânt nu funcționează!\n</string>
+    <string name="BT_MSG_INVALID_WIND_VALUE">"Valoarea intensității vântului invalidă! Valoarea primită: "</string>
+    <string name="BT_MSG_INVALID_WEATHER_CODE">"Valoarea codul de vreme invalidă! Valoarea primită: "</string>
+    <string name="BT_MSG_AIR_SENSOR_NOT_WORKING">Modulul de calitate a aerului nu funcționează\n</string>
+    <string name="BT_MSG_INVALID_AIR_VALUE">"Valoarea senzorului de poluare invalidă! Valoarea primită: "</string>
+    <string name="BT_MSG_GET_COORDINATES_FEATURE_ENABLED">Primirea datelor GPS la fiecare o secundă a fost activată!\n</string>
+    <string name="BT_MSG_GET_COORDINATE_FEATURE_DISABLED">Primirea datelor GPS la fiecare o secundă a fost dezactivată!\n</string>
+    <string name="BT_MSG_UNKNOWN_COMMAND">Comandă necunoscută!\n</string>
+
+</resources>

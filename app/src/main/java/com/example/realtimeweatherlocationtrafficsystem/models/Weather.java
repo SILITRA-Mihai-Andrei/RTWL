@@ -1,5 +1,7 @@
 package com.example.realtimeweatherlocationtrafficsystem.models;
 
+import com.example.realtimeweatherlocationtrafficsystem.R;
+
 /**
  * General weather data.
  * <p>
@@ -54,9 +56,9 @@ public class Weather {
      */
     public String toStringFormatDataBase() {
         String tabs = "\n\t\t\t\t\t\t";
-        return tabs + "weather: " + weather + tabs + "danger: " + danger
-                + tabs + "air: " + air + tabs + "humidity: " + humidity
-                + tabs + "temperature: " + temperature;
+        return tabs + Resources.resources.getString(R.string.weather_dots) + weather + tabs + Resources.resources.getString(R.string.danger_dots) + danger
+                + tabs + Resources.resources.getString(R.string.air_dots) + air + tabs + Resources.resources.getString(R.string._humidity_dots) + humidity
+                + tabs + Resources.resources.getString(R.string.temp_dots) + temperature;
     }
 
     /**

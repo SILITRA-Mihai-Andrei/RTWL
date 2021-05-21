@@ -243,8 +243,8 @@ public class BluetoothService extends Service implements Parcelable {
                     // The first part is the translated string
                     // The second part is the received string (unmodified)
                     String[] messages = message.split(UtilsBluetooth.BLUETOOTH_RECEIVE_DELIMITER);
-                    for (String m : messages){
-                        String response = UtilsBluetooth.getReceivedMessage(m, getBaseContext());
+                    for (String m : messages) {
+                        String response = UtilsBluetooth.getReceivedMessage(m);
 
                         // Check if the translated message exists
                         if (response != null) {
@@ -275,14 +275,13 @@ public class BluetoothService extends Service implements Parcelable {
                                     // Send the data to database
                                     sendToDataBase(d);
                                 } else {
-                                    if (s_response[1].contains(UtilsBluetooth.MESSAGE_GPS_COORDINATES)){
-                                        if (GPS_MODULE_WORKING && LocationService.currentLocation != null){
+                                    if (s_response[1].contains(UtilsBluetooth.MESSAGE_GPS_COORDINATES)) {
+                                        if (GPS_MODULE_WORKING && LocationService.currentLocation != null) {
                                             currentLocation = LocationService.currentLocation;
                                         }
                                         // Send broadcast message to all active activities with th translated and received messages
                                         sendMessage(SERVICE_MESSAGE_ID_RECEIVED, s_response[1]);
-                                    }
-                                    else {
+                                    } else {
                                         // The received message is a reply message
                                         // Send the reply message as broadcast message to all active activities
                                         sendMessage(SERVICE_MESSAGE_ID_RECEIVED, splited[0]);
@@ -433,10 +432,10 @@ public class BluetoothService extends Service implements Parcelable {
             }
             // Configure the notification layout with the new data
             notificationLayoutExpanded.setImageViewResource(R.id.logo,
-                    UtilsGoogleMaps.getWeatherIcon(UtilsGoogleMaps.getWeatherStringIndex(d[1], this)));
+                    UtilsGoogleMaps.getWeatherIcon(UtilsGoogleMaps.getWeatherStringIndex(d[1])));
             notificationLayout.setTextViewText(R.id.title, region + " - " + d[1]);
             notificationLayoutExpanded.setTextViewText(R.id.region, region);
-            notificationLayoutExpanded.setTextColor(R.id.weather, UtilsGoogleMaps.getWeatherTextColor(UtilsGoogleMaps.getWeatherGrade(d[1], this)));
+            notificationLayoutExpanded.setTextColor(R.id.weather, UtilsGoogleMaps.getWeatherTextColor(UtilsGoogleMaps.getWeatherGrade(d[1])));
             notificationLayoutExpanded.setTextViewText(R.id.weather, d[1]);
             notificationLayoutExpanded.setTextViewText(R.id.temperature, d[2].split(": ")[1] + "℃");
             notificationLayoutExpanded.setTextViewText(R.id.humidity, d[3].split(": ")[1] + "%");

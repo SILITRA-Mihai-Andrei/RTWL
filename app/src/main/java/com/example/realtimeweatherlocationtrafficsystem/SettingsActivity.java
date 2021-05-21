@@ -222,13 +222,13 @@ public class SettingsActivity extends AppCompatActivity {
                         if (value.getClass() == Integer.class) {
                             if ((int) value == -1) return null;                 // invalid value
                             else
-                                return String.format(string, (int) value);     // convert the Integer value to String
+                                return String.format(string, value);     // convert the Integer value to String
                         } else if (value.getClass() == Float.class) {
                             if ((float) value == -1f) return null;              // invalid value
                             else
-                                return String.format(string, (float) value);   // convert the Float value to String
+                                return String.format(string, value);   // convert the Float value to String
                         } else if (value.getClass() == String.class) {
-                            return String.format(string, (String) value);       // make sure the value is returned as String
+                            return String.format(string, value);       // make sure the value is returned as String
                         }
                         return null;
                     }
@@ -278,12 +278,12 @@ public class SettingsActivity extends AppCompatActivity {
                             // Convert the new value to Integer and put the value into the editor using the corresponding key
                             editor.putInt(key, (Integer) newValue);
                             // Update the value from view with the new value
-                            editTextPreference.setSummaryProvider(getSummary(key, (Integer) newValue, TYPE_EDIT_TEXT_PREF, order));
+                            editTextPreference.setSummaryProvider(getSummary(key, newValue, TYPE_EDIT_TEXT_PREF, order));
                         } else if (newValue.getClass() == String.class) {
                             // Convert the new value to String and put the value into the editor using the corresponding key
                             editor.putString(key, (String) newValue);
                             // Update the value from view with the new value
-                            editTextPreference.setSummaryProvider(getSummary(key, (String) newValue, TYPE_EDIT_TEXT_PREF, order));
+                            editTextPreference.setSummaryProvider(getSummary(key, newValue, TYPE_EDIT_TEXT_PREF, order));
                         }
                     } else if (field.getClass() == ListPreference.class) {
                         // Get the preference of ListPreference type
@@ -293,7 +293,7 @@ public class SettingsActivity extends AppCompatActivity {
                             // Convert the new value to String and put the value into the editor using the key
                             editor.putString(key, (String) newValue);
                             // Update the value from view with the new value
-                            listPreference.setSummaryProvider(getSummary(key, (String) newValue, TYPE_LIST_PREF, order));
+                            listPreference.setSummaryProvider(getSummary(key, newValue, TYPE_LIST_PREF, order));
                         }
                     }
                     // Apply all changes made to editor

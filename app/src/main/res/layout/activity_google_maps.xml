@@ -12,6 +12,35 @@
         android:layout_height="match_parent"
         tools:ignore="FragmentTagUsage" />
 
+    <ImageView
+        android:id="@+id/center"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@id/map"
+        android:layout_alignTop="@id/map"
+        android:layout_alignEnd="@id/map"
+        android:layout_alignBottom="@id/map"
+        android:contentDescription="@string/the_center_of_the_map"
+        android:scaleX="0.02"
+        android:scaleY="0.02"
+        android:src="@drawable/blue_circle" />
+
+    <TextView
+        android:id="@+id/notification"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@id/map"
+        android:layout_alignTop="@id/map"
+        android:layout_alignEnd="@id/map"
+        android:layout_marginStart="100dp"
+        android:layout_marginTop="150dp"
+        android:layout_marginEnd="100dp"
+        android:layout_marginBottom="100dp"
+        android:background="@color/color_red_dark_transparent"
+        android:padding="@dimen/dim_16dp"
+        android:textAlignment="center"
+        android:visibility="gone" />
+
     <TextView
         android:id="@+id/received"
         android:layout_width="115sp"
