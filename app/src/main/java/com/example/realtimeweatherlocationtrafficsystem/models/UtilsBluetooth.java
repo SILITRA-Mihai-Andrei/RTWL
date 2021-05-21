@@ -1,8 +1,6 @@
 package com.example.realtimeweatherlocationtrafficsystem.models;
 
-import android.content.Context;
-import android.widget.Toast;
-
+import com.example.realtimeweatherlocationtrafficsystem.R;
 import com.example.realtimeweatherlocationtrafficsystem.services.BluetoothService;
 import com.example.realtimeweatherlocationtrafficsystem.services.LocationService;
 
@@ -25,7 +23,7 @@ public class UtilsBluetooth {
 
     public final static String MESSAGE_TIME_START = "[";                // the start String before current time of the message
     public final static String MESSAGE_TIME_END = "] \n";               // the String after current time of the message
-    public final static String MESSAGE_GPS_COORDINATES = "###";         // notity that the message contains only GPS data
+    public final static String MESSAGE_GPS_COORDINATES = "###";         // notify that the message contains only GPS data
 
     public final static String MUST_GET_LOCATION = "#";                 // indicates that the message contains invalid GPS coordinates and must be replaced
     public final static int BLUETOOTH_BUFFER_SIZE = 1024;               // the maximum buffer size that is used to receive messages from Bluetooth device
@@ -37,20 +35,14 @@ public class UtilsBluetooth {
     public final static String INVALID_GPS_COORDINATES = "0.0 0.0";     // GPS coordinates that indicates the GPS module is not working
     public final static String INVALID_GPS_COORDINATES1 = ".0 0.0";     // GPS coordinates that indicates the GPS module is not working
     public final static String DIRECTION_UNKNOWN = "unknown";           // replacement for unknown direction
-    public final static String MSG_REGION_START = "Region:";            // region string used before GPS coordinates of the region
+    public final static String MSG_REGION_START = Resources.resources.getString(R.string.MSG_REGION_START);            // region string used before GPS coordinates of the region
 
     // There values must have one single character
     public final static String BLUETOOTH_RECEIVE_DELIMITER = "\r";      // delimiter for messages received from Bluetooth device
     public final static String BLUETOOTH_RECEIVE_STATE_DELIMITER = ":"; // delimiter for state messages received from Bluetooth device
 
     // List of available commands to send for Bluetooth device
-    public final static String BLUETOOTH_COMMANDS_LIST =
-            "-1\t\t|\t\trs\t\t\t|\t\treset\nSoft reset Arduino\n------------------------------------\n" +
-                    " 0\t\t|\t\tgr\t\t|\t\tping\nGet response from Arduino\n------------------------------------\n" +
-                    " 1\t\t|\t\tgd\t\t|\t\tget data\nGet sensors value\n------------------------------------\n" +
-                    " 2\t\t|\t\tpd\t\t|\t\tproxy fail\nWarn proxy sensor failure\n------------------------------------\n" +
-                    " 3\t\t|\t\tgc\t\t|\t\tget coordinates\nSet Arduino to send GPS coordinates every second\n------------------------------------\n" +
-                    " 4\t\t|\t\tdgc\t\t|\t\tdisable get coordinates\nDisable get coordinates feature\n------------------------------------\n";
+    public final static String BLUETOOTH_COMMANDS_LIST = Resources.resources.getString(R.string.BLUETOOTH_COMMANDS_LIST);
 
     // Define Bluetooth state messages received from Bluetooth device
     public final static String STATE_START =                            // the hardware system started / restarted
@@ -98,9 +90,8 @@ public class UtilsBluetooth {
      * Translate the received Bluetooth message.
      *
      * @param message is the message received from the Bluetooth device.
-     * @param context is the calling activity context used to get strings from resources.
      */
-    public static String getReceivedMessage(String message, Context context) {
+    public static String getReceivedMessage(String message) {
         if (message == null) return null;
         // Initialize the String result object that will be returned
         String result = "";
@@ -109,9 +100,9 @@ public class UtilsBluetooth {
 
         // Check what kind of message is using the states variables and the default formats
         if (message.contains(STATE_START)) {
-            result = "RTWL System started\n";
+            result = Resources.resources.getString(R.string.RTWL_system_started);
         } else if (message.contains(STATE_PING)) {
-            result = "Arduino is active.\n";
+            result = Resources.resources.getString(R.string.Arduino_is_active);
             // The message contains GPS coordinates
         } else if (message.contains(".")) {
             // Split the message to spaces
@@ -151,24 +142,22 @@ public class UtilsBluetooth {
                 // Add to result String the sensors values translated
                 result +=
                         "\n\t-\t" + UtilsGoogleMaps.getWeatherString(           // translate the weather_code in weather string
-                                UtilsGoogleMaps.getWeatherStringIndex(
-                                        Integer.parseInt(string[2])), context)
-                                + "\n\t-\tTemperature: " + string[3]            // insert the temperature value
-                                + "\n\t-\tHumidity: " + string[4]               // insert the humidity value
-                                + "\n\t-\tAir: " + string[5]                    // insert the air quality value
-                                + "\n\t-\tSpeed: " +                            // insert the speed value
+                                UtilsGoogleMaps.getWeatherStringIndex(Integer.parseInt(string[2])))
+                                + "\n\t-\t" + Resources.resources.getString(R.string.temperature_space_dots) + string[3]            // insert the temperature value
+                                + "\n\t-\t" + Resources.resources.getString(R.string.humidity_space_dots) + string[4]               // insert the humidity value
+                                + "\n\t-\t" + Resources.resources.getString(R.string.air_space_dots) + string[5]                    // insert the air quality value
+                                + "\n\t-\t" + Resources.resources.getString(R.string.speed_space_dots) +                            // insert the speed value
                                 (string[6].equals("-1") ? "0" : string[6])
-                                + "\n\t-\tDirection: " + direction + "\n";      // insert the direction
+                                + "\n\t-\t" + Resources.resources.getString(R.string.direction_space_dots) + direction + "\n";      // insert the direction
                 // Insert in result string the translated message and the received message separated by '@' character
                 result = result + "@" + message;
             }
             // Get GPS coordinates every 1 second is enable. Receiving GPS coordinates without any data.
-            else if (string.length == 2){
+            else if (string.length == 2) {
                 // Check if the GPS coordinates are valid
-                if (message.contains(INVALID_GPS_COORDINATES) || message.contains(INVALID_GPS_COORDINATES1)){
+                if (message.contains(INVALID_GPS_COORDINATES) || message.contains(INVALID_GPS_COORDINATES1)) {
                     BluetoothService.GPS_MODULE_WORKING = false;
-                }
-                else {
+                } else {
                     BluetoothService.GPS_MODULE_WORKING = true;
                     LocationService.updateLocation(message);    // update the current location with the received GPS data
                     // Send a message with the GPS coordinates
@@ -177,35 +166,35 @@ public class UtilsBluetooth {
             }
             // Check if the message contains a state
         } else if (message.contains(STATES_STRING.substring(STATE_ERROR, STATE_ERROR + 2))) {
-            result = "An error occurred to Arduino microprocessor\n";
+            result = Resources.resources.getString(R.string.BT_MSG_ERROR);
         } else if (message.contains(STATES_STRING.substring(STATE_GPS_NOT_WORKING, STATE_GPS_NOT_WORKING + 2))) {
-            result = "GPS is not working!\n";
+            result = Resources.resources.getString(R.string.BT_MSG_GPS_NOT_WORKING);
         } else if (message.contains(STATES_STRING.substring(STATE_GPS_INVALID_DATA, STATE_GPS_INVALID_DATA + 2))) {
-            result = "Invalid data from GPS\n";
+            result = Resources.resources.getString(R.string.BT_MSG_INVALID_GPS);
         } else if (message.contains(STATES_STRING.substring(STATE_TEMP_HUM_SENSOR_NOT_WORKING, STATE_TEMP_HUM_SENSOR_NOT_WORKING + 2))) {
-            result = "Temperature and humidity sensor is not working!\n";
+            result = Resources.resources.getString(R.string.BT_MSG_TEMP_HUM_SENSOR_NOT_WORKING);
         } else if (message.contains(STATES_STRING.substring(STATE_TEMP_INVALID_DATA, STATE_TEMP_INVALID_DATA + 2))) {
-            result = "Invalid temperature value! Received value: " + message.split(":")[1];
+            result = Resources.resources.getString(R.string.BT_MSG_INVALID_TEMPERATURE) + message.split(":")[1];
         } else if (message.contains(STATES_STRING.substring(STATE_HUM_INVALID_DATA, STATE_HUM_INVALID_DATA + 2))) {
-            result = "Invalid humidity value! Received value: " + message.split(":")[1];
+            result = Resources.resources.getString(R.string.BT_MSG_INVALID_HUMIDITY) + message.split(":")[1];
         } else if (message.contains(STATES_STRING.substring(STATE_PROXY_SENSOR_NOT_WORKING, STATE_PROXY_SENSOR_NOT_WORKING + 2))) {
-            result = "Proxy sensor is not working!\n";
+            result = Resources.resources.getString(R.string.BT_MSG_PROXY_SENSOR_NOT_WORKING);
         } else if (message.contains(STATES_STRING.substring(STATE_WIND_SENSOR_NOT_WORKING, STATE_WIND_SENSOR_NOT_WORKING + 2))) {
-            result = "Wind sensor not working!\n";
+            result = Resources.resources.getString(R.string.BT_MSG_WIND_SENSOR_NOT_WORKING);
         } else if (message.contains(STATES_STRING.substring(STATE_WIND_SENSOR_INVALID_DATA, STATE_WIND_SENSOR_INVALID_DATA + 2))) {
-            result = "Invalid wind sensor value! Received value: " + message.split(":")[1];
+            result = Resources.resources.getString(R.string.BT_MSG_INVALID_WIND_VALUE) + message.split(":")[1];
         } else if (message.contains(STATES_STRING.substring(STATE_WEATHER_CODE_INVALID, STATE_WEATHER_CODE_INVALID + 2))) {
-            result = "Invalid weather code value Received value: " + message.split(":")[1];
+            result = Resources.resources.getString(R.string.BT_MSG_INVALID_WEATHER_CODE) + message.split(":")[1];
         } else if (message.contains(STATES_STRING.substring(STATE_AIR_SENSOR_NOT_WORKING, STATE_AIR_SENSOR_NOT_WORKING + 2))) {
-            result = "Air quality sensor is not working\n";
+            result = Resources.resources.getString(R.string.BT_MSG_AIR_SENSOR_NOT_WORKING);
         } else if (message.contains(STATES_STRING.substring(STATE_AIR_SENSOR_INVALID_DATA, STATE_AIR_SENSOR_INVALID_DATA + 2))) {
-            result = "Invalid air quality sensor value Received value: " + message.split(":")[1];
+            result = Resources.resources.getString(R.string.BT_MSG_INVALID_AIR_VALUE) + message.split(":")[1];
         } else if (message.contains(STATES_STRING.substring(STATE_GET_GPS_COORDINATES_ENABLED, STATE_GET_GPS_COORDINATES_ENABLED + 2))) {
-            result = "Get coordinates every second feature is enabled!\n";
+            result = Resources.resources.getString(R.string.BT_MSG_GET_COORDINATES_FEATURE_ENABLED);
         } else if (message.contains(STATES_STRING.substring(STATE_GET_GPS_COORDINATES_DISABLED, STATE_GET_GPS_COORDINATES_DISABLED + 2))) {
-            result = "Get coordinates every second feature is disabled!\n";
+            result = Resources.resources.getString(R.string.BT_MSG_GET_COORDINATE_FEATURE_DISABLED);
         } else if (message.contains(STATES_STRING.substring(UNKNOWN_COMMAND, UNKNOWN_COMMAND + 2))) {
-            result = "Unknown command!\n";
+            result = Resources.resources.getString(R.string.BT_MSG_UNKNOWN_COMMAND);
         } else result = null;
 
         if (result == null) return null;

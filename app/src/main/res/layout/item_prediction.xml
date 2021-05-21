@@ -20,9 +20,9 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/prediction_body"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:visibility="gone"
+        android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -30,7 +30,7 @@
 
         <TextView
             android:id="@+id/prediction_datetime"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/dim_4dp"
             android:textSize="@dimen/size_8sp"
@@ -79,7 +79,7 @@
 
         <TextView
             android:id="@+id/prediction_temperature"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/dim_4dp"
             android:textSize="@dimen/size_10sp"
@@ -106,7 +106,7 @@
 
         <TextView
             android:id="@+id/prediction_humidity"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="@dimen/size_10sp"
             app:layout_constraintStart_toEndOf="@id/hum_image"

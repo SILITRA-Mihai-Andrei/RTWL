@@ -45,6 +45,7 @@ public class FireBaseService extends Service implements FireBaseManager.onFireBa
     // Define the region list received from database
     public static List<Region> regions = new ArrayList<>();
     public static List<HashMap<String, HashMap<String, Prediction>>> predictions = new ArrayList<>();
+    public static List<HashMap<String, String>> dangers = new ArrayList<>();
 
 
     @Override
@@ -162,6 +163,11 @@ public class FireBaseService extends Service implements FireBaseManager.onFireBa
     public void onDataNewFireBasePredictions(List<HashMap<String, HashMap<String, Prediction>>> predictions) {
         // Update the received predictions list
         FireBaseService.predictions = predictions;
+    }
+
+    @Override
+    public void onDataNewFireBaseDangers(ArrayList<HashMap<String, String>> dangers) {
+        FireBaseService.dangers = dangers;
     }
 
     @Override

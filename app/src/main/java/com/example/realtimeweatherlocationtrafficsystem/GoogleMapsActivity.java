@@ -15,6 +15,7 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -61,6 +62,8 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
     private TextView received;                          // text box where Bluetooth data is displayed
     private ImageView regionWeatherIcon;                // weather icon in the region where it is zoomed
     private ImageView locationTrackIcon;                // the location tracking icon
+    private ImageView centerMap;                        // the circle from the center of the map (active when tracking is enabled)
+    private TextView notificationView;                  // in this box will be shown the dangers
 
     // Colors for receive box background
     private final int receivedBoxOFF = Color.argb(32, 0, 0, 0);  // low opacity color
@@ -101,8 +104,9 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
         // This registers messageReceiver to receive messages from broadcast
         // Create the filters of receiver - which type of messages to take
         IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(BluetoothService.SERVICE_KEY);  // messages from Bluetooth service
-        intentFilter.addAction(MainActivity.SERVICE_KEY);  // general messages from broadcast
+        intentFilter.addAction(BluetoothService.SERVICE_KEY);   // messages from Bluetooth service
+        intentFilter.addAction(MainActivity.SERVICE_KEY);       // general messages from broadcast
+        intentFilter.addAction(LocationService.SERVICE_KEY);    // from LocationService
         // Locally register the message receiver from broadcasts
         LocalBroadcastManager.getInstance(this).registerReceiver(messageReceiver, intentFilter);
         // Check if there are regions in database
@@ -158,6 +162,20 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
                     // Check if location tracking is enabled and the new location exists
                     if (locationTracked && currentLocation != null) {
                         moveMapCamera(currentLocation.getLatitude(), currentLocation.getLongitude(), map.getCameraPosition().zoom);
+                    }
+                }
+                return;
+            }
+
+            // Get the message id from broadcast containing messages from LocationService
+            messageID = intent.getIntExtra(LocationService.SERVICE_MESSAGE_ID_KEY, -1);
+            // Check if the message was found
+            if (messageID != -1) {
+                // Check if the message contains the regions from Firebase service
+                if (messageID == LocationService.SERVICE_MESSAGE_DANGERS_KEY) {
+                    String dangers = intent.getStringExtra(LocationService.SERVICE_MESSAGE_DANGERS_DATA_KEY);
+                    if (dangers != null && dangers.length() > 1) {
+                        showDanger(dangers);
                     }
                 }
                 return;
@@ -265,12 +283,12 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
                 // Add a marker on map for the current region using its location coordinates and weather data
                 map.addMarker(UtilsGoogleMaps.getMarkerOptions(location, region.getName(), null,
                         markerIcons.get(UtilsGoogleMaps.getWeatherStringIndex(
-                                region.getWeather().getWeather(), getBaseContext()))));
+                                region.getWeather().getWeather()))));
                 // Initialize the region area background color with green, corresponding to low
                 //  weather intensity (ex: sunny, soft rain, soft wind)
                 int color = UtilsGoogleMaps.COLOR_REGION_GREEN;
                 // Get the index of the weather string (0 is sunny and 11 is massive snow fall)
-                int index = UtilsGoogleMaps.getWeatherStringIndex(region.getWeather().getWeather(), this);
+                int index = UtilsGoogleMaps.getWeatherStringIndex(region.getWeather().getWeather());
                 // Check if the weather intensity is medium (ex: sun, moderate rain, moderate wind)
                 if (index == 1 || index == 4 || index == 7)
                     // Update the region area background color for this weather intensity case
@@ -318,7 +336,7 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
                     // The middle of the map view is inside of an active region
                     // Get the region weather icon and set it as static icon over map
                     regionWeatherIcon.setImageResource(markerIcons.get(
-                            UtilsGoogleMaps.getWeatherStringIndex(regions.get(i).getWeather().getWeather(), getBaseContext())));
+                            UtilsGoogleMaps.getWeatherStringIndex(regions.get(i).getWeather().getWeather())));
                     return;
                 }
             }
@@ -337,6 +355,8 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
         if (tracked) {
             // Set the corresponding icon
             locationTrackIcon.setImageResource(R.drawable.location_track);
+            // Show the circle in the center of the map
+            centerMap.setVisibility(View.VISIBLE);
             // If the last location exists and is valid
             if (currentLocation != null) {
                 // Move the map to current location or last known location with the current map zoom
@@ -347,6 +367,8 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
         } else {
             // Location tracking is disabled
             locationTrackIcon.setImageResource(R.drawable.location_untracked);
+            // Hide the circle in the center of the map
+            centerMap.setVisibility(View.GONE);
             map.setTrafficEnabled(false);
         }
     }
@@ -420,6 +442,8 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
     private void initComponents() {
         // Find the UI components
         locationTrackIcon = findViewById(R.id.location);
+        centerMap = findViewById(R.id.center);
+        notificationView = findViewById(R.id.notification);
         received = findViewById(R.id.received);
         regionWeatherIcon = findViewById(R.id.regionWeatherIcon);
 
@@ -438,6 +462,12 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
                     // Change it to OFF background color
                     received.setBackgroundColor(receivedBoxOFF);
                 }
+            }
+        });
+        notificationView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                notificationView.setVisibility(View.GONE);
             }
         });
         received.setText(getString(R.string.no_message));
@@ -552,7 +582,7 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
                 // Set the weather title
                 weather.setText(weatherObj.getWeather());
                 // Get the weather string index (0 is "sunny" and 11 is "massive snow fall" weather)
-                int index = UtilsGoogleMaps.getWeatherStringIndex(weatherObj.getWeather(), getBaseContext());
+                int index = UtilsGoogleMaps.getWeatherStringIndex(weatherObj.getWeather());
                 if ((index + 2) % 3 == 0) {  // check weather index; 1, 4, 7, 10 are moderate
                     // Set the weather title color for moderate weather (orange)
                     weather.setTextColor(getResources().getColor(R.color.color_orange_light));
@@ -590,6 +620,21 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
                 marker.hideInfoWindow();
             }
         });
+    }
+
+    private void showDanger(String danger) {
+        if (danger == null || danger.length() <= 1) return;
+        if (danger.contains(LocationService.DANGER_CURRENT_REGION_SEP)) {
+            notificationView.setText(danger.split(LocationService.DANGER_REGION_SEP)[0].replace(LocationService.DANGER_CURRENT_REGION_SEP, ""));
+            notificationView.setVisibility(View.VISIBLE);
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    notificationView.setText("");
+                    notificationView.setVisibility(View.GONE);
+                }
+            }, 5000);
+        }
     }
 
     /**
@@ -654,8 +699,7 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
                 // Set the views from prediction layout with custom prediction data
                 prediction_weather.setText(
                         UtilsGoogleMaps.getWeatherString(
-                                UtilsGoogleMaps.getWeatherStringIndex(
-                                        predict.getCode()), getBaseContext()));
+                                UtilsGoogleMaps.getWeatherStringIndex(predict.getCode())));
                 String[] datetime = key.split(":");
                 prediction_datetime.setText(String.format("%s:%s", datetime[3], datetime[4]));
                 prediction_weather_probability.setText(String.format(getString(R.string.int_percent_placeholder), predict.getCode_p()));
@@ -697,7 +741,6 @@ public class GoogleMapsActivity extends FragmentActivity implements OnMapReadyCa
             weather_data_ll.addView(predictions_ll);
         }
     }
-
 
     /**
      * Initialize the list of markers icons corresponding to each weather condition.

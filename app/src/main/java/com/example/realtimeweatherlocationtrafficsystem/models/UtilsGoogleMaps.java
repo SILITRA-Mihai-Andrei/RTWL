@@ -1,8 +1,6 @@
 package com.example.realtimeweatherlocationtrafficsystem.models;
 
-import android.content.Context;
 import android.graphics.Color;
-import android.util.Log;
 
 import com.example.realtimeweatherlocationtrafficsystem.R;
 import com.example.realtimeweatherlocationtrafficsystem.services.FireBaseService;
@@ -12,8 +10,6 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolygonOptions;
 
 import java.util.HashMap;
-import java.util.List;
-import java.util.Objects;
 
 /**
  * Implement public static functions used for GoogleMaps activity.
@@ -179,12 +175,11 @@ public class UtilsGoogleMaps {
      * For sun weather, the intensities are Sunny (0), Sun (1), Heat (2)
      *
      * @param weather is the weather title (ex: "Sun", "Soft rain").
-     * @param context is the current activity context used for resources.
      * @return the weather grade/intensity.
      */
-    public static int getWeatherGrade(String weather, Context context) {
+    public static int getWeatherGrade(String weather) {
         // Get the weather index using the weather title
-        int index = getWeatherStringIndex(weather, context);
+        int index = getWeatherStringIndex(weather);
         // Check if the index is valid
         if (index == -1) return -1;
         // Return the weather intensity
@@ -285,22 +280,44 @@ public class UtilsGoogleMaps {
      * - for "Massive snow fall", the index will be the last one, index=11.
      *
      * @param weather is the weather string, containing the weather title (ex: "Soft rain").
-     * @param context is the current activity context, used for extracting the string resources.
      * @return the weather index from 0 to 11.
      */
-    public static int getWeatherStringIndex(String weather, Context context) {
-        if (weather.equals(context.getString(R.string.weather_sunny))) return 0;
-        else if (weather.equals(context.getString(R.string.weather_sun))) return 1;
-        else if (weather.equals(context.getString(R.string.weather_heat))) return 2;
-        else if (weather.equals(context.getString(R.string.weather_soft_rain))) return 3;
-        else if (weather.equals(context.getString(R.string.weather_moderate_rain))) return 4;
-        else if (weather.equals(context.getString(R.string.weather_torrential_rain))) return 5;
-        else if (weather.equals(context.getString(R.string.weather_soft_wind))) return 6;
-        else if (weather.equals(context.getString(R.string.weather_moderate_wind))) return 7;
-        else if (weather.equals(context.getString(R.string.weather_torrential_wind))) return 8;
-        else if (weather.equals(context.getString(R.string.weather_soft_snow_fall))) return 9;
-        else if (weather.equals(context.getString(R.string.weather_moderate_snow_fall))) return 10;
-        else if (weather.equals(context.getString(R.string.weather_massive_snow_fall))) return 11;
+    public static int getWeatherStringIndex(String weather) {
+        if (weather.equals(Resources.resources.getString(R.string.weather_sunny))
+                || weather.equals(Resources.resources.getString(R.string.weather_sunny_ro)))
+            return 0;
+        else if (weather.equals(Resources.resources.getString(R.string.weather_sun))
+                || weather.equals(Resources.resources.getString(R.string.weather_sun_ro))) return 1;
+        else if (weather.equals(Resources.resources.getString(R.string.weather_heat))
+                || weather.equals(Resources.resources.getString(R.string.weather_heat_ro)))
+            return 2;
+        else if (weather.equals(Resources.resources.getString(R.string.weather_soft_rain))
+                || weather.equals(Resources.resources.getString(R.string.weather_soft_rain_ro)))
+            return 3;
+        else if (weather.equals(Resources.resources.getString(R.string.weather_moderate_rain))
+                || weather.equals(Resources.resources.getString(R.string.weather_moderate_rain_ro)))
+            return 4;
+        else if (weather.equals(Resources.resources.getString(R.string.weather_torrential_rain))
+                || weather.equals(Resources.resources.getString(R.string.weather_torrential_rain_ro)))
+            return 5;
+        else if (weather.equals(Resources.resources.getString(R.string.weather_soft_wind))
+                || weather.equals(Resources.resources.getString(R.string.weather_soft_wind_ro)))
+            return 6;
+        else if (weather.equals(Resources.resources.getString(R.string.weather_moderate_wind))
+                || weather.equals(Resources.resources.getString(R.string.weather_moderate_wind_ro)))
+            return 7;
+        else if (weather.equals(Resources.resources.getString(R.string.weather_torrential_wind))
+                || weather.equals(Resources.resources.getString(R.string.weather_torrential_wind_ro)))
+            return 8;
+        else if (weather.equals(Resources.resources.getString(R.string.weather_soft_snow_fall))
+                || weather.equals(Resources.resources.getString(R.string.weather_soft_snow_fall_ro)))
+            return 9;
+        else if (weather.equals(Resources.resources.getString(R.string.weather_moderate_snow_fall))
+                || weather.equals(Resources.resources.getString(R.string.weather_moderate_snow_fall_ro)))
+            return 10;
+        else if (weather.equals(Resources.resources.getString(R.string.weather_massive_snow_fall))
+                || weather.equals(Resources.resources.getString(R.string.weather_massive_snow_fall_ro)))
+            return 11;
         else return -1;
     }
 
@@ -312,22 +329,30 @@ public class UtilsGoogleMaps {
      * - for weather code 467-499, the weather string is "Massive snow fall".
      *
      * @param weatherCode is the weather code (100-499).
-     * @param context     is the current activity context, used for extracting string resources.
      * @return the weather string.
      */
-    public static String getWeatherString(int weatherCode, Context context) {
-        if (weatherCode == 0) return context.getString(R.string.weather_sunny);
-        else if (weatherCode == 1) return context.getString(R.string.weather_sun);
-        else if (weatherCode == 2) return context.getString(R.string.weather_heat);
-        else if (weatherCode == 3) return context.getString(R.string.weather_soft_rain);
-        else if (weatherCode == 4) return context.getString(R.string.weather_moderate_rain);
-        else if (weatherCode == 5) return context.getString(R.string.weather_torrential_rain);
-        else if (weatherCode == 6) return context.getString(R.string.weather_soft_wind);
-        else if (weatherCode == 7) return context.getString(R.string.weather_moderate_wind);
-        else if (weatherCode == 8) return context.getString(R.string.weather_torrential_wind);
-        else if (weatherCode == 9) return context.getString(R.string.weather_soft_snow_fall);
-        else if (weatherCode == 10) return context.getString(R.string.weather_moderate_snow_fall);
-        else if (weatherCode == 11) return context.getString(R.string.weather_massive_snow_fall);
+    public static String getWeatherString(int weatherCode) {
+        if (weatherCode == 0) return Resources.resources.getString(R.string.weather_sunny);
+        else if (weatherCode == 1) return Resources.resources.getString(R.string.weather_sun);
+        else if (weatherCode == 2) return Resources.resources.getString(R.string.weather_heat);
+        else if (weatherCode == 3)
+            return Resources.resources.getString(R.string.weather_soft_rain);
+        else if (weatherCode == 4)
+            return Resources.resources.getString(R.string.weather_moderate_rain);
+        else if (weatherCode == 5)
+            return Resources.resources.getString(R.string.weather_torrential_rain);
+        else if (weatherCode == 6)
+            return Resources.resources.getString(R.string.weather_soft_wind);
+        else if (weatherCode == 7)
+            return Resources.resources.getString(R.string.weather_moderate_wind);
+        else if (weatherCode == 8)
+            return Resources.resources.getString(R.string.weather_torrential_wind);
+        else if (weatherCode == 9)
+            return Resources.resources.getString(R.string.weather_soft_snow_fall);
+        else if (weatherCode == 10)
+            return Resources.resources.getString(R.string.weather_moderate_snow_fall);
+        else if (weatherCode == 11)
+            return Resources.resources.getString(R.string.weather_massive_snow_fall);
         else return null;
     }
 

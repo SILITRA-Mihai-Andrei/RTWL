@@ -1,7 +1,5 @@
 package com.example.realtimeweatherlocationtrafficsystem.models;
 
-import android.util.Log;
-
 import androidx.annotation.NonNull;
 
 import com.google.firebase.database.DataSnapshot;
@@ -25,10 +23,12 @@ public class FireBaseManager {
     public static final String dataPath = "data/";                  // contains all the records sent by users
     public static final String weatherPath = "weather/";            // contains all calculated data from /data/ node
     public static final String predictionPath = "predictions/";     // contains all predictions for regions
+    public static final String dangersPath = "dangers/";         // contains all dangers for regions
 
     // Define the list of regions that will received from database
     private List<Region> regions = new ArrayList<>();
     private ArrayList<HashMap<String, HashMap<String, Prediction>>> predictions = new ArrayList<>();
+    private ArrayList<HashMap<String, String>> dangers = new ArrayList<>();
     // Interface that will notify when new data from database is received
     private onFireBaseDataNew onFireBaseDataNew;
 
@@ -40,6 +40,8 @@ public class FireBaseManager {
         void onDataNewFireBase(List<Region> regions);
 
         void onDataNewFireBasePredictions(List<HashMap<String, HashMap<String, Prediction>>> predictions);
+
+        void onDataNewFireBaseDangers(ArrayList<HashMap<String, String>> dangers);
     }
 
     /**
@@ -59,6 +61,12 @@ public class FireBaseManager {
                 FirebaseDatabase.getInstance().getReference().child(predictionPath);
         // Add listener on value added to database event
         databasePredictionReference.addValueEventListener(getPredictionValueEventListener());
+        // Create the database reference for /dangers/ node
+        // This node contains all the dangers for all regions
+        DatabaseReference databaseDangersReference =
+                FirebaseDatabase.getInstance().getReference().child(dangersPath);
+        // Add listener on value added to database event
+        databaseDangersReference.addValueEventListener(getDangersValueEventListener());
         // Initialize the interface
         this.onFireBaseDataNew = onFireBaseDataNew;
     }
@@ -142,6 +150,41 @@ public class FireBaseManager {
                 }
                 // Notify the interface that the predictions list is updated
                 onFireBaseDataNew.onDataNewFireBasePredictions(predictions);
+            }
+
+            /** No implementation. */
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+            }
+        };
+    }
+
+    /**
+     * Listener that will be notified when new values appear in database /dangers/ node.
+     * It will receive all new data from database.
+     */
+    public ValueEventListener getDangersValueEventListener() {
+        return new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                dangers = new ArrayList<>();
+                // Loop through all new data received from database
+                for (final DataSnapshot ds : snapshot.getChildren()) {
+                    // Create the HashMap from dictionary
+                    // The String will be the region name
+                    // The second String will be the danger
+                    final String map = (String) ds.getValue();
+                    if (map != null)
+                        // Add the danger to dangers list
+                        dangers.add(new HashMap<String, String>() {
+                            {
+                                // Insert the region name and the danger data for it
+                                put(ds.getKey(), map);
+                            }
+                        });
+                }
+                // Notify the interface that the predictions list is updated
+                onFireBaseDataNew.onDataNewFireBaseDangers(dangers);
             }
 
             /** No implementation. */

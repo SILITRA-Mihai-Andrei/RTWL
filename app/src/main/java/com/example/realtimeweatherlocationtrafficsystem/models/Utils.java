@@ -4,12 +4,13 @@ import android.app.ActivityManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.content.res.Resources;
 import android.provider.Settings;
 import android.widget.EditText;
 
 import androidx.core.app.ActivityCompat;
+
 import com.example.realtimeweatherlocationtrafficsystem.R;
+
 import java.util.Date;
 import java.util.List;
 
@@ -33,7 +34,7 @@ public class Utils {
 
     /**
      * Return if the application is still running.
-     * */
+     */
     public static boolean isBackgroundRunning(Context context) {
         ActivityManager am = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
         assert am != null;
@@ -73,22 +74,21 @@ public class Utils {
     /**
      * Using the validation code, return the validation string.
      *
-     * @param code     specifies the validation code.
-     * @param activity current activity that called the function (used for resources).
+     * @param code specifies the validation code.
      * @return the validations string.
      */
-    public static String getValidityMessage(int code, Context activity) {
-        // Get the resources from current activity
-        Resources resources = activity.getResources();
-        if (code == INVALID_COORDINATES) return resources.getString(R.string.invalid_coordinates);
-        else if (code == INVALID_CODE) return resources.getString(R.string.invalid_code);
+    public static String getValidityMessage(int code) {
+        if (code == INVALID_COORDINATES)
+            return Resources.resources.getString(R.string.invalid_coordinates);
+        else if (code == INVALID_CODE) return Resources.resources.getString(R.string.invalid_code);
         else if (code == INVALID_TEMPERATURE)
-            return resources.getString(R.string.invalid_temperature);
-        else if (code == INVALID_HUMIDITY) return resources.getString(R.string.invalid_humidity);
-        else if (code == INVALID_AIR) return resources.getString(R.string.invalid_air);
+            return Resources.resources.getString(R.string.invalid_temperature);
+        else if (code == INVALID_HUMIDITY)
+            return Resources.resources.getString(R.string.invalid_humidity);
+        else if (code == INVALID_AIR) return Resources.resources.getString(R.string.invalid_air);
         else if (code == VALID)
-            return resources.getString(R.string.valid_data); // all fields are valid, so...
-        else return resources.getString(R.string.invalid_data);
+            return Resources.resources.getString(R.string.valid_data); // all fields are valid, so...
+        else return Resources.resources.getString(R.string.invalid_data);
     }
 
     /**

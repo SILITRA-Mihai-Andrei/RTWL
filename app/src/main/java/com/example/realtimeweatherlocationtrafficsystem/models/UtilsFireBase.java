@@ -1,5 +1,7 @@
 package com.example.realtimeweatherlocationtrafficsystem.models;
 
+import com.example.realtimeweatherlocationtrafficsystem.R;
+
 import java.util.List;
 
 /**
@@ -16,7 +18,7 @@ public class UtilsFireBase {
         // Check if the list exists and have at least one element
         if (regions == null || regions.size() == 0) {
             // There is no region in database
-            return "No data.";
+            return Resources.resources.getString(R.string.no_data);
         }
         // Create a StringBuilder to control the String format
         StringBuilder result = new StringBuilder();
@@ -27,10 +29,10 @@ public class UtilsFireBase {
             // Append all weather values of the region to the String and separate them using a format
             result.append(regions.get(i).getName())
                     .append("\n\t\t").append(regions.get(i).getWeather().getWeather())
-                    .append("\n\t\tdanger: ").append(danger == null ? "none" : danger)
-                    .append("\n\t\ttemperature: ").append(regions.get(i).getWeather().getTemperature())
-                    .append("\n\t\thumidity: ").append(regions.get(i).getWeather().getHumidity())
-                    .append("\n\t\tair: ").append(regions.get(i).getWeather().getAir())
+                    .append("\n\t\t").append(Resources.resources.getString(R.string.danger_dots)).append(danger == null ? Resources.resources.getString(R.string.none) : danger)
+                    .append("\n\t\t").append(Resources.resources.getString(R.string.temp_dots)).append(regions.get(i).getWeather().getTemperature())
+                    .append("\n\t\t").append(Resources.resources.getString(R.string._humidity_dots)).append(regions.get(i).getWeather().getHumidity())
+                    .append("\n\t\t").append(Resources.resources.getString(R.string.air_dots)).append(regions.get(i).getWeather().getAir())
                     .append('\n');
         }
         return result.toString();
